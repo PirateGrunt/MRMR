@@ -23,6 +23,10 @@ GetNAICData = function (dataSetName = "ppauto_pos.csv")
                    , "Reserve1997")
   
   source("https://raw.github.com/PirateGrunt/MRMR/master/RegressionSupport.r")
-  df = CalculateIncrementals(df, df$GroupName)
-  return(df)
+  
+  lCompanyDFs = split(df, df$GroupCode)
+  lTriangles = lapply(lCompanyDFs, CalculateIncrementals)
+  dfAllTriangles = do.call("rbind", lTriangles)
+  
+  return(dfAllTriangles)
 }

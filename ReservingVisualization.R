@@ -6,18 +6,25 @@
 #   WriteModelDiagnosticsToFile (Fit, DataSetName, ResponseName, PredictorName, delta, DesignWidth, Category, OriginYear, CalendarYear)
 #==================================================================================================
 
-ShowIncrementals = function(df, SegmentName)
+ShowTriangle = function(df, EntityName, Cumulative = TRUE, Paid = TRUE, Show = TRUE)
 {
-  df$LossPeriodFactor = as.factor(df$LossPeriod)
+  require(ggplot2)
+  df$LossPeriod = as.factor(df$LossPeriod)
   
-  plt = ggplot(df, aes(x = DevelopmentLag, y = IncrementalPaid, group = LossPeriodFactor, colour = LossPeriodFactor)) + geom_line()
-  plt = plt + geom_point() + opts(title=paste(SegmentName, " incremental paid loss by accident year", sep=""))
+  PaidOrIncurred = ifelse(Paid, "Paid", "Incurred")
+  CumulativeOrIncremental = ifelse(Cumulative, "Cumulative", "Incremental")
+  LossValue = paste0(CumulativeOrIncremental, PaidOrIncurred)
   
-  print(plt)
+  df$LossValue = df[,LossValue]
   
-  plt = ggplot(df, aes(x = DevelopmentLag, y = IncrementalIncurred, group = LossPeriodFactor, colour = LossPeriodFactor)) + geom_line()
-  plt = plt + geom_point() + opts(title=paste(SegmentName, " incremental incurred loss by accident year", sep=""))
-  print(plt)
+  PlotTitle = paste(EntityName, tolower(CumulativeOrIncremental), tolower(PaidOrIncurred), "loss by accident year")
+  
+  plt = ggplot(df, aes(x = DevelopmentLag, y = LossValue, group = LossPeriod, colour = LossPeriod)) 
+  plt = plt + geom_line(show_guide=FALSE) + geom_point(show_guide=FALSE) + labs(title=PlotTitle)
+  
+  if (Show) print(plt)
+  
+  return (plt)
 }
 
 #==================================================================================================
