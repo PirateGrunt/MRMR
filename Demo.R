@@ -6,12 +6,37 @@ source("https://raw.github.com/PirateGrunt/MRMR/master/ReservingVisualization.R"
 df = GetNAICData("wkcomp_pos.csv")
 bigCompany = as.character(df[which(df$CumulativePaid == max(df$CumulativePaid)),"GroupName"])
 
-df.sub = subset(df, GroupName == bigCompany)
+df.BigCo = subset(df, GroupName == bigCompany)
 
-df.sub = subset(df.sub, DevelopmentYear <=1997)
+df.UpperTriangle = subset(df.BigCo, DevelopmentYear <=1997)
 
-library(ggplot2)
-#ShowIncrementals (df.sub, bigCompany)
-plt = ShowTriangle(df.sub, bigCompany)
-plt = ShowTriangle(df.sub, bigCompany, Cumulative=FALSE)
+tri = Triangle(TriangleData = df.UpperTriangle
+               , TriangleName = bigCompany
+               , LossPeriodType = "Annual"
+               , LossPeriodInterval = years(1)
+               , DevelopmentInterval = years(1))
+
+tri@TriangleName
+tri
+
+is(tri, "Triangle")
+is.Triangle(tri)
+
+plt = ShowTriangle(df.UpperTriangle, bigCompany)
+
+plot(tri)
+
+plt = ShowTriangle(df.UpperTriangle, bigCompany, Cumulative=FALSE)
 #Note the apparent calendar year impact in 1996. This is invisible in the cumulative display.
+
+# To calibrate a multiplicative chain ladder, we must omit the first development lag.
+df.UpperTriangle = subset(df.UpperTriangle, DevelopmentLag >1)
+
+fit = with( df.UpperTriangle, FitModel(IncrementalPaid, PriorCumulativePaid, DevelopmentLag, 1, 0))
+
+devFactors = CreateDevelopmentArray(fit, 1, 10)
+
+# To project a multiplicative chain ladder, we may only use the latest diagonal.
+df.Latest = subset(df.BigCo, DevelopmentYear == 1997)
+
+df.project = with(df.Latest, ProjectValues(CumulativePaid, DevelopmentLag, LossPeriod, devFactors, TRUE))
