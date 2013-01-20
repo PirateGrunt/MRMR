@@ -45,7 +45,7 @@ CreateDesignMatrixByCategory = function(Predictor, Category, MinFrequency)
         DesignMatrix[idx, i] = Predictor[idx]
     }
     
-    idx = array(FALSE,nRows)
+    idx = array(FALSE, nRows)
     tail = z[which(z$Freq < MinFrequency), 1]
     idx[which(Category %in% tail)] = TRUE
     DesignMatrix[idx, nCols] = Predictor[idx]
@@ -53,6 +53,9 @@ CreateDesignMatrixByCategory = function(Predictor, Category, MinFrequency)
     dmNames = as.character(z[which(z$Freq >= MinFrequency), 1])
     dmNames = c(dmNames, "tail")
     colnames(DesignMatrix) = dmNames
+#     if (sum(DesignMatrix$tail) == 0){
+#       DesignMatrix$tail = NULL
+#     }
     return (DesignMatrix)
 }
 #== end CreateDesignMatrixByCategory ==============================================================
@@ -73,23 +76,26 @@ CreateRegressionWeights = function(DesignMatrix, delta)
 #==================================================================================================
 # function CreateDevelopmentArray
 #==================================================================================================
-CreateDevelopmentArray = function(DesignMatrix, Fit, IntervalLength, MaxInterval)
+CreateDevelopmentArray = function(Fit, IntervalLength, MaxInterval)
 {
-  df = as.data.frame(names(DesignMatrix))
+  Fit = fit
+  IntervalLength = 1
+  MaxInterval = 10
+  dm = model.matrix(formula(Fit), dat=model.frame(Fit))
+  
+  FactorNames = gsub("dm", "", colnames(dm))
   factors = as.numeric(coef(Fit))
-  df = cbind(df, factors)
-  colnames(df)[1] = "FactorName"
-  colnames(df)[2] = "Factor"
+  df = data.frame(FactorName = FactorNames, Factor = factors)
   
   dfDevFactor = as.data.frame(IntervalLength * 1:MaxInterval)
   colnames(dfDevFactor)[1] = "Devs"
   
-  dfMojo = match(as.vector(dfDevFactor$Devs), df$FactorName, nomatch = match("tail", df$FactorName))
-  dfDevFactor = cbind(dfDevFactor, df[dfMojo, "FactorName"])
+  Mojo = match(as.vector(dfDevFactor$Devs), df$FactorName, nomatch = match("tail", df$FactorName))
+  dfDevFactor = cbind(dfDevFactor, df[Mojo, "FactorName"])
   colnames(dfDevFactor)[2] = "Categories"
   
-  dfMojo = match(as.vector(dfDevFactor$Categories), df$FactorName, nomatch = match("tail", df$FactorName))
-  dfDevFactor = cbind(dfDevFactor, df[dfMojo, "Factor"])
+  Mojo = match(as.vector(dfDevFactor$Categories), df$FactorName, nomatch = match("tail", df$FactorName))
+  dfDevFactor = cbind(dfDevFactor, df[Mojo, "Factor"])
   colnames(dfDevFactor)[3] = "Factors"
   
   return (dfDevFactor)
@@ -99,17 +105,14 @@ CreateDevelopmentArray = function(DesignMatrix, Fit, IntervalLength, MaxInterval
 #==================================================================================================
 # function FitModel
 #==================================================================================================
-FitModel = function(Response, Predictor, Category, MinFrequency, delta, IntervalWidth, MaxInterval)
+FitModel = function(Response, Predictor, Category, MinFrequency, delta)
 {
   DesignMatrix <- CreateDesignMatrixByCategory(Predictor, Category, MinFrequency)
   RegressionWeights <- CreateRegressionWeights(DesignMatrix, delta)
   dm = as.matrix(DesignMatrix)
   Fit = lm(Response ~ dm + 0, weights=RegressionWeights)
-  
-  df = CreateDevelopmentArray(DesignMatrix, Fit, IntervalWidth, MaxInterval)
-  
-  z = list(DevelopmentArray = df, Fit = Fit)
-  return (z)
+
+  return (Fit)
 }
 #= end FitModel ===================================================================================
 
@@ -136,6 +139,15 @@ GetFactors = function(ModelFit)
 }
 #= end GetFactors =================================================================================
 
+ProjectRecursively = function(Predictor, DevelopmentLag, LossPeriod, DevelopmentArray, Iteration)
+{
+  maxIterations = max(DevelopmentArray$Devs)
+  if (Iteration == maxIterations)
+  { return } else
+  {
+    
+  }
+}
 #==================================================================================================
 # function ProjectValues
 # This will project values iteratively.
@@ -144,27 +156,38 @@ GetFactors = function(ModelFit)
 # Some methods are recursive (i.e. multiplicative chain ladder) and will use a response as the predictor for the next iteration.
 # OriginPeriod may be a vector of indices which map to calendar periods.
 #==================================================================================================
-ProjectValues = function(Predictor, Category, OriginPeriod, DevelopmentArray, Recursive)
+ProjectValues = function(Predictor, Category, LossPeriod, DevelopmentArray, Recursive)
 {
   # TODO: We must be able to extrapolate through the bottom and also interpolate between factors.
   
   # Establish a data frame with a dummy row. This means that we don't have to keep checking
   # to see if we set up the data fram or merely bind a new row.
-  dfReturnValue = data.frame(OriginPeriod = OriginPeriod[1], Category=Category[1], Incremental=0.0, row.names=NULL)
+  
+#   Predictor = df.Latest$PriorCumulativePaid
+#   Category = df.Latest$DevelopmentLag
+#   LossPeriod = df.Latest$LossPeriod
+#   DevelopmentArray = devFactors
+#   Recursive = TRUE
+  
+  dfReturnValue = data.frame(LossPeriod = LossPeriod[1], Category=Category[1], Incremental=0.0, row.names=NULL)
   nRows = length(Predictor)
   maxDevs = length(DevelopmentArray$Devs)
   for (iRow in 1:nRows)
   {
     thePredictor = Predictor[iRow]
-    theOriginPeriod = OriginPeriod[iRow]
+    theLossPeriod = LossPeriod[iRow]
     
-    firstDev = match(Category[iRow], DevelopmentArray$Categories) + 1
+    #firstDev = match(Category[iRow], DevelopmentArray$Categories) + 1
+    # CAZART
+    firstDev = Category[iRow] + 1
     if (is.na(firstDev) == TRUE) { firstDev = match("tail", DevelopmentArray$Categories)}
     for (iDev in firstDev:maxDevs)
     {
+      print(paste("theLossPeriod =", theLossPeriod, "iDev =", iDev, "thePredictor =", thePredictor
+                  , "theFactor =", DevelopmentArray$Factors[iDev]))
       theCategory = DevelopmentArray$Devs[iDev]
       theProjection =  thePredictor * DevelopmentArray$Factors[iDev]
-      dfReturnValue = rbind(dfReturnValue, data.frame(OriginPeriod = theOriginPeriod
+      dfReturnValue = rbind(dfReturnValue, data.frame(LossPeriod = theLossPeriod
                                                       , Category = theCategory
                                                       , Incremental = theProjection
                                                       , row.names=NULL))
@@ -176,7 +199,8 @@ ProjectValues = function(Predictor, Category, OriginPeriod, DevelopmentArray, Re
   dfReturnValue = dfReturnValue[-1,]
   row.names(dfReturnValue) = seq(nrow(dfReturnValue))
   
-  dfReturnValue$OriginYear = as.POSIXlt(dfReturnValue$OriginPeriod)$year + 1900
+#   if class(dfReturnValue$LossPeriod)
+#   dfReturnValue$LossPeriod = as.POSIXlt(dfReturnValue$LossPeriod)$year + 1900
   return(dfReturnValue)
 }
 #= end ProjectValues ==============================================================================
