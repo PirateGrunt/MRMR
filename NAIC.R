@@ -22,21 +22,9 @@ GetNAICData = function (dataSetName = "ppauto_pos.csv")
                    , "Single"
                    , "Reserve1997")
   
-  source("https://raw.github.com/PirateGrunt/MRMR/master/RegressionSupport.r")
-  
   require(lubridate)
-  df$LossPeriodStart = Sys.Date()
+  df$LossPeriodStart = ymd("2000-01-01")
   year(df$LossPeriodStart) = df$LossPeriod
-  month(df$LossPeriodStart) = 1
-  day(df$LossPeriodStart) = 1
   
-  df$LossPeriodEnd = df$LossPeriodStart
-  month(df$LossPeriodEnd) = 12
-  day(df$LossPeriodEnd) = 31
-  
-  lCompanyDFs = split(df, df$GroupCode)
-  lTriangles = lapply(lCompanyDFs, CalculateIncrementals)
-  dfAllTriangles = do.call("rbind", lTriangles)
-  
-  return(dfAllTriangles)
+  return(df)
 }
