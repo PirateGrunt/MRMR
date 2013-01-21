@@ -53,8 +53,8 @@ setGeneric("LatestDiagonal", function(x){
 
 setMethod("LatestDiagonal", "Triangle", function(x){
   df = x@TriangleData
-  latestDev = max(df$DevelopmentYear)
-  df.latest = subset(df, DevelopmentYear == latestDev)
+  latestEval = max(df$EvaluationDate)
+  df.latest = subset(df, EvaluationDate == latestEval)
 })
 
 .plotTriangle = function(tri)
@@ -169,6 +169,8 @@ Triangle = function(TriangleData
             , LossPeriodInterval = LossPeriodInterval
             , DevelopmentInterval = DevelopmentInterval)
   
+  tri@TriangleData = CalculateIncrementals(tri)
+  
   return (tri)
 }
 #== End Triangle constructor ======================================================================
@@ -178,14 +180,44 @@ is.Triangle = function(object)
   is(object, "Triangle")
 }
 
-# setGeneric("ProjectTriangle", function(x){
-#   standardGeneric("ProjectTriangle")
-# })
-# 
-# setMethod("ProjectTriangle", "Triangle", function(Triangle, NumberOfPeriods){
-#   df = LatestDiagonal(Triangle)
-#   return(df)
-# })
+setGeneric("CalculateIncrementals", function(x){
+  standardGeneric("CalculateIncrementals")
+})
+
+setMethod("CalculateIncrementals", "Triangle", function(x){
+  df = x@TriangleData
+  df = df[order(df$LossPeriod, df$DevelopmentLag),]
+  
+  rownames(df) = NULL
+  df$IncrementalPaid = df$CumulativePaid
+  df$IncrementalIncurred = df$CumulativeIncurred
+  df$PriorCumulativePaid = df$CumulativePaid
+  df$PriorCumulativeIncurred = df$PriorCumulativeIncurred
+  
+  nrows = length(df$CumulativePaid)
+  
+  df$PriorCumulativePaid[2:nrows] = df$CumulativePaid[1:nrows-1]
+  df$PriorCumulativeIncurred[2:nrows] = df$CumulativeIncurred[1:nrows-1]
+  df$IncrementalPaid[2:nrows] = df$CumulativePaid[2:nrows] - df$CumulativePaid[1:nrows-1]
+  df$IncrementalIncurred[2:nrows] = df$CumulativeIncurred[2:nrows] - df$CumulativeIncurred[1:nrows-1]
+  
+  firstLag = which(df$DevelopmentLag == 1)
+  df$IncrementalPaid[firstLag] = df$CumulativePaid[firstLag]
+  df$IncrementalIncurred[firstLag] = df$CumulativeIncurred[firstLag]
+  df$PriorCumulativePaid[firstLag] = 0
+  df$PriorCumulativeIncurred[firstLag] = 0
+  
+  return(df)
+})
+
+setGeneric("ProjectTriangle", function(x, ...){
+  standardGeneric("ProjectTriangle")
+})
+
+setMethod("ProjectTriangle", "Triangle", function(x, NumberOfPeriods){
+  df = LatestDiagonal(Triangle)
+  return(df)
+})
 
 # CreateProjection(dfTriangle, NumberOfPeriods, Response, IntervalWidth)
 # {
