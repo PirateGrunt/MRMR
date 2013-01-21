@@ -25,13 +25,13 @@ tri
 is(tri, "Triangle")
 is.Triangle(tri)
 
-plt = ShowTriangle(df.UpperTriangle, bigCompany)
+plt = ShowTriangle(tri@TriangleData, bigCompany)
 
 plot(tri)
 head(LatestDiagonal(tri))
 length(LatestDiagonal(tri)[,1])
 
-plt = ShowTriangle(df.UpperTriangle, bigCompany, Cumulative=FALSE)
+plt = ShowTriangle(tri@TriangleData, bigCompany, Cumulative=FALSE)
 #Note the apparent calendar year impact in 1996. This is invisible in the cumulative display.
 
 # To calibrate a multiplicative chain ladder, we must omit the first development lag.
