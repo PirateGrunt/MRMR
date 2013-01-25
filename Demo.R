@@ -53,7 +53,7 @@ tri@TriangleName
 tri@TriangleName = "Another name"
 
 #===========================
-# Now let's fit a couple of models
+# Now let's fit a of model
 
 chainLadder = TriangleModel("CumulPaid"
                             , BaseTriangle = tri
