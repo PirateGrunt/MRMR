@@ -210,15 +210,26 @@ setMethod("CalculateIncrementals", "Triangle", function(x){
   return(df)
 })
 
-setGeneric("ProjectTriangle", function(x, ...){
-  standardGeneric("ProjectTriangle")
-})
+setGeneric("setName<-", function(object, value) {
+  standardGeneric("setName<-")
+  })
 
-setMethod("ProjectTriangle", "Triangle", function(x, NumberOfPeriods){
-  df = LatestDiagonal(Triangle)
-  return(df)
-})
+setReplaceMethod(
+  f = "setName"
+  , signature = "Triangle"
+  , definition = function(object, value){
+    object@TriangleName <- value
+    return(object)
+  })
 
+# setGeneric("ProjectTriangle", function(x, ...){
+#   standardGeneric("ProjectTriangle")
+# })
+# 
+# setMethod("ProjectTriangle", "Triangle", function(x, FutureDate){
+#   df = LatestDiagonal(Triangle)
+#   return(df)
+# })
 # CreateProjection(dfTriangle, NumberOfPeriods, Response, IntervalWidth)
 # {
 #   
