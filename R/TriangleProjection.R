@@ -10,28 +10,34 @@ setValidity("TriangleProjection"
               }
             })
 
+GetProjectionDates = function(LatestEvalDate, ProjectionDate, DevelopmentInterval){
+  
+  require(lubridate)
+  
+  ProjectionInterval = as.period(new_interval(LatestEvalDate, ProjectionDate))
+  # TODO: add a check for a remainder
+  ProjectionIntervals = ProjectionInterval / DevelopmentInterval
+  DevIntervals = (1:ProjectionIntervals) * DevelopmentInterval
+  EvalDates = LatestEvalDate + DevIntervals
+  
+  return (as.data.frame(EvalDates))
+}
+
 TriangleProjection = function(ProjectionName
                               , Model
                               , AsOfDate)
 {
-  # count the number of periods between
+  Model = chainLadder
   Triangle = Model@BaseTriangle
   df = Triangle@TriangleData
   
-  latestDate = max(df$EvaluationDate)
-  span = as.duration(AsOfDate - latestDate)
+  df.latest = LatestDiagonal(Triangle)
+  latestDate = df.latest$EvaluationDate
   
-  # still not sure how to calculate the number of intervals
-  latestDate + tri@DevelopmentInterval
+  mojo = as.data.frame(GetProjectionDates(latestDate[1], AsOfDate, Triangle@DevelopmentInterval))
   
-  mojo = as.period(new_interval(latestDate, AsOfDate))
-  ProjectionIntervals = mojo / tri@DevelopmentInterval
-  # TODO: add a check for a remainder
-  
-  DevIntervals = (1:ProjectionIntervals) * tri@DevelopmentInterval
-  DevIntervals
-  EvalDates = latestDate + DevIntervals
-  EvalDates
+  mojo = lapply(latestDate, GetProjectionDates, AsOfDate, Triangle@DevelopmentInterval)
+  dfResults = do.call("rbind", mojo)
   
   df = 
   
@@ -42,6 +48,7 @@ TriangleProjection = function(ProjectionName
   
   return (proj)
 }
+
 #==============
 # summary will have ability to write TEX output.
 # setMethod("summary", "TriangleProjection",
