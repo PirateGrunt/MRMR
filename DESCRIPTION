@@ -1,0 +1,8 @@
+Package: MRMR
+Title: Multivariate Regression Models for Reserving
+Description: Tools to analyze non-life loss reserves
+Version: 0.1
+Authors@R: 
+Maintainer: Brian Fannin <BFannin@RedwoodsGroup.com>
+Author: Brian Fannin [aut, cre] 
+License: GPL (>= 2)
