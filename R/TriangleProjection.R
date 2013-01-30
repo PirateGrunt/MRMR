@@ -8,7 +8,7 @@ setValidity("TriangleProjection"
             , function(object){
                 return (TRUE)
               }
-            })
+            )
 
 GetProjectionDates = function(LatestEvalDate, ProjectionDate, DevelopmentInterval){
   
