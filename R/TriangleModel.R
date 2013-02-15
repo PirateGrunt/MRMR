@@ -1,3 +1,5 @@
+#' @include Triangle.R
+NULL
 
 setClass("TriangleModel", 
          representation(TriangleModelName = "character"
