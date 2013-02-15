@@ -23,8 +23,9 @@ GetNAICData = function (dataSetName = "ppauto_pos.csv")
                    , "Reserve1997")
   
   require(lubridate)
-  df$LossPeriodStart = ymd("2000-01-01")
-  year(df$LossPeriodStart) = df$LossPeriod
+  df$OriginPeriodStart = ymd("2000-01-01")
+  year(df$OriginPeriodStart) = df$LossPeriod
+  df$LossPeriod = NULL
   
   return(df)
 }
