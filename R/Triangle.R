@@ -1,92 +1,35 @@
-#==============================================================================================================
-# Triangle object
-# The Triangle object houses aggregate claim data at regular evaluation dates.
-#==============================================================================================================
+#' @include Utils.R
+#' 
+library(lubridate)
 
-ColumnExists = function(df, ColumnName)
-{  
-  ColumnExists = sum(colnames(df) %in% ColumnName)
-  
-  return (ColumnExists != 0)
+checkTriangle = function(object)
+{
+  return (TRUE)
 }
 
-setClass("Triangle", 
-         representation(TriangleData = "data.frame"
+#' Triangle class
+#' 
+#' Triangle is an S4 class used to store aggregated loss data.
+#' 
+#' @name Triangle-class
+#' @rdname Triangle-class
+#' @exportClass Triangle
+#' 
+setClass("Triangle"
+         , validity = checkTriangle
+         , representation(TriangleData = "data.frame"
                         , TriangleName = "character"
-                        , LossPeriodType = "character"
-                        , LossPeriodInterval = "Period"
+                        , OriginPeriodType = "character"
+                        , OriginPeriodInterval = "Period"
                         , DevelopmentInterval = "Period"))
 
-setValidity("Triangle"
-            , function(object){
-              # the dataframe must have the following named columns:
-                # LossPeriodStart
-                # LossPeriodEnd
-                # EvaluationDate
-                # DevelopmentInterval
-                # one of the following: Incremental or cumulative PaidLoss, ReportedLoss, CaseReserve, ReportedClaims, ClosedClaims
-              ValidPeriodTypes = c("accident", "policy", "report")
-              if (is.na(match(tolower(object@LossPeriodType), ValidPeriodTypes))){
-                return ("Invalid loss period type")
-              }else{
-                return (TRUE)
-              }
-            })
-
-setMethod("summary", "Triangle",
-          function(object, ...) {
-            print(paste("Loss period type = ", object@LossPeriodType))
-            print(paste("Loss period interval = ", object@LossPeriodInterval))
-          })
-
-setMethod("show", "Triangle"
-          , function(object){
-            cat("This is a loss triangle\n")
-            cat("Its name is", object@TriangleName, "\n")
-            cat("Its columns are", colnames(object@TriangleData), "\n")
-            print(head(object@TriangleData))
-          })
-
-setGeneric("LatestDiagonal", function(x){
-  standardGeneric("LatestDiagonal")
-})
-
-setMethod("LatestDiagonal", "Triangle", function(x){
-  df = x@TriangleData
-  latestEval = max(df$EvaluationDate)
-  df.latest = subset(df, EvaluationDate == latestEval)
-})
-
-.plotTriangle = function(tri)
-{
-  require(ggplot2)
-  df = tri@TriangleData
-  df$LossPeriod = as.factor(df$LossPeriod)
-  
-  #PaidOrIncurred = ifelse(Paid, "Paid", "Incurred")
-  PaidOrIncurred = "Paid"
-  #CumulativeOrIncremental = ifelse(Cumulative, "Cumulative", "Incremental")
-  CumulativeOrIncremental = "Cumulative"
-  LossValue = paste0(CumulativeOrIncremental, PaidOrIncurred)
-  
-  df$LossValue = df[,LossValue]
-  
-  PlotTitle = paste(tri@TriangleName, tolower(CumulativeOrIncremental), tolower(PaidOrIncurred), "loss by accident year")
-  
-  plt = ggplot(df, aes(x = DevelopmentLag, y = LossValue, group = LossPeriod, colour = LossPeriod)) 
-  plt = plt + geom_line(show_guide=FALSE) + geom_point(show_guide=FALSE) + labs(title=PlotTitle)
-  
-  print(plt)
-  
-  return (plt)
-}
-
-setMethod("plot", "Triangle"
-          , function(x, y, ...){
-            .plotTriangle(x)
-          })
-
-#==================================================================================================
+#' Create a Triangle object
+#' Triangle creates a new Triangle
+#' @param TriangleData A dataframe
+#' @param TriangleName The name of the triangle
+#' @param OriginPeriodType A character string which describes the type of origin period. 
+#' @param OriginPeriodInterval
+#' @export Triangle
 # User-friendly constructor
 # This is a giant pile of code which basically does the following:
 #   * Ensure that we have a proper date for the loss period start
@@ -95,53 +38,27 @@ setMethod("plot", "Triangle"
 #       for development period (based on lubridate Period class), compute the evaluation date.
 Triangle = function(TriangleData
                     , TriangleName
-                    , LossPeriodType = "accident"
-                    , LossPeriodInterval = years(1)
+                    , OriginPeriodColumn
+                    , OriginPeriodType = "accident"
+                    , OriginPeriodInterval = years(1)
+                    , DevelopmentColumn
                     , DevelopmentInterval = years(1)
-                    , LossPeriodColumn
-                    , DevelopmentColumn)
+                    , MeasureMeta)
 {  
   
   # confirm that the loss period column exists. If not, we throw an error.
-  if (!ColumnExists(TriangleData, LossPeriodColumn))
+  if (!ColumnExists(TriangleData, OriginPeriodColumn))
   {
-    stop ("The specified column for the loss period does not exist. Unable to create the triangle.")
+    stop ("The specified column for the origin period does not exist. Unable to create the triangle.")
   }
   
   require(lubridate)
   
   # if the loss period column is not a date, attempt to convert it.
-  if (!is.POSIXt(TriangleData[,LossPeriodColumn])){
-    attemptConvert = ymd(TriangleData[,LossPeriodColumn])
-    if (sum(is.Date(attemptConvert)) ==0 ){
-      attemptConvert = ydm(TriangleData[,LossPeriodColumn])
-      if (sum(is.Date(attemptConvert)) ==0 ){
-        attemptConvert = mdy(TriangleData[,LossPeriodColumn])
-        if (sum(is.Date(attemptConvert)) ==0 ){
-          attemptConvert = myd(TriangleData[,LossPeriodColumn])
-          if (sum(is.Date(attemptConvert)) ==0 ){
-            attemptConvert = dmy(TriangleData[,LossPeriodColumn])
-            if (sum(is.Date(attemptConvert)) ==0 ){
-              attemptConvert = dym(TriangleData[,LossPeriodColumn])
-              if (sum(is.Date(attemptConvert)) ==0 ){
-                stop ("Loss period column is not in date form and all values cannot be converted to a date. Unable to create the triangle")
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  # If we've made it this far, we can safely convert the loss period start date
-  if (!is.POSIXt(TriangleData[, LossPeriodColumn])){
-    TriangleData$LossPeriodStart = attemptConvert
-  } else {
-    TriangleData$LossPeriodStart = TriangleData[, LossPeriodColumn]
-  }
+  TriangleData$OriginPeriodStart = GetValidDate(TriangleData[, OriginPeriodColumn])
   
   # Now add the period to create the end date
-  TriangleData$LossPeriodEnd = TriangleData$LossPeriodStart + LossPeriodInterval - days(1)
+  TriangleData$OriginPeriodEnd = TriangleData$OriginPeriodStart + OriginPeriodInterval - days(1)
   
   # it's possible that the user has fed data with overlap. 
   # Annual data with two start dates in the same year and annual development period, zB.
@@ -155,98 +72,87 @@ Triangle = function(TriangleData
   
   # For now, development periods must be integer.
   if (!is.integer(TriangleData[,DevelopmentColumn])){
-    TriangleData[,DevelopmentColumn] = as.integer(TriangleData[,DevelopmentColumn])
+    TriangleData$DevelopmentMultiplier = as.integer(TriangleData[,DevelopmentColumn])
   }
   
-  TriangleData$Development = TriangleData[,DevelopmentColumn] * DevelopmentInterval
+  TriangleData$DevelopmentMultiplier = TriangleData[,DevelopmentColumn]
+  
+  TriangleData$DevelopmentLag = TriangleData$DevelopmentMultiplier * DevelopmentInterval
   
   # if we can, construct an evaluation date based on loss period start and development interval
-  TriangleData$EvaluationDate = TriangleData$LossPeriodStart + TriangleData$Development - days(1)
+  TriangleData$EvaluationDate = TriangleData$OriginPeriodStart + TriangleData$DevelopmentLag - days(1)
+  
+  # Reorder the data
+  # TODO: sort out the case when there are different grouping levels
+  TriangleData = TriangleData[order(TriangleData$OriginPeriodStart, TriangleData$DevelopmentLag),]
+  
+  # Add a stem so that column names for newly created incremental/cumulative may be formed 
+  MeasureStem = gsub("*Cumulative*", "", MeasureMeta$MeasureName)
+  MeasureStem = gsub("*Incremental*", "", MeasureStem)
+  MeasureMeta = cbind(MeasureMeta, MeasureStem = as.character(MeasureStem))
+  
+  # Create new columns so that every measure has both incremental and cumulative
+  # I can alter this code so that premium and other such measures are not included
+  whichRecords = subset(MeasureMeta, Cumulative != "Neither")
+  NewCols = apply(as.matrix(whichRecords), 1, AdjustTriangleMeasures, TriangleData)
+  NewCols = as.data.frame(do.call("cbind", NewCols))
+  TriangleData = cbind(TriangleData, NewCols)
+  
+  # Now create columns for prior measures
+  whichRecords = subset(MeasureMeta, Cumulative != "Neither")
+  NewCols = apply(as.matrix(whichRecords), 1, ConstructPriorMeasures, TriangleData, DevelopmentInterval)
+  NewCols = as.data.frame(do.call("cbind", NewCols))
+  TriangleData = cbind(TriangleData, NewCols)
+  
+  row.names(TriangleData) = NULL
   
   tri = new("Triangle", TriangleData = TriangleData
             , TriangleName = TriangleName
-            , LossPeriodType = LossPeriodType
-            , LossPeriodInterval = LossPeriodInterval
+            , OriginPeriodType = OriginPeriodType
+            , OriginPeriodInterval = OriginPeriodInterval
             , DevelopmentInterval = DevelopmentInterval)
-  
-  tri@TriangleData = CalculateIncrementals(tri)
   
   return (tri)
 }
-#== End Triangle constructor ======================================================================
 
-is.Triangle = function(object)
+AdjustTriangleMeasures = function(MetaRow, df)
 {
-  is(object, "Triangle")
+  MeasureName = as.character(MetaRow[1])
+  Cumulative = as.character(MetaRow[2])
+  MeasureStem = as.character(MetaRow[3])
+  
+  #TODO: Adjust the split so that it will account for other grouping elements
+  alist = split(df, as.factor(df$OriginPeriodStart))
+  alist = lapply(alist, "[[", MeasureName)
+  
+  if (Cumulative == "Cumulative"){
+    ColName = paste0("Incremental", MeasureStem)
+    NewCol = lapply(alist, function(x){
+      incr = c(x[1], diff(x))
+      NewCol = data.frame(NewColumn = incr)})
+  } else {
+    ColName = paste0("Cumultive", MeasureStem)
+    NewCol = lapply(alist, function(x){
+      cumul = cumsum(x)
+      NewCol = data.frame(NewColumn = incr)})
+  }
+  
+  NewCol = as.data.frame(do.call("rbind", NewCol))
+  NewCol = RenameColumn(NewCol, "NewColumn", ColName)
+  
+  return(NewCol)
 }
 
-setGeneric("CalculateIncrementals", function(x){
-  standardGeneric("CalculateIncrementals")
-})
-
-setMethod("CalculateIncrementals", "Triangle", function(x){
-  df = x@TriangleData
-  df = df[order(df$LossPeriod, df$DevelopmentLag),]
+ConstructPriorMeasures = function(MetaRow, df, DevelopmentInterval)
+{
+  MeasureStem = as.character(MetaRow[3])
+  CumulativeCol = paste0("Cumulative", MeasureStem)
+  IncrementalCol = paste0("Incremental", MeasureStem)
+  NewColumnVal = df[,CumulativeCol] - df[,IncrementalCol]
   
-  rownames(df) = NULL
-  df$IncrementalPaid = df$CumulativePaid
-  df$IncrementalIncurred = df$CumulativeIncurred
-  df$PriorCumulativePaid = df$CumulativePaid
-  df$PriorCumulativeIncurred = df$PriorCumulativeIncurred
-  
-  nrows = length(df$CumulativePaid)
-  
-  df$PriorCumulativePaid[2:nrows] = df$CumulativePaid[1:nrows-1]
-  df$PriorCumulativeIncurred[2:nrows] = df$CumulativeIncurred[1:nrows-1]
-  df$IncrementalPaid[2:nrows] = df$CumulativePaid[2:nrows] - df$CumulativePaid[1:nrows-1]
-  df$IncrementalIncurred[2:nrows] = df$CumulativeIncurred[2:nrows] - df$CumulativeIncurred[1:nrows-1]
-  
-  firstLag = which(df$DevelopmentLag == 1)
-  df$IncrementalPaid[firstLag] = df$CumulativePaid[firstLag]
-  df$IncrementalIncurred[firstLag] = df$CumulativeIncurred[firstLag]
-  df$PriorCumulativePaid[firstLag] = 0
-  df$PriorCumulativeIncurred[firstLag] = 0
-  
-  return(df)
-})
-
-setGeneric("setName<-", function(object, value) {
-  standardGeneric("setName<-")
-  })
-
-setReplaceMethod(
-  f = "setName"
-  , signature = "Triangle"
-  , definition = function(object, value){
-    object@TriangleName <- value
-    return(object)
-  })
-
-# setGeneric("ProjectTriangle", function(x, ...){
-#   standardGeneric("ProjectTriangle")
-# })
-# 
-# setMethod("ProjectTriangle", "Triangle", function(x, FutureDate){
-#   df = LatestDiagonal(Triangle)
-#   return(df)
-# })
-# CreateProjection(dfTriangle, NumberOfPeriods, Response, IntervalWidth)
-# {
-#   
-#   return (dfProjection)
-# }
-
-# setMethod(
-#   f = "Initialize"
-#   , signature = "Triangle"
-#   , definition = function(.Object, TriangleData
-#                           , TriangleName
-#                           , LossPeriodType
-#                           , LossPeriodInterval
-#                           , DevelopmentInterval){
-#     cat("Initialize triangle")
-#     .Object@TriangleData = TriangleData
-#     .Object@LossPeriodType = LossPeriodType
-#     .ObjectLossPeriodInterval = LossPeriodInterval
-#   }
-#   )
+  firstDevs = df$DevelopmentLag == DevelopmentInterval
+  NewColumnVal[firstDevs] = NA
+  df = data.frame(NewColumn = NewColumnVal)
+  ColName = paste0("PriorCumulative", MeasureStem)
+  df = RenameColumn(df, "NewColumn", ColName)
+}
