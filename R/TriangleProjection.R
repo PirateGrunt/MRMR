@@ -1,3 +1,5 @@
+#' @include Triangle.R
+NULL
 
 setClass("TriangleProjection", 
          representation(ProjectionName = "character"
