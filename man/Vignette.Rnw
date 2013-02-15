@@ -1,0 +1,49 @@
+\documentclass[11pt]{article}
+\usepackage{Sweave}
+\usepackage{url}
+\usepackage{wrapfig}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\hypersetup{
+  colorlinks = true
+  , pdftitle = {MRMR: Multivariate Regression Models for Reserving}
+  , pdfauthor={Brian A. Fannin}%
+}
+
+%\VignetteIndexEntry{MRMR: Multivariate Regression Models for Reserving}
+%\VignetteDepends{MRMR}
+%\VignetteKeywords{reserving, actuarial}
+%\VignettePackage{MRMR}
+
+%\SweaveOpts{engine=R,eps=FALSE}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\title{MRMR:\\
+        Multivariate Regression Models for Reserving \\
+        Version: \Sexpr{packageDescription("MRMR")[['Version']]} \\
+        DRAFT
+}
+
+\author{by Brian A. Fannin{\href{mailto:BFannin@RedwoodsGroup.com}}
+}
+\maketitle
+
+\noindent
+Techniques to analyze loss reserves are decades old. Many suffer from a common shortcoming with respect to the presentation of the data. 
+\section{Background}
+A complete historical treatise is beyond the scope of this paper. However, a basic overview will suffice to 
+\section{Data}
+We presume that losses have a basic and common structure. Claims are grouped according to temporal characteristics associated with incidence of a claim. Common candidates are: the effective date of the policy, the date the claim occurred and the date the claim was reported. Whichever sort of date is used, there is a 
+
+Irrespective of the origin period scheme, an evaluation date is a common and essential feature.
+
+There are a number of quantitative elements associated with a claim. The most obvious being the cumulative amount paid as of a specific point in time.
+\section{Technique}
+Once the data have been arranged in tabular format, a model may be posited. We should pause here for a moment and pose a vital question: what is it exactly that we are trying to predict? For most practicing actuaries, the answer will be the "ultimate" value of the quantity in question, aggregted over the origin periods. "Ultimate" presumes that all claims have been fully and finally resolved and that the liability on behalf of the insurance company has been met. In general, it is impossible to know at what point in time that will occur. 
+
+This package does not subscribe to the "ultimate" view, nor does it presume the existence of a "tail factor" which may account for amounts projected in an uncertain time frame. Instead, we adopt the use of model factors which may or may not be associated with temporal characteristics. However, those factors are applied, a prediction is based on a model's functional form. Where new predictors are available, new responses are generated. Put differently, if the modeler wants to produce a forecast, she must specify a future point in time and provide required predictors to generate the forecast.
+
+An example may make this clear.
+
+\end{document}
