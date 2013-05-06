@@ -14,15 +14,6 @@
 #             print(paste("Loss period interval = ", object@OriginPeriodInterval))
 #           })
 # 
-# setGeneric("LatestDiagonal", function(x){
-#   standardGeneric("LatestDiagonal")
-# })
-# 
-# setMethod("LatestDiagonal", "Triangle", function(x){
-#   df = x@TriangleData
-#   latestEval = max(df$EvaluationDate)
-#   df.latest = subset(df, EvaluationDate == latestEval)
-# })
 # 
 # .plotTriangle = function(tri)
 # {
