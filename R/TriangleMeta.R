@@ -1,0 +1,39 @@
+#' HasGroups
+#' 
+#' Reports whether or not this triangle contains any subgroups
+#' @param x Triangle
+#' @examples
+#' \donttest{
+#' # An example
+#' }
+HasGroups = function(aTriangle){
+  aTriangle@HasGroups
+}
+
+OriginDevMatch = function(objTriangle){
+  maxRows = length(unique(objTriangle@OriginPeriod))
+  maxRows = maxRows * length(unique(objTriangle@DevelopmentLag))
+  
+  maxRows <= nrow(objTriangle@TriangleData)
+}
+
+TriangleOriginPeriods = function(objTriangle){
+  op = unique(objTriangle@TriangleData$OriginPeriodStart)
+  op = op[order(op)]
+  op
+}
+
+TriangleCalendarPeriods = function(objTriangle){
+  cp = unique(objTriangle@TriangleData$CalendarPeriodStart)
+  cp = cp[order(cp)]
+  cp
+}
+
+# TriangleGroups = function(aTriangle){
+#   groups = unique(aTriangle@TriangleData$Group)
+#   groups
+# }
+
+TriangleMeasures = function(aTriangle){
+  
+}
