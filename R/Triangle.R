@@ -2,9 +2,27 @@
 #' 
 library(lubridate)
 
+is.Triangle = function(object)
+{
+  is(object, "Triangle")
+}
+
 checkTriangle = function(object)
 {
-  return (TRUE)
+  errors = character()
+#   numOPs = length(unique(object@OriginPeriod))
+#   numDevs = length(unique(object@DevelopmentLag))
+#   numGroups = length(unique(object@Group))
+#   maxRows = numDevs * numOPs * numGroups
+#   if ((nrow(object@TriangleData)) > maxRows){
+#     paste0("The number of origin periods and lags suggests that you forgot to add a grouping field.")
+#     paste0("Number of origin periods: ", numOPs)
+#     paste0("Number of development lags: ", numDevs)
+#     paste0("Number of groups: ", numGroups)
+#     paste0("OP * Dev * Groups = ", maxRows)
+#     paste0("Number of records in TriangleData: ", nrow(object@TriangleData))
+#   }
+  if (length(errors) == 0) TRUE else errors
 }
 
 #' Triangle class
@@ -16,143 +34,115 @@ checkTriangle = function(object)
 #' @exportClass Triangle
 #' 
 setClass("Triangle"
-         , validity = checkTriangle
-         , representation(TriangleData = "data.frame"
-                        , TriangleName = "character"
-                        , OriginPeriodType = "character"
-                        , OriginPeriodInterval = "Period"
-                        , DevelopmentInterval = "Period"))
+         , representation(  TriangleData = "data.frame"
+                          , TriangleName = "character"
+                          , OriginPeriodType = "character"
+                          , Measures = "character"
+                          , Groups = "character")
+#          , sealed = TRUE
+#         , validity = #some function
+         )
 
-#' Create a Triangle object
-#' Triangle creates a new Triangle
-#' @param TriangleData A dataframe
+#' Create a Triangle object.
+#' @param TriangleData A dataframe 
 #' @param TriangleName The name of the triangle
 #' @param OriginPeriodType A character string which describes the type of origin period. 
 #' @param OriginPeriodInterval
 #' @export Triangle
 # User-friendly constructor
-# This is a giant pile of code which basically does the following:
-#   * Ensure that we have a proper date for the loss period start
-#   * Ensure that we have a column for the development lag
-#   * Once those have been established, create columns for loss period start and end, create a column
-#       for development period (based on lubridate Period class), compute the evaluation date.
-Triangle = function(TriangleData
-                    , TriangleName
-                    , OriginPeriodColumn
-                    , OriginPeriodType = "accident"
-                    , OriginPeriodInterval = years(1)
-                    , DevelopmentColumn
-                    , DevelopmentInterval = years(1)
-                    , MeasureMeta)
-{  
+newTriangle = function(OriginPeriods = NULL
+                    , OriginEnd = NULL
+                    , OriginLength = years(1)
+                    , StartDay = 1
+                    , StartMonth = 1
+                    , DevelopmentLags = NULL
+                    , DevelopmentPeriod = months(1)
+                    , EvaluationDates = NULL
+                    , OriginPeriodType = "Accident Year"
+                    , TriangleName = NULL
+                    , TriangleData = NULL
+                    , Measures
+                    , Groups = NULL
+                    , Cumulative = TRUE)
+{
+  arguments <- as.list(match.call())
   
-  # confirm that the loss period column exists. If not, we throw an error.
-  if (!ColumnExists(TriangleData, OriginPeriodColumn))
-  {
-    stop ("The specified column for the origin period does not exist. Unable to create the triangle.")
+  OriginPeriods = eval(arguments$OriginPeriods, TriangleData)
+  if(is.null(OriginPeriods)) stop ("No origin period was specified.")
+  
+  if (!is.interval(OriginPeriods)) {
+    OriginPeriods = CreateOriginPeriods(OriginPeriods, OriginEnd, OriginLength, StartDay, StartMonth)
   }
   
-  require(lubridate)
+  DevelopmentLags = eval(arguments$DevelopmentLags, TriangleData)
+  if(is.null(DevelopmentLags)) stop ("No development lag information was provided.")
   
-  # if the loss period column is not a date, attempt to convert it.
-  TriangleData$OriginPeriodStart = GetValidDate(TriangleData[, OriginPeriodColumn])
+  if (!is.period(DevelopmentLags)){
+    DevelopmentLags = CreateDevelopmentLags(DevelopmentLags, DevelopmentPeriod, EvaluationDates, OriginPeriods)
+  }
   
-  # Now add the period to create the end date
-  TriangleData$OriginPeriodEnd = TriangleData$OriginPeriodStart + OriginPeriodInterval - days(1)
+  CommonDevInterval = DevelopmentLags[order(DevelopmentLags)]
+  CommonDevInterval = CommonDevInterval[1]
+  DevInteger = DevelopmentLags / CommonDevInterval
+
+  if(is.null(EvaluationDates)) {
+    EvaluationDates = CreateEvaluationDates(OriginPeriods, DevelopmentLags)
+  } else {
+    # Throw a warning if the evaluation dates which were passed in are not consistent with what they ought to be.
+  }
   
-  # it's possible that the user has fed data with overlap. 
+  # It's possible that the user has fed data with overlap. 
   # Annual data with two start dates in the same year and annual development period, zB.
   # I might decide to check for this and throw a warning, but for now, I'll just blame the user.
   
-  # Now confirm that the development lag column exists. If not, we throw an error.
-  if (!ColumnExists(TriangleData, DevelopmentColumn))
+  dfNewTriangleData = data.frame(OriginPeriod = OriginPeriods
+                                 , DevelopmentLag = DevelopmentLags
+                                 , EvaluationDate = EvaluationDates
+                                 , DevInteger = DevInteger)
+  
+  dfNewTriangleData$OriginPeriodStart = int_start(dfNewTriangleData$OriginPeriod)
+  dfNewTriangleData$OriginPeriodEnd = int_end(dfNewTriangleData$OriginPeriod)
+  
+  dfNewTriangleData$CalendarPeriodStart = dfNewTriangleData$EvaluationDate - CommonDevInterval + days(1)
+  dfNewTriangleData$CalendarPeriodEnd = dfNewTriangleData$EvaluationDate 
+  dfNewTriangleData$CalendarPeriod = with(dfNewTriangleData, new_interval(CalendarPeriodStart, CalendarPeriodEnd))
+  
+  if (is.null(Groups))
   {
-    stop ("The specified column for the development does not exist. Unable to create the triangle.")
+    dfNewTriangleData$Group = "All"
+    Groups = "Group"
+  } else {
+    dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[Groups])
   }
   
-  # For now, development periods must be integer.
-  if (!is.integer(TriangleData[,DevelopmentColumn])){
-    TriangleData$DevelopmentMultiplier = as.integer(TriangleData[,DevelopmentColumn])
+  if (is.null(Measures)) stop ("You've not supplied any measures for this triangle. Idiot.")
+
+  dfMeasures = TriangleData[Measures]
+  names(dfMeasures) = FormMeasureNames(dfMeasures, Cumulative)
+
+  dfNewTriangleData = cbind(dfNewTriangleData, dfMeasures) 
+  
+  measureNames = names(dfMeasures)
+  if(Cumulative) {
+    dfNewTriangleData = CreateIncrementals(dfNewTriangleData, measureNames, Groups)
+    measureNames = c(measureNames, gsub("Cumulative", "Incremental", measureNames))
+  } else {
+    dfNewTriangleData = CreateCumulative(dfNewTriangleData, measureNames, Groups)
+    measureNames = c(measureNames, gsub("Incremental","Cumulative", measureNames))
   }
   
-  TriangleData$DevelopmentMultiplier = TriangleData[,DevelopmentColumn]
+  dfNewTriangleData = CreatePriors(dfNewTriangleData, measureNames, Groups)
   
-  TriangleData$DevelopmentLag = TriangleData$DevelopmentMultiplier * DevelopmentInterval
+  if (is.null(TriangleName)) TriangleName = ""
   
-  # if we can, construct an evaluation date based on loss period start and development interval
-  TriangleData$EvaluationDate = TriangleData$OriginPeriodStart + TriangleData$DevelopmentLag - days(1)
+  row.names(dfNewTriangleData) = NULL
   
-  # Reorder the data
-  # TODO: sort out the case when there are different grouping levels
-  TriangleData = TriangleData[order(TriangleData$OriginPeriodStart, TriangleData$DevelopmentLag),]
-  
-  # Add a stem so that column names for newly created incremental/cumulative may be formed 
-  MeasureStem = gsub("*Cumulative*", "", MeasureMeta$MeasureName)
-  MeasureStem = gsub("*Incremental*", "", MeasureStem)
-  MeasureMeta = cbind(MeasureMeta, MeasureStem = as.character(MeasureStem))
-  
-  # Create new columns so that every measure has both incremental and cumulative
-  # I can alter this code so that premium and other such measures are not included
-  whichRecords = subset(MeasureMeta, Cumulative != "Neither")
-  NewCols = apply(as.matrix(whichRecords), 1, AdjustTriangleMeasures, TriangleData)
-  NewCols = as.data.frame(do.call("cbind", NewCols))
-  TriangleData = cbind(TriangleData, NewCols)
-  
-  # Now create columns for prior measures
-  whichRecords = subset(MeasureMeta, Cumulative != "Neither")
-  NewCols = apply(as.matrix(whichRecords), 1, ConstructPriorMeasures, TriangleData, DevelopmentInterval)
-  NewCols = as.data.frame(do.call("cbind", NewCols))
-  TriangleData = cbind(TriangleData, NewCols)
-  
-  row.names(TriangleData) = NULL
-  
-  tri = new("Triangle", TriangleData = TriangleData
+  tri = new("Triangle"
+            , TriangleData = dfNewTriangleData
             , TriangleName = TriangleName
             , OriginPeriodType = OriginPeriodType
-            , OriginPeriodInterval = OriginPeriodInterval
-            , DevelopmentInterval = DevelopmentInterval)
+            , Measures = CleanMeasureNames(measureNames)
+            , Groups = Groups)
   
-  return (tri)
-}
-
-AdjustTriangleMeasures = function(MetaRow, df)
-{
-  MeasureName = as.character(MetaRow[1])
-  Cumulative = as.character(MetaRow[2])
-  MeasureStem = as.character(MetaRow[3])
-  
-  #TODO: Adjust the split so that it will account for other grouping elements
-  alist = split(df, as.factor(df$OriginPeriodStart))
-  alist = lapply(alist, "[[", MeasureName)
-  
-  if (Cumulative == "Cumulative"){
-    ColName = paste0("Incremental", MeasureStem)
-    NewCol = lapply(alist, function(x){
-      incr = c(x[1], diff(x))
-      NewCol = data.frame(NewColumn = incr)})
-  } else {
-    ColName = paste0("Cumultive", MeasureStem)
-    NewCol = lapply(alist, function(x){
-      cumul = cumsum(x)
-      NewCol = data.frame(NewColumn = incr)})
-  }
-  
-  NewCol = as.data.frame(do.call("rbind", NewCol))
-  NewCol = RenameColumn(NewCol, "NewColumn", ColName)
-  
-  return(NewCol)
-}
-
-ConstructPriorMeasures = function(MetaRow, df, DevelopmentInterval)
-{
-  MeasureStem = as.character(MetaRow[3])
-  CumulativeCol = paste0("Cumulative", MeasureStem)
-  IncrementalCol = paste0("Incremental", MeasureStem)
-  NewColumnVal = df[,CumulativeCol] - df[,IncrementalCol]
-  
-  firstDevs = df$DevelopmentLag == DevelopmentInterval
-  NewColumnVal[firstDevs] = NA
-  df = data.frame(NewColumn = NewColumnVal)
-  ColName = paste0("PriorCumulative", MeasureStem)
-  df = RenameColumn(df, "NewColumn", ColName)
+  tri
 }
