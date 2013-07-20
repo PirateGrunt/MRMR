@@ -1,13 +1,6 @@
 # This script will fetch several sets of data from the CAS website and bind them together
 # using multiple group IDs
 
-# Source from a local directory
-myDirectory = "~/Github/MRMR/R/"
-sourceFiles = c("NAIC.R")
-
-dummy = lapply(paste0(myDirectory, sourceFiles), source)
-rm(myDirectory, sourceFiles, dummy)
-
 dfAuto = GetNAICData(dataSetName = "comAuto_pos.csv")
 dfWC =  GetNAICData(dataSetName = "wkcomp_pos.csv")
 dfGL =  GetNAICData(dataSetName = "othliab_pos.csv")
