@@ -3,11 +3,10 @@
 \title{Create a Triangle object
 Triangle creates a new Triangle}
 \usage{
-  Triangle(TriangleData, TriangleName,
+  Triangle(TriangleData, TriangleName, OriginPeriodColumn,
     OriginPeriodType = "accident",
-    OriginPeriodInterval = years(1),
-    DevelopmentInterval = years(1), OriginPeriodColumn,
-    DevelopmentColumn)
+    OriginPeriodInterval = years(1), DevelopmentColumn,
+    DevelopmentInterval = years(1), MeasureMeta)
 }
 \arguments{
   \item{TriangleData}{A dataframe}
