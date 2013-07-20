@@ -1,3 +1,15 @@
+SpliceDFs = function(aDF, anotherDF, colnames)
+{
+  if (length(colnames) == 1){
+    x = as.data.frame(anotherDF[, colnames])
+    names(x) = colnames
+  } else {
+    x = anotherDF[, colnames]
+  }
+  df = cbind(aDF,  x)
+  df
+}
+
 GetValidDate = function(ValIn)
 {
   
@@ -37,8 +49,13 @@ ColumnExists = function(df, ColumnName)
 
 RenameColumn = function(df, OldName, NewName)
 {
-  whichCol = colnames(df) == OldName
-  colnames(df)[whichCol] = NewName
+  if (ColumnExists (df, OldName)){
+    whichCol = colnames(df) == OldName
+    colnames(df)[whichCol] = NewName  
+  } else
+  {
+    warning(paste0("The column name you specified ", OldName, " does not exist. No changes have been made."))
+  }
   
   return(df)
 }
