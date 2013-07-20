@@ -6,20 +6,9 @@ Maintainer: Brian Fannin <BFannin@RedwoodsGroup.com>
 Author: Brian Fannin [aut, cre]
 License: GPL (>= 2)
 Depends:
-    R (>= 2.15.0),
-    lubridate,
-    RODBC
+    R (>= 2.15.0)
+    , lubridate
+    , RODBC
+    , Mesa
 Collate:
-    'data.R'
-    'Utils.R'
-    'Help.R'
-    'NAIC.R'
-    'RegressionSupport.r'
-    'ReservingVisualization.R'
-    'Triangle.R'
-    'TriangleModel.R'
-    'TriangleProjection.R'
-    'Another Demo.R'
-    'ParkingLot.R'
-    'Stanard.R'
-    'Clustered LDF.R'
+  
