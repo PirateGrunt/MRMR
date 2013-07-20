@@ -49,16 +49,12 @@ TriangleModel = function(ModelName
   }
   
   # Now calibrate the model
-  df$Response = df[,ResponseName]
-  df$Predictor = df[,PredictorName]
+  theFormula = as.formula(paste0(ResponseName, " ~ ", PredictorName, ":", CategoryName, " + 0"))
   if (tolower(CategoryName) == "none"){
-    fit = lm(Response ~ Predictor + 0, data = df)
-  } else{
-    # Augment the 
-    df$Category = as.factor(df[,CategoryName])
-    #df$AdjustedCategory = 
-    fit = lm(Response ~ Predictor:Category + 0, data = df)
-  }
+    theFormula = as.formula(paste0(ResponseName, " ~ ", PredictorName, " + 0"))
+  } 
+  
+  fit = lm(theFormula, data = df)
   
   triModel = new("TriangleModel"
                  , TriangleModelName = ModelName
