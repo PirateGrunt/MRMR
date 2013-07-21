@@ -11,7 +11,7 @@ plotTriangleModel = function(x, y,  ...)
   require(ggplot2)
   
   objModel = x
-  plot(objModel@Fit$coefficients)
+  qlot(objModel@Fit$coefficients)
   
 }
 
