@@ -34,10 +34,11 @@ checkTriangle = function(object)
 #' @exportClass Triangle
 #' 
 setClass("Triangle"
-         , representation(  TriangleData = "data.frame"
+         , representation(TriangleData = "data.frame"
                           , TriangleName = "character"
                           , OriginPeriodType = "character"
-                          , Measures = "character"
+                          , StaticMeasures = "character"
+                          , StochasticMeasures = "character"
                           , Groups = "character")
 #          , sealed = TRUE
 #         , validity = #some function
@@ -61,7 +62,8 @@ newTriangle = function(OriginPeriods = NULL
                     , OriginPeriodType = "Accident Year"
                     , TriangleName = NULL
                     , TriangleData = NULL
-                    , Measures
+                    , StaticMeasures
+                    , StochasticMeasures
                     , Groups = NULL
                     , Cumulative = TRUE)
 {
@@ -115,23 +117,26 @@ newTriangle = function(OriginPeriods = NULL
     dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[Groups])
   }
   
-  if (is.null(Measures)) stop ("You've not supplied any measures for this triangle. Idiot.")
-
-  dfMeasures = TriangleData[Measures]
-  names(dfMeasures) = FormMeasureNames(dfMeasures, Cumulative)
-
-  dfNewTriangleData = cbind(dfNewTriangleData, dfMeasures) 
+  if (!is.null(StaticMeasures)) dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[StaticMeasures])
   
-  measureNames = names(dfMeasures)
+  if (is.null(StochasticMeasures)) stop ("You've not supplied any stochastic measures for this triangle. Idiot.")
+
+  dfStochasticMeasures = TriangleData[StochasticMeasures]
+  stochasticMeasureNames = FormMeasureNames(dfStochasticMeasures, Cumulative)
+  names(dfStochasticMeasures) = stochasticMeasureNames
+
+  dfNewTriangleData = cbind(dfNewTriangleData, dfStochasticMeasures) 
+  
   if(Cumulative) {
-    dfNewTriangleData = CreateIncrementals(dfNewTriangleData, measureNames, Groups)
-    measureNames = c(measureNames, gsub("Cumulative", "Incremental", measureNames))
+    dfNewTriangleData = CreateIncrementals(dfNewTriangleData, stochasticMeasureNames, Groups)
+    print(colnames(dfNewTriangleData))
+    stochasticMeasureNames = c(stochasticMeasureNames, gsub("Cumulative", "Incremental", stochasticMeasureNames))
   } else {
-    dfNewTriangleData = CreateCumulative(dfNewTriangleData, measureNames, Groups)
-    measureNames = c(measureNames, gsub("Incremental","Cumulative", measureNames))
+    dfNewTriangleData = CreateCumulative(dfNewTriangleData, stochasticMeasureNames, Groups)
+    stochasticMeasureNames = c(stochasticMeasureNames, gsub("Incremental","Cumulative", stochasticMeasureNames))
   }
   
-  dfNewTriangleData = CreatePriors(dfNewTriangleData, measureNames, Groups)
+  dfNewTriangleData = CreatePriors(dfNewTriangleData, stochasticMeasureNames, Groups)
   
   if (is.null(TriangleName)) TriangleName = ""
   
@@ -141,8 +146,47 @@ newTriangle = function(OriginPeriods = NULL
             , TriangleData = dfNewTriangleData
             , TriangleName = TriangleName
             , OriginPeriodType = OriginPeriodType
-            , Measures = CleanMeasureNames(measureNames)
+            , StaticMeasures = CleanMeasureNames(stochasticMeasureNames)
+            , StochasticMeasures = StaticMeasures
             , Groups = Groups)
   
   tri
 }
+
+# setMethod("c", signature(x = "Triangle"), function(x,  ...){
+#   
+#   elements = list(...)
+# #  TriangleDatas = lapply(elements, slot, "TriangleData"))
+#   TriangleNames = c(x@TriangleName, unlist(lapply(elements, slot, "TriangleName")))
+#   OriginPeriodTypes = c(x@OriginPeriodType, unlist(lapply(elements, slot, "OriginPeriodType")))
+#   Measures = c(x@Measures, unlist(lapply(elements, slot, "Measures")))
+#   Groups = c(x@Groups, unlist(lapply(elements, slot, "Groups")))
+#   
+#   new("Triangle"
+# #      , TriangleData = TriangleDatas
+#       , TriangleName = TriangleNames
+#       , OriginPeriodType = OriginPeriodTypes
+#       , Measures = Measures
+#       , Groups = Groups)
+# })
+# 
+# # elements = list(tri1, tri2)
+# # TriangleDatas = lapply(elements, slot, "TriangleData")
+# # TriangleNames = unlist(lapply(elements, slot, "TriangleName"))
+# # OriginPeriodTypes = unlist(lapply(elements, slot, "OriginPeriodType"))
+# # Measures = unlist(lapply(elements, slot, "Measures"))
+# # Groups = unlist(lapply(elements, slot, "Groups"))
+# # 
+# # mojo = as.data.frame(TriangleDatas[[1]])
+# 
+# mojo = new("Triangle"
+# #    , TriangleData = as.data.frame(TriangleDatas)
+#     , TriangleName = "tri1"
+#     , OriginPeriodType = "AY"
+#     , Measures = c("1", "2", "3")
+#     , Groups = c("monkey", "zebra"))
+# 
+# mojo1 = mojo
+# mojo2 = mojo
+# 
+# monkey = c(mojo1, mojo2)
