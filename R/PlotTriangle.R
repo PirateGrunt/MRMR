@@ -7,7 +7,7 @@
 #' @examples
 #' 
 plotTriangle = function(x, y
-                        , Predictor, Response, GroupColumn = "OriginPeriodStart"
+                        , Predictor, Response, Group = "OriginPeriodStart"
                         , Lines = TRUE, FitLines = FALSE, ...)
 {
   require(ggplot2)
@@ -15,11 +15,11 @@ plotTriangle = function(x, y
   # TODO: allow for null parameters
   df = x@TriangleData
 
-  df$OriginGroup = factor(df[, GroupColumn])
+  df$OriginGroup = factor(df[, Group])
   df$WhichMeasure = df[, Response]
   df$WhichTime = df[,Predictor]
   
-  plotTitle = paste0(Response, " by ", Predictor, " grouped by ", GroupColumn)
+  plotTitle = paste0(Response, " by ", Predictor, " grouped by ", Group)
   
   plt = ggplot(df, aes(x = WhichTime, y = WhichMeasure, group = OriginGroup, colour = OriginGroup)) 
   plt = plt + geom_point() + labs(title = plotTitle) + xlab(Predictor) + ylab(Response)
