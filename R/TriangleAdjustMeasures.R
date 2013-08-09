@@ -19,12 +19,13 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
     theMeasures = x[, measureCols]
     incrementals = apply(theMeasures, 2, diff)
     incrementals = rbind(theMeasures[1,], incrementals)
+    colnames(incrementals) = gsub("Cumulative", "Incremental", measureCols)
+    x = cbind(x, incrementals)
   })
   dfMeasures = do.call("rbind", lOriginYear)
   row.names(dfMeasures) = NULL
-  colnames(dfMeasures) = gsub("Cumulative", "Incremental", measureCols)
   
-  dfTriangleData = cbind(dfTriangleData, dfMeasures)
+  dfMeasures
   
 }
 
@@ -47,12 +48,13 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
     x = x[order(x$OriginPeriodStart, x$EvaluationDate),]
     theMeasures = x[, measureCols]
     cumulatives = apply(theMeasures, 2, cumsum)
+    names(cumulatives) = gsub("Incremental", "Cumulative", measureCols)
+    x = cbind(x, cumulatives)
   })
   dfMeasures = do.call("rbind", lOriginYear)
   row.names(dfMeasures) = NULL
-  colnames(dfMeasures) = gsub("Incremental", "Cumulative", measureCols)
   
-  dfTriangleData = cbind(dfTriangleData, dfMeasures)
+  dfMeasures
   
 }
 
