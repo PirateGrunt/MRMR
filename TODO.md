@@ -16,3 +16,7 @@
 16. Reconsider use of the name "FitCategory" in the call signature to TriangleModel
 17. S4 with list of data frames for Triangle, TriangleModel objects
 18. Plotting functions to compare model F stats
+19. Change dispatch method so that LatestDiagonal may accept either Triangle or data frame as an input
+20. Add labels to the model factor plots
+21. Triangle pivot function
+22. All of the noise from lubridate functions
