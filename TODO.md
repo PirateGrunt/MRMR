@@ -20,3 +20,5 @@
 20. Add labels to the model factor plots
 21. Triangle pivot function
 22. All of the noise from lubridate functions
+23. Clean up TriangleModel data so that only predictors and responses are included
+24. Clean up "magic numbers" in determining stochastic names in ProjectValues.R
