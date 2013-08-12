@@ -135,3 +135,17 @@ GetStochasticColumnNames = function(MeasureNames){
   theNames = c(priorNames, incrNames, cumulNames)
   theNames
 }
+
+GetPriorNames = function(MeasureNames){
+  baseNames = CleanMeasureNames(MeasureNames)
+  priorNames = paste0("Prior", baseNames)
+  
+  priorNames 
+}
+
+GetCumulativeNames = function(MeasureNames){
+  baseNames = CleanMeasureNames(MeasureNames)
+  cumulNames = paste0("Cumulative", baseNames)
+  
+  cumulNames 
+}
