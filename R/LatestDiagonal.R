@@ -2,7 +2,8 @@
 #' 
 LatestDiagonal = function(df)
 {
-#  df = objTriangle@TriangleData
+  if (class(df) == "Triangle") df = df@TriangleData
+  
   lOriginYear = dlply(df, "OriginPeriodStart")
   lOriginYear = lapply(lOriginYear, function(x) {
     whichRows = x$EvaluationDate == max(x$EvaluationDate)
