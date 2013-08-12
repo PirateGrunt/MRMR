@@ -29,6 +29,16 @@ TriangleCalendarPeriods = function(objTriangle){
   cp
 }
 
+is.StochasticMeasure = function(objTriangle, MeasureName){
+  MeasureName = CleanMeasureNames(MeasureName)
+  MeasureName %in% objTriangle@StochasticMeasures
+}
+
+is.StaticMeasure = function(objTriangle, MeasureName){
+  MeasureName = CleanMeasureNames(MeasureName)
+  MeasureName %in% objTriangle@StaticMeasures
+}
+
 # TriangleGroups = function(aTriangle){
 #   groups = unique(aTriangle@TriangleData$Group)
 #   groups
