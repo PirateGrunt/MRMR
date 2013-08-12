@@ -37,6 +37,7 @@ setClass("Triangle"
          , representation(TriangleData = "data.frame"
                           , TriangleName = "character"
                           , OriginPeriodType = "character"
+                          , DevelopmentInterval = "Period"
                           , StaticMeasures = "character"
                           , StochasticMeasures = "character"
                           , Groups = "character")
@@ -146,8 +147,9 @@ newTriangle = function(OriginPeriods = NULL
             , TriangleData = dfNewTriangleData
             , TriangleName = TriangleName
             , OriginPeriodType = OriginPeriodType
-            , StaticMeasures = CleanMeasureNames(stochasticMeasureNames)
-            , StochasticMeasures = StaticMeasures
+            , DevelopmentInterval = CommonDevInterval
+            , StaticMeasures = StaticMeasures
+            , StochasticMeasures = CleanMeasureNames(stochasticMeasureNames)
             , Groups = Groups)
   
   tri
