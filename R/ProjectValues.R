@@ -13,29 +13,40 @@ ProjectStochasticValues = function(objTriangleModel, dfProjection)
 {
   fit = objTriangleModel@Fit
   
-#   baseName = CleanMeasureNames(objTriangleModel@Response)
-#   cumulName = paste0("Cumulative", baseName)
-#   incrName = paste0("Incremental", baseName)
-#   priorName = paste0("Prior", baseName)
-#   
-#   evalDates = unique(dfProjection$EvaluationDate)
-#   evalDates = sort(evalDates)
-#   
-#   for (i in seq_along(evalDates)) {
-#     whichRows = (dfProjection$EvaluationDate == evalDates[i])
-#     dfProjection[whichRows,] = predict(fit, newdata = dfProjection[whichRows,])
-#     dfProjection[whichRows, cumulName] = dfProjection[whichRows, incrName] + dfProjection[whichRows, priorName]
-#   }
-#   
-  dfProjection = predict(fit, newdata = dfProjection)
+  theCols = GetStochasticColumnNames(objTriangleModel@Response)
+  priorCol = theCols[1]
+  incrCol = theCols[2]
+  cumulCol = theCols[3]
+  theResponse = objTriangleModel@Response
+  
+  evalDates = unique(dfProjection$EvaluationDate)
+  evalDates = sort(evalDates)
+  
+  maxDev = max(dfProjection$DevInteger)
+  
+  for (i in seq_along(evalDates)) {
+    whichRows = (dfProjection$EvaluationDate == evalDates[i])
+    dfProjection[whichRows, theResponse] = predict(fit, newdata = dfProjection[whichRows,])
+          
+    if (theResponse == incrCol) {
+      dfProjection[whichRows, cumulCol] = dfProjection[whichRows, incrCol] + dfProjection[whichRows, priorCol]
+    }else {
+      dfProjection[whichRows, incrCol] = dfProjection[whichRows, cumulCol] - dfProjection[whichRows, priorCol]
+    }
+    
+    if(i != length(evalDates)){
+      nextRows = (dfProjection$EvaluationDate == evalDates[i+1])
+      currentRows = (dfProjection$DevInteger %in% (dfProjection$DevInteger[nextRows] - 1)
+                     & dfProjection$EvaluationDate == evalDates[i])
+      dfProjection[nextRows, priorCol] = dfProjection[currentRows, cumulCol]
+    }
+  }
+  
+#  dfProjection = predict(fit, newdata = dfProjection)
   
   dfProjection
 }
 
-mojo = unique(Friedland@TriangleData$EvaluationDate)
-mojo = sort(mojo)
-
-for (i in seq_along(mojo)) print(mojo[i])
 # if (CategoryName == "none"){
 #   newX = df[, colnames(df) %in% PredictorName]
 # } else {
