@@ -63,8 +63,8 @@ newTriangle = function(OriginPeriods = NULL
                     , OriginPeriodType = "Accident Year"
                     , TriangleName = NULL
                     , TriangleData = NULL
-                    , StaticMeasures
-                    , StochasticMeasures
+                    , StaticMeasures = NULL
+                    , StochasticMeasures = NULL
                     , Groups = NULL
                     , Cumulative = TRUE)
 {
