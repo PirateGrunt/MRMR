@@ -6,7 +6,8 @@ ProjectToDev = function(objTriangleModel, lOriginYears, MaxDev)
   
   require(lubridate)
   
-  DevelopmentInterval = months(12)
+  objTriangle = objTriangleModel@Triangle
+  DevelopmentInterval = objTriangle@DevelopmentInterval
   
   mojo = lapply(lOriginYears, function(x){
     ProjectionIntervals = MaxDev - x$DevInteger
@@ -23,7 +24,9 @@ ProjectToDev = function(objTriangleModel, lOriginYears, MaxDev)
   df$DevelopmentLag = as.period(new_interval(df$OriginPeriodStart, df$EvaluationDate + days(1)))
   df$DevInteger = df$DevelopmentLag / DevelopmentInterval
   
-  df = CreatePriors(df, c("CumulativePaid", "IncrementalPaid"), Groups = "All")
+  priors = GetPriorNames(objTriangle@StochasticMeasures)
+  cumuls = GetCumulativeNames(objTriangle@StochasticMeasures)
+  df[, priors] = df[, cumuls]
   
   df
 }

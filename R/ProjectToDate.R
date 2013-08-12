@@ -6,7 +6,8 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   
   require(lubridate)
   
-  DevelopmentInterval = objTriangleModel@Triangle@DevelopmentInterval
+  objTriangle = objTriangleModel@Triangle
+  DevelopmentInterval = objTriangle@DevelopmentInterval
   
   mojo = lapply(lOriginYears, function(x){
     tz(AsOfDate) = tz(x$EvaluationDate)
@@ -22,8 +23,13 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   })
   
   df = do.call("rbind", mojo)
+  
   df$DevelopmentLag = as.period(new_interval(df$OriginPeriodStart, df$EvaluationDate + days(1)))
   df$DevInteger = df$DevelopmentLag / DevelopmentInterval
+  
+  priors = GetPriorNames(objTriangle@StochasticMeasures)
+  cumuls = GetCumulativeNames(objTriangle@StochasticMeasures)
+  df[, priors] = df[, cumuls]
   
   df
 }
