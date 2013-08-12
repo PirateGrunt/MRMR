@@ -70,9 +70,6 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
 #' 
 CreatePriors = function(dfTriangleData, measureCols, Groups)
 {
-#   dfTriangleData = mojo
-#   measureCols = names(mojo)
-#   measureCols = measureCols[- (1:10)]
   
   cumulCols = grep("*Cumulative*", measureCols)
   cumulCols = measureCols[cumulCols]
@@ -123,4 +120,18 @@ CleanMeasureNames = function(MeasureNames){
   MeasureNames = gsub("*cumulative*", "", MeasureNames, ignore.case = TRUE)
   MeasureNames = gsub("*incremental*", "", MeasureNames, ignore.case = TRUE)
   MeasureNames = unique(MeasureNames)
+}
+
+#' GetStochasticColumnNames
+#' 
+#' @export GetStochasticColumnNames
+#' 
+GetStochasticColumnNames = function(MeasureNames){
+  baseNames = CleanMeasureNames(MeasureNames)
+  incrNames = paste0("Incremental", baseNames)
+  cumulNames = paste0("Cumulative", baseNames)
+  priorNames = paste0("Prior", baseNames)
+  
+  theNames = c(priorNames, incrNames, cumulNames)
+  theNames
 }
