@@ -32,7 +32,7 @@ TriangleProjection = function(objTriangleModel
   strResponse = objTriangleModel@Response
   
   if (is.StochasticMeasure(objTriangle, strResponse)){
-    dfProjection[objTriangleModel@Response] = ProjectStochasticValues(objTriangleModel, dfProjection)
+    dfProjection = ProjectStochasticValues(objTriangleModel, dfProjection)
   } else {
     dfProjection[objTriangleModel@Response] = ProjectStaticValues(objTriangleModel, dfProjection)
   }
