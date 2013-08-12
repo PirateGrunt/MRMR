@@ -19,8 +19,11 @@ ProjectToDev = function(objTriangleModel, lOriginYears, MaxDev)
   })
   
   df = do.call("rbind", mojo)
+  
   df$DevelopmentLag = as.period(new_interval(df$OriginPeriodStart, df$EvaluationDate + days(1)))
   df$DevInteger = df$DevelopmentLag / DevelopmentInterval
+  
+  df = CreatePriors(df, c("CumulativePaid", "IncrementalPaid"), Groups = "All")
   
   df
 }
