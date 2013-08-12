@@ -6,7 +6,7 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   
   require(lubridate)
   
-  DevelopmentInterval = months(12)
+  DevelopmentInterval = objTriangleModel@Triangle@DevelopmentInterval
   
   mojo = lapply(lOriginYears, function(x){
     tz(AsOfDate) = tz(x$EvaluationDate)
@@ -27,5 +27,3 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   
   df
 }
-
-# mojo = new_interval(mdy("1/1/2009"), mdy("12/31/2009")) / days(1)
