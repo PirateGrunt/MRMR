@@ -13,7 +13,7 @@ TriangleProjection = function(objTriangleModel
                               , MaxDev = 10
                               , AsOfDate = mdy("12/31/2010"))
 {
-  dfLatest = LatestDiagonal(objTriangleModel@ModelData)
+  dfLatest = LatestDiagonal(objTriangleModel@Triangle)
   
   lOriginYear = dlply(dfLatest, "OriginPeriodStart")
   
@@ -28,7 +28,15 @@ TriangleProjection = function(objTriangleModel
     dfProjection$FitCategory = factor(dfProjection$FitCategory)
   }
   
-  dfProjection[objTriangleModel@Response] = ProjectValues(objTriangleModel, dfProjection)
+  objTriangle = objTriangleModel@Triangle
+  strResponse = objTriangleModel@Response
+  
+  if (is.StochasticMeasure(objTriangle, strResponse)){
+    dfProjection[objTriangleModel@Response] = ProjectStochasticValues(objTriangleModel, dfProjection)
+  } else {
+    dfProjection[objTriangleModel@Response] = ProjectStaticValues(objTriangleModel, dfProjection)
+  }
+  
   
   row.names(dfProjection) = NULL
   
