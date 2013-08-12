@@ -44,6 +44,9 @@ df = PaidAM_Projection@ProjectionData
 PaidAM_Projection = TriangleProjection(PaidAM1, ProjectToDev = TRUE, MaxDev = 10)
 df = PaidAM_Projection@ProjectionData
 
+PaidCL_Projection = TriangleProjection(PaidCL1, ProjectToDev = TRUE, MaxDev = 10)
+df = PaidCL_Projection@ProjectionData
+
 plot(PaidAM_Projection)
 
 dfBase = Friedland@TriangleData
