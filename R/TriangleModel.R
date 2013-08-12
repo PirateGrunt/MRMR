@@ -27,14 +27,15 @@ setClass("TriangleModel"
                           , Tail = "numeric"
                           , Fit = "lm"
                           , Formula = "formula"
-                          , TailFunction = "function")
+                          , TailFunction = "function"
+                          , Triangle = "Triangle")
          #          , sealed = TRUE
          # , validity = #some function
 )
 
 TailFunction = function(x, Tail)
 {
-  y = ifelse(x > Tail, "Tail", x)
+  y = ifelse(x >= Tail, "Tail", x)
   if (!"Tail" %in% y){
     y[y == max(y)] = "Tail"
   }
@@ -92,7 +93,8 @@ newTriangleModel = function(Triangle
                       , Alpha = 0
                       , Tail = Tail
                       , Fit = Fit
-                      , Formula = theFormula)
+                      , Formula = theFormula
+                      , Triangle = Triangle)
   
   TriangleModel
 }
