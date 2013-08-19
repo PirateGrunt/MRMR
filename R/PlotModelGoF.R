@@ -1,10 +1,8 @@
 #' Plot
 #' 
-#' @export PlotModelFactors
+#' @export PlotModelGoF
 #' @param OriginPeriod Vector of intervals
 #' @return A vector of intervals
-#' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
-#' @examples
 #' 
 PlotModelGoF = function(objTriangleModel,  ...)
 {
@@ -26,5 +24,3 @@ PlotModelGoF = function(objTriangleModel,  ...)
   plt
   
 }
-
-#setMethod("PlotModelFactors", c("TriangleModel"), definition = plotTriangleModel)

@@ -1,14 +1,41 @@
 Package: MRMR
 Title: Multivariate Regression Models for Reserving
 Description: Tools to analyze non-life loss reserves
-Version: 0.1
+Version: 0.2
 Maintainer: Brian Fannin <BFannin@RedwoodsGroup.com>
 Author: Brian Fannin [aut, cre]
 License: GPL (>= 2)
 Depends:
     R (>= 2.15.0)
-    , lubridate
-    , RODBC
-    , Mesa
+Imports:
+    plyr,
+    reshape2,
+    ggplot2,
+    lubridate
 Collate:
-  
+    'TriangleDevelopmentLag.R'
+    'TriangleEvaluationDate.R'
+    'TriangleOriginPeriod.R'
+    'TriangleAdjustMeasures.R'
+    'Triangle.R'
+    'PlotTriangle.R'
+    'TriangleMeta.R'
+    'LatestDiagonal.R'
+    'TrianglePivot.R'
+    'TrianglePivot2.R'
+    'TextPlotTriangle.R'
+    'TriangleModel.R'
+    'SummaryTriangleModel.R'
+    'PlotModelFactors.R'
+    'PlotModelGoF.R'
+    'PlotTriangleModel.R'
+    'ProjectToDate.R'
+    'ProjectToDev.R'
+    'ProjectValues.R'
+    'TriangleProjection.R'
+    'Utils.R'
+    'CompleteTriangle.R'
+    'ModifyTail.R'
+    'Help.R'
+    'data.R'
+    'NAIC.R'

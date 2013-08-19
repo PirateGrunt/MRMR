@@ -13,12 +13,12 @@ plot.TriangleNumbers = function(aMatrix)
   
 }
 
-aTriangle = matrix(c("1,000", "1,100", "1,200", "1,800"
-                     , "1,100", "1,350", "1,500", ""
-                     , "1,200", "1,400", "", ""
-                     , "1,400", "", "", ""), nrow = 4, ncol = 4, byrow=TRUE)
-
-colnames(aTriangle) = c("6 Months", "12 Months", "18 Months", "24 Months")
-row.names(aTriangle) = c("2000 H1", "2000 H2", "2001 H1", "2001 H2")
-
-plot.TriangleNumbers(aTriangle)
+# aTriangle = matrix(c("1,000", "1,100", "1,200", "1,800"
+#                      , "1,100", "1,350", "1,500", ""
+#                      , "1,200", "1,400", "", ""
+#                      , "1,400", "", "", ""), nrow = 4, ncol = 4, byrow=TRUE)
+# 
+# colnames(aTriangle) = c("6 Months", "12 Months", "18 Months", "24 Months")
+# row.names(aTriangle) = c("2000 H1", "2000 H2", "2001 H1", "2001 H2")
+# 
+# plot.TriangleNumbers(aTriangle)

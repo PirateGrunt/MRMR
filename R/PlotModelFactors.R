@@ -1,10 +1,6 @@
 #' Plot
 #' 
 #' @export PlotModelFactors
-#' @param OriginPeriod Vector of intervals
-#' @return A vector of intervals
-#' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
-#' @examples
 #' 
 PlotModelFactors = function(objTriangleModel,  ...)
 {
@@ -32,7 +28,6 @@ PlotModelFactors = function(objTriangleModel,  ...)
   
 }
 
-#setMethod("PlotModelFactors", c("TriangleModel"), definition = plotTriangleModel)
 GetX = function(objTriangleModel)
 {
   fit = objTriangleModel@Fit
@@ -44,8 +39,3 @@ GetX = function(objTriangleModel)
   
   x
 }
-
-# cazart = c(EPModel, PaidCL)
-# mojo = c(1,2)
-# mojo = GetX()
-# PlotModelFactors(PaidCL)

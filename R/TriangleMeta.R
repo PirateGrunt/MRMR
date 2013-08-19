@@ -1,11 +1,6 @@
 #' HasGroups
 #' 
 #' Reports whether or not this triangle contains any subgroups
-#' @param x Triangle
-#' @examples
-#' \donttest{
-#' # An example
-#' }
 HasGroups = function(aTriangle){
   aTriangle@HasGroups
 }
@@ -43,7 +38,3 @@ is.StaticMeasure = function(objTriangle, MeasureName){
 #   groups = unique(aTriangle@TriangleData$Group)
 #   groups
 # }
-
-TriangleMeasures = function(aTriangle){
-  
-}

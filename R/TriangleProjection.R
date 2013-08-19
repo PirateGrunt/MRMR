@@ -1,6 +1,3 @@
-#' @include Triangle.R
-NULL
-
 setClass("TriangleProjection"
          , representation(TriangleModel = "TriangleModel"
                           , ProjectToDev = "logical"

@@ -1,7 +1,4 @@
-#' @include Utils.R
-#' 
-library(lubridate)
-
+ 
 is.Triangle = function(object)
 {
   is(object, "Triangle")
@@ -27,7 +24,15 @@ checkTriangle = function(object)
 
 #' Triangle class
 #' 
-#' Triangle is an S4 class used to store aggregated loss data.
+#' @description
+#' Triangle is an S4 class used to store aggregated loss data. All triangles must have a defined set of OriginPeriods, a defined set of DevelopmentIntervals 
+#' and data along those axes. A triangle may carry additional descriptive information such as line of business, geographic region and so on.
+#' 
+#' @details
+#' One will rarely, if ever use the setClass method directly. The function \code{\link{newTriangle}} will generally be used to create a new Triangle object
+#' 
+#' @seealso \code{\link{newTriangle}}
+#' 
 #' 
 #' @name Triangle-class
 #' @rdname Triangle-class
@@ -50,7 +55,7 @@ setClass("Triangle"
 #' @param TriangleName The name of the triangle
 #' @param OriginPeriodType A character string which describes the type of origin period. 
 #' @param OriginPeriodInterval
-#' @export Triangle
+#' @export newTriangle
 # User-friendly constructor
 newTriangle = function(OriginPeriods = NULL
                     , OriginEnd = NULL

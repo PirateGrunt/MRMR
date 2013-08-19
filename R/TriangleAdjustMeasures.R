@@ -8,7 +8,6 @@
 #' @param StartMonth If OriginStart and OriginEnd are supplied, this argument is ignored.
 #' @return A vector of intervals
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
-#' @examples
 #' 
 CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 {
@@ -37,8 +36,7 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 #' @param Group A vector of groups
 #' @param Variable A list of 
 #' @return Adjusted triangle
-#' @seealso \code{\link{CreateIncremental}}, \code{\link{CreatePrior}}
-#' @examples
+#' @seealso \code{\link{CreateIncrementals}}, \code{\link{CreatePriors}}
 #' 
 CreateCumulative = function(dfTriangleData, measureCols, Groups)
 {
@@ -68,13 +66,12 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
 
 #' Create priors
 #' 
-#' @export CreateCumulative
+#' @export CreatePriors
 #' @param OriginPeriod Vector of intervals
 #' @param Group A vector of groups
 #' @param Variable A list of 
 #' @return Adjusted triangle
 #' @seealso \code{\link{CreateIncremental}}, \code{\link{CreateCumulative}}
-#' @examples
 #' 
 CreatePriors = function(dfTriangleData, measureCols, Groups)
 {
@@ -109,8 +106,7 @@ CreatePriors = function(dfTriangleData, measureCols, Groups)
 
 #' Form measures
 #' 
-#' @export FormMeasures
-#' @param 
+#' @export FormMeasureNames
 #' 
 FormMeasureNames = function(Measures, Cumulative = TRUE)
 {

@@ -11,6 +11,6 @@
 PivotTriangle = function(ColumnCategory, RowCategory, Value, data)
 {
   arguments <- as.list(match.call())
-   = eval(arguments$OriginPeriods, TriangleData)
+#   = eval(arguments$OriginPeriods, TriangleData)
 }
 

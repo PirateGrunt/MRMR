@@ -1,10 +1,5 @@
 #' Plot
 #' 
-#' @export Plot
-#' @param OriginPeriod Vector of intervals
-#' @return A vector of intervals
-#' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
-#' @examples
 #' 
 plotTriangle = function(x, y
                         , Predictor, Response, Group = "OriginPeriodStart"

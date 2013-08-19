@@ -6,5 +6,3 @@ PivotTriangle = function(objTriangle, whichMeasure, whichRows, whichColumns)
   melt
   
 }
-
-df = Friedland@TriangleData[, c("CumulativePaid", "OriginPeriodStart", "DevInteger")]

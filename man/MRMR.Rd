@@ -4,12 +4,11 @@
 \alias{MRMR-package}
 \title{Multivariate Regression Models for Reserving}
 \description{
-  MRMR
+  MRMR allows an actuary to create sets of loss data and
+  forecast liabilities. It uses a set of 3 S4 objects to
+  store data, models and predictions.
 }
 \details{
-  MRMR allows an actuary to create sets of loss data and
-  forecast liabilities.
-
   Triangle
 
   A Triangle is a collection of aggregate loss data. All
@@ -24,16 +23,12 @@
   A TriangleModel is a statistical model fit to triangle
   data. The formula may be defined by the user and will
   generally be a linear or generalized linear model. A
-  triangle may have more than one model. Indeed, it usually
-  will.
+  triangle may have more than one model. It usually will.
 
   TriangleProjection
 
   A TriangleProjection is a prediction based on a
   TriangleModel. A TriangleModel may have more than one
   projection.
-
-  \code{\link{CompanyData}} is a data set which contains
-  NAIC filed data for a select set of companies.
 }
 

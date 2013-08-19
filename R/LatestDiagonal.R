@@ -1,5 +1,4 @@
-#' adf
-#' 
+
 LatestDiagonal = function(df)
 {
   if (class(df) == "Triangle") df = df@TriangleData

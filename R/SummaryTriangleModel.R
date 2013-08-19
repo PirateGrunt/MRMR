@@ -1,10 +1,9 @@
 #' summaryTriangleModel
 #' 
-#' @export summary
+#' @export summaryTriangleModel
 #' @param OriginPeriod Vector of intervals
 #' @return A vector of intervals
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
-#' @examples
 #' 
 summaryTriangleModel = function(object, ...)
 {

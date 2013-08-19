@@ -3,6 +3,18 @@
 \title{Triangle class}
 \description{
   Triangle is an S4 class used to store aggregated loss
-  data.
+  data. All triangles must have a defined set of
+  OriginPeriods, a defined set of DevelopmentIntervals and
+  data along those axes. A triangle may carry additional
+  descriptive information such as line of business,
+  geographic region and so on.
+}
+\details{
+  One will rarely, if ever use the setClass method
+  directly. The function \code{\link{newTriangle}} will
+  generally be used to create a new Triangle object
+}
+\seealso{
+  \code{\link{newTriangle}}
 }
 
