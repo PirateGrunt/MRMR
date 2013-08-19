@@ -12,6 +12,7 @@
 #' 
 CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 {
+  require(plyr)
   lOriginYear = dlply(dfTriangleData, c(Groups, "OriginPeriodStart"))
   
   lOriginYear = lapply(lOriginYear, function(x) {
@@ -41,14 +42,21 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 #' 
 CreateCumulative = function(dfTriangleData, measureCols, Groups)
 {
+  require(plyr)
+  
+  cumulColNames = gsub("Incremental", "Cumulative", measureCols)
   
   lOriginYear = dlply(dfTriangleData, c(Groups, "OriginPeriodStart"))
   
   lOriginYear = lapply(lOriginYear, function(x) {
     x = x[order(x$OriginPeriodStart, x$EvaluationDate),]
-    theMeasures = x[, measureCols]
-    cumulatives = apply(theMeasures, 2, cumsum)
-    names(cumulatives) = gsub("Incremental", "Cumulative", measureCols)
+    theMeasures = x[measureCols]
+    if (nrow(theMeasures) == 1){
+      cumulatives = theMeasures
+    } else {
+      cumulatives = as.data.frame(apply(theMeasures, 2, cumsum))  
+    }
+    names(cumulatives) = cumulColNames
     x = cbind(x, cumulatives)
   })
   dfMeasures = do.call("rbind", lOriginYear)
@@ -70,25 +78,27 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
 #' 
 CreatePriors = function(dfTriangleData, measureCols, Groups)
 {
-  
+  require(plyr)
   cumulCols = grep("*Cumulative*", measureCols)
   cumulCols = measureCols[cumulCols]
   incrCols = grep("*Incremental*", measureCols)
   incrCols = measureCols[incrCols]
   
+  numMeasures = length(incrCols)
+  
   lOriginYear = dlply(dfTriangleData, c(Groups, "OriginPeriodStart"))
   
   lOriginYear = lapply(lOriginYear, function(x) {
-    priors = x[, cumulCols] - x[, incrCols]
-    if (nrow(x) > 1 )
+    if (nrow(x) == 1 )
     {
-      priors = priors[-1,]
-      priors = rbind(rep(NA, ncol(priors)), priors)
+      priors = as.data.frame(x[cumulCols])
     } else {
-      priors[1,] = rep(NA, ncol(priors))
-      priors
+      priors = x[cumulCols] - x[incrCols]
     }
+    priors[1, ] = rep(NA, numMeasures)
+    priors
   })
+  
   dfMeasures = do.call("rbind", lOriginYear)
   row.names(dfMeasures) = NULL
   colnames(dfMeasures) = gsub("Incremental", "Prior", incrCols)
