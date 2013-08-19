@@ -66,7 +66,8 @@ newTriangle = function(OriginPeriods = NULL
                     , StaticMeasures = NULL
                     , StochasticMeasures = NULL
                     , Groups = NULL
-                    , Cumulative = TRUE)
+                    , Cumulative = TRUE
+                    , Verbose = TRUE)
 {
   arguments <- as.list(match.call())
   
@@ -74,14 +75,14 @@ newTriangle = function(OriginPeriods = NULL
   if(is.null(OriginPeriods)) stop ("No origin period was specified.")
   
   if (!is.interval(OriginPeriods)) {
-    OriginPeriods = CreateOriginPeriods(OriginPeriods, OriginEnd, OriginLength, StartDay, StartMonth)
+    OriginPeriods = CreateOriginPeriods(OriginPeriods, OriginEnd, OriginLength, StartDay, StartMonth, Verbose)
   }
   
   DevelopmentLags = eval(arguments$DevelopmentLags, TriangleData)
   if(is.null(DevelopmentLags)) stop ("No development lag information was provided.")
   
   if (!is.period(DevelopmentLags)){
-    DevelopmentLags = CreateDevelopmentLags(DevelopmentLags, DevelopmentPeriod, EvaluationDates, OriginPeriods)
+    DevelopmentLags = CreateDevelopmentLags(DevelopmentLags, DevelopmentPeriod, EvaluationDates, OriginPeriods, Verbose)
   }
   
   CommonDevInterval = DevelopmentLags[order(DevelopmentLags)]
@@ -130,14 +131,13 @@ newTriangle = function(OriginPeriods = NULL
   
   if(Cumulative) {
     dfNewTriangleData = CreateIncrementals(dfNewTriangleData, stochasticMeasureNames, Groups)
-    print(colnames(dfNewTriangleData))
     stochasticMeasureNames = c(stochasticMeasureNames, gsub("Cumulative", "Incremental", stochasticMeasureNames))
   } else {
     dfNewTriangleData = CreateCumulative(dfNewTriangleData, stochasticMeasureNames, Groups)
     stochasticMeasureNames = c(stochasticMeasureNames, gsub("Incremental","Cumulative", stochasticMeasureNames))
   }
   
-  dfNewTriangleData = CreatePriors(dfNewTriangleData, stochasticMeasureNames, Groups)
+#  dfNewTriangleData = CreatePriors(dfNewTriangleData, stochasticMeasureNames, Groups)
   
   if (is.null(TriangleName)) TriangleName = ""
   
