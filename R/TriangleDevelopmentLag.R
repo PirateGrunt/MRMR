@@ -46,12 +46,12 @@
 #' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates, OriginPeriods = OriginPeriods)
 #' DevelopmentLag
 
-CreateLagsFromIntegers = function(LagValues, DevelopmentPeriod = months(1))
+CreateLagsFromIntegers = function(LagValues, DevelopmentPeriod = months(1), Verbose = TRUE)
 {
   if (!is.period(DevelopmentPeriod)) stop ("A period object was not specified for the DevelopmentPeriod.")
   
   if (!is.integer(LagValues)){
-    warning ("LagValues converted to integer.")
+    if (Verbose) warning ("LagValues converted to integer.")
     LagValues = as.integer(LagValues)
   }
   
@@ -66,17 +66,17 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
   if (is.null(OriginPeriods)) stop ("OriginPeriods were not specified.")
   
   DevelopmentInterval = new_interval(int_start(OriginPeriod), EvalDates + days(3))
-  DevelopmentLag = DevelopmentInterval / DevelopmentPeriod
+  DevelopmentLag = suppressMessages (DevelopmentInterval / DevelopmentPeriod)
   DevelopmengLag = DevelopmentLag * DevelopmentPeriod
 }
 
-CreateDevelopmentLags = function(LagValues, DevelopmentPeriod = months(1), EvaluationDates = NULL, OriginPeriods = NULL)
+CreateDevelopmentLags = function(LagValues, DevelopmentPeriod = months(1), EvaluationDates = NULL, OriginPeriods = NULL, Verbose = TRUE)
 {
   if (!is.period(DevelopmentPeriod)) stop ("A period object was not specified for the DevelopmentPeriod.")
   
   if (is.null(EvaluationDates))
   {
-    return (CreateLagsFromIntegers(LagValues, DevelopmentPeriod))
+    return (CreateLagsFromIntegers(LagValues, DevelopmentPeriod, Verbose))
   } else {
     return (CreateLagsFromEvalDates(EvaluationDates, OriginPeriods, DevelopmentPeriod))
   }

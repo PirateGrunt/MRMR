@@ -37,7 +37,7 @@
 #' OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1), StartDay = 1, StartMonth = 1)
 #' OriginPeriods
 #' 
-OriginPeriodFromDates = function(OriginStart, OriginEnd)
+OriginPeriodFromDates = function(OriginStart, OriginEnd, Verbose)
 {
   if(is.null(OriginStart)) stop ("No OriginStart argument supplied.")
   
@@ -54,7 +54,7 @@ OriginPeriodFromDates = function(OriginStart, OriginEnd)
   OriginPeriod = new_interval(OriginStart, OriginEnd) 
 }
 
-OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), StartDay = 1, StartMonth = 1)
+OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), StartDay = 1, StartMonth = 1, Verbose)
 {
   if (is.null(OriginStartYears)) stop ("No OriginStartYears argument supplied.")
   
@@ -62,11 +62,11 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
   
   if (class(OriginLength) != "Period") stop ("A Period object was not supplied with the OriginLength argument.")
   
-  warning("You've not supplied a date for the OriginStart. I'm going to assume that you've given me years.")
+  if (Verbose) warning("You've not supplied a date for the OriginStart. I'm going to assume that you've given me years.")
   
   if (is.double(OriginStartYears)) 
   {
-    warning ("Converting OriginStartYears from double to integer")
+    if (Verbose) warning ("Converting OriginStartYears from double to integer")
     OriginStartYears = as.integer(OriginStartYears)
   }
   
@@ -82,7 +82,7 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
   
 }
 
-CreateOriginPeriods = function(OriginStart, OriginEnd = NULL, OriginLength = years(1), StartDay = 1, StartMonth = 1)
+CreateOriginPeriods = function(OriginStart, OriginEnd = NULL, OriginLength = years(1), StartDay = 1, StartMonth = 1, Verbose)
 {
   if(is.null(OriginStart))
   {
@@ -103,5 +103,5 @@ CreateOriginPeriods = function(OriginStart, OriginEnd = NULL, OriginLength = yea
   }
   
   # Case 3: We've been given a set of numbers, but no date
-  OriginPeriodFromYears(OriginStart, OriginLength, StartDay = 1, StartMonth = 1)
+  OriginPeriodFromYears(OriginStart, OriginLength, StartDay = 1, StartMonth = 1, Verbose)
 }
