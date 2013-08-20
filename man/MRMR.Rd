@@ -9,7 +9,7 @@
   store data, models and predictions.
 }
 \details{
-  Triangle
+  \strong{Triangle}
 
   A Triangle is a collection of aggregate loss data. All
   triangles must have a defined set of OriginPeriods, a
@@ -18,14 +18,14 @@
   information such as line of business, geographic region
   and so on.
 
-  TriangleModel
+  \strong{TriangleModel}
 
   A TriangleModel is a statistical model fit to triangle
   data. The formula may be defined by the user and will
   generally be a linear or generalized linear model. A
   triangle may have more than one model. It usually will.
 
-  TriangleProjection
+  \strong{TriangleProjection}
 
   A TriangleProjection is a prediction based on a
   TriangleModel. A TriangleModel may have more than one

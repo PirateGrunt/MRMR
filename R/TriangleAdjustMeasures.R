@@ -1,12 +1,15 @@
 #' Create incrementals
 #' 
 #' @export CreateIncrementals
+#' 
 #' @param OriginPeriod Vector of intervals
 #' @param Group A vector of groups
 #' @param Variable A list of 
 #' @param StartDay If OriginStart and OriginEnd are supplied, this argument is ignored.
 #' @param StartMonth If OriginStart and OriginEnd are supplied, this argument is ignored.
+#' 
 #' @return A vector of intervals
+#' 
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
 #' 
 CreateIncrementals = function(dfTriangleData, measureCols, Groups)

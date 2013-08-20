@@ -5,16 +5,16 @@
   plotTriangleModel(x, y, ...)
 }
 \arguments{
-  \item{OriginPeriod}{Vector of intervals}
+  \item{x}{A TriangleModel object y Nuisance parameter}
 }
 \value{
-  A vector of intervals
+  None
 }
 \description{
   plotTriangleModel
 }
 \seealso{
-  \code{\link{CreateCumulative}},
-  \code{\link{CreatePriors}}
+  \code{\link{PlotModelGoF}},
+  \code{\link{PlotModelFactors}}
 }
 

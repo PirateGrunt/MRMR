@@ -1,8 +1,17 @@
-#' Plot
-#' 
+#' PlotModelGoF
 #' @export PlotModelGoF
-#' @param OriginPeriod Vector of intervals
+#' @include TriangleModel.R
+#' 
+#' @description
+#' This function will plot the F distribution associated with the TriangleModel, along with a vertical line indicating the 
+#' F statistic for this model.
+#' 
+#' @param 
+#' objTriangleModel A TriangleModel object
+#' 
 #' @return A vector of intervals
+#' 
+#' @seealso \code{\link{PlotModelFactors}}
 #' 
 PlotModelGoF = function(objTriangleModel,  ...)
 {

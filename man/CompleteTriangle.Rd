@@ -8,7 +8,8 @@
   \item{objProjection}{}
 }
 \value{
-  A data frame
+  A data frame with the sample data (the "upper triangle")
+  bound with the projected data (the "lower triangle").
 }
 \description{
   This function will bind the projected values to the base

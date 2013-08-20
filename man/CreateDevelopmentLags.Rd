@@ -1,9 +1,10 @@
-\name{CreateLagsFromIntegers}
-\alias{CreateLagsFromIntegers}
+\name{CreateDevelopmentLags}
+\alias{CreateDevelopmentLags}
 \title{Create triangle development lags}
 \usage{
-  CreateLagsFromIntegers(LagValues,
-    DevelopmentPeriod = months(1), Verbose = TRUE)
+  CreateDevelopmentLags(LagValues,
+    DevelopmentPeriod = months(1), EvaluationDates = NULL,
+    OriginPeriods = NULL, Verbose = TRUE)
 }
 \arguments{
   \item{OriginStart}{Either a vector of date-time objects,
@@ -55,7 +56,7 @@ DevelopmentLag
 LagValues = c(12, 24, 12)
 dPeriod = months(1)
 DevelopmentLags = CreateDevelopmentLags(LagValues, DevelopmentPeriod = dPeriod)
-DevelopmentLag
+DevelopmentLags
 
 # Case 3
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
@@ -63,11 +64,13 @@ OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
 OriginPeriods = CreateOriginPeriods(OriginStart, OriginEnd)
 
 EvaluationDates = c(mdy("12/31/2000"), mdy("12/31/2001"), mdy("12/31/2001"))
-DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates, OriginPeriods = OriginPeriods)
-DevelopmentLag
+DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+                                       , OriginPeriods = OriginPeriods)
+DevelopmentLags
 
 DevelopmentPeriod = years(1)
-DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates, OriginPeriods = OriginPeriods)
+DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+                                       , OriginPeriods = OriginPeriods)
 DevelopmentLag
 }
 \seealso{

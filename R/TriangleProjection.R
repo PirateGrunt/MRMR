@@ -1,3 +1,14 @@
+#' TriangleProjection class
+#' 
+#' @description
+#' TriangleProjection is an S4 class used to project values.
+#' 
+#' @seealso \code{\link{newTriangle}}
+#' 
+#' @name TriangleProjection-class
+#' @rdname TriangleProjection-class
+#' @exportClass TriangleProjection
+#' 
 setClass("TriangleProjection"
          , representation(TriangleModel = "TriangleModel"
                           , ProjectToDev = "logical"
@@ -5,6 +16,15 @@ setClass("TriangleProjection"
                           , AsOfDate = "POSIXct"
                           , ProjectionData = "data.frame"))
 
+#' @title TriangleProjection
+#' 
+#' @description
+#' This will construct a TriangleProjection object
+#' 
+#' @export 
+#' 
+#' @include Triangle.R
+#' @include TriangleModel.R
 TriangleProjection = function(objTriangleModel
                               , ProjectToDev = TRUE
                               , MaxDev = 10

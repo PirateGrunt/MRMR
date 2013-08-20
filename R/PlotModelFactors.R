@@ -1,6 +1,18 @@
-#' Plot
+#' PlotModelFactors
+#' 
+#' @description
+#' This function will plot the model factors associated with a triangle model.
+#' 
+#' @param
+#' objTriangleModel A TriangleModel object
+#' 
+#' @return
+#' A ggplot2 plot object
+#' 
+#' @seealso \code{\link{PlotModelFactors}}
 #' 
 #' @export PlotModelFactors
+#' @include TriangleModel.R
 #' 
 PlotModelFactors = function(objTriangleModel,  ...)
 {

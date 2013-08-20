@@ -1,16 +1,21 @@
 \name{PlotModelGoF}
 \alias{PlotModelGoF}
-\title{Plot}
+\title{PlotModelGoF}
 \usage{
   PlotModelGoF(objTriangleModel, ...)
 }
 \arguments{
-  \item{OriginPeriod}{Vector of intervals}
+  \item{objTriangleModel}{A TriangleModel object}
 }
 \value{
   A vector of intervals
 }
 \description{
-  Plot
+  This function will plot the F distribution associated
+  with the TriangleModel, along with a vertical line
+  indicating the F statistic for this model.
+}
+\seealso{
+  \code{\link{PlotModelFactors}}
 }
 

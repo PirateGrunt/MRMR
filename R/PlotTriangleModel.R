@@ -1,16 +1,19 @@
 #' plotTriangleModel
 #' 
 #' @export plotTriangleModel
-#' @param OriginPeriod Vector of intervals
-#' @return A vector of intervals
-#' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
+#' @include TriangleModel.R
+#' @param 
+#' x A TriangleModel object
+#' y Nuisance parameter
+#' @return None
+#' @seealso \code{\link{PlotModelGoF}}, \code{\link{PlotModelFactors}}
 #' 
 plotTriangleModel = function(x, y,  ...)
 {
   require(ggplot2)
   
   objModel = x
-  qlot(objModel@Fit$coefficients)
+  qplot(objModel@Fit$coefficients)
   
 }
 

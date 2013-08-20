@@ -1,4 +1,4 @@
-#' ProjectToDev
+#' @include TriangleModel.R
 #' 
 
 ProjectToDev = function(objTriangleModel, lOriginYears, MaxDev)

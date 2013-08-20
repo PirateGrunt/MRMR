@@ -55,7 +55,13 @@ setClass("Triangle"
 #' @param TriangleName The name of the triangle
 #' @param OriginPeriodType A character string which describes the type of origin period. 
 #' @param OriginPeriodInterval
+#' 
 #' @export newTriangle
+#' @include TriangleAdjustMeasures.R
+#' @include CreateDevelopmentLags.R
+#' @include CreateEvaluationDates.R
+#' @include CreateOriginPeriods.R
+#' 
 # User-friendly constructor
 newTriangle = function(OriginPeriods = NULL
                     , OriginEnd = NULL

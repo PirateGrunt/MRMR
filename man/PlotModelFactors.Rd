@@ -1,10 +1,20 @@
 \name{PlotModelFactors}
 \alias{PlotModelFactors}
-\title{Plot}
+\title{PlotModelFactors}
 \usage{
   PlotModelFactors(objTriangleModel, ...)
 }
+\arguments{
+  \item{objTriangleModel}{A TriangleModel object}
+}
+\value{
+  A ggplot2 plot object
+}
 \description{
-  Plot
+  This function will plot the model factors associated with
+  a triangle model.
+}
+\seealso{
+  \code{\link{PlotModelFactors}}
 }
 

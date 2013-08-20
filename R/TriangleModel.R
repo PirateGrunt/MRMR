@@ -28,7 +28,10 @@ setClass("TriangleModel"
                           , Fit = "lm"
                           , Formula = "formula"
                           , TailFunction = "function"
-                          , Triangle = "Triangle")
+                          , Triangle = "Triangle"
+                          , SW = "htest"
+                          , DW = "htest"
+                          , BP = "list")
          #          , sealed = TRUE
          # , validity = #some function
 )
@@ -43,6 +46,12 @@ TailFunction = function(x, Tail)
 }
 
 #' Create a new TriangleModel object
+#' @export newTriangleModel
+#' 
+#' @include Triangle.R
+#' 
+#' @import lmtest
+#' @import stats
 newTriangleModel = function(Triangle
                             , Response
                             , Predictor
@@ -85,6 +94,10 @@ newTriangleModel = function(Triangle
   
   Fit = lm(theFormula, data = df)
   
+  SW = shapiro.test(residuals(Fit))
+  DW = dwtest(Fit)
+  BP = bptest(Fit)
+  
   TriangleModel = new("TriangleModel"
                       , ModelData = df
                       , Response = Response
@@ -94,7 +107,10 @@ newTriangleModel = function(Triangle
                       , Tail = Tail
                       , Fit = Fit
                       , Formula = theFormula
-                      , Triangle = Triangle)
+                      , Triangle = Triangle
+                      , SW = SW
+                      , DW = DW
+                      , BP = BP)
   
   TriangleModel
 }

@@ -1,6 +1,13 @@
 #' ProjectToDate
 #' 
-
+#' @export ProjectToDate
+#' @include TriangleModel.R
+#' 
+#' @description
+#' This function 
+#' 
+#' @return
+#' A data frame which has projected dates and columns for the new stochastic values
 ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
 {
   

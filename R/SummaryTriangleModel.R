@@ -1,14 +1,19 @@
 #' summaryTriangleModel
 #' 
 #' @export summaryTriangleModel
-#' @param OriginPeriod Vector of intervals
+#' @include TriangleModel.R
+#' 
+#' @param x TriangleModel object
+#' 
 #' @return A vector of intervals
+#' 
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
 #' 
-summaryTriangleModel = function(object, ...)
+summaryTriangleModel = function(x, ...)
 {
-  summary(object@Fit)
+  summary(x@Fit)
   
 }
 
-setMethod("summary", signature = "TriangleModel", definition = summaryTriangleModel)
+#setMethod("summary", signature = "TriangleModel", definition = summaryTriangleModel)
+setMethod("summary", definition = summaryTriangleModel)

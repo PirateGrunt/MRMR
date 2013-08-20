@@ -1,8 +1,10 @@
-\name{OriginPeriodFromDates}
-\alias{OriginPeriodFromDates}
-\title{Create triangle origin period}
+\name{CreateOriginPeriods}
+\alias{CreateOriginPeriods}
+\title{CreateOriginPeriods}
 \usage{
-  OriginPeriodFromDates(OriginStart, OriginEnd, Verbose)
+  CreateOriginPeriods(OriginStart, OriginEnd = NULL,
+    OriginLength = years(1), StartDay = 1, StartMonth = 1,
+    Verbose = FALSE)
 }
 \arguments{
   \item{OriginStart}{Either a vector of date-time objects,
@@ -27,6 +29,9 @@
   A vector of intervals
 }
 \description{
+  This will create a set of origin period values
+}
+\details{
   If the triangle dataframe does not have lubridate
   intervals, they must be created. Origin periods may be
   established one of three ways: 1. The origin periods are
@@ -40,9 +45,6 @@
   in month and day values
 }
 \examples{
-library(lubridate)
-
-Sys.setenv(TZ='UTC')
 # Case 1
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
 OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
@@ -52,7 +54,7 @@ OriginPeriods
 
 # Case 2
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
-OriginPeriods = OriginPeriods(OriginStart, OriginLength = months(12))
+OriginPeriods = CreateOriginPeriods(OriginStart, OriginLength = months(12))
 OriginPeriods
 
 # Case 3

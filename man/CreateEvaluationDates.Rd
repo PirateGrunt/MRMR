@@ -22,7 +22,7 @@ library(lubridate)
 
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
 OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
-OriginPeriod = FormOriginPeriods(OriginStart, OriginEnd)
+OriginPeriod = CreateOriginPeriods(OriginStart, OriginEnd)
 DevelopmentLag = c(months(12), months(24), months(12))
 
 EvaluationDates = CreateEvaluationDates(OriginPeriod, DevelopmentLag)
