@@ -10,9 +10,17 @@ checkTriangleModel = function(object)
   if (length(errors) == 0) TRUE else errors
 }
 
+setOldClass("htest")
+
 #' TriangleModel class
 #' 
+#' @description
 #' Triangle is an S4 class used to store a model fit to a Triangle object.
+#' 
+#' @details
+#' Some stuff
+#' 
+#' @seealso \code{\link{Triangle-class}}
 #' 
 #' @name TriangleModel-class
 #' @rdname TriangleModel-class
@@ -30,9 +38,8 @@ setClass("TriangleModel"
                           , TailFunction = "function"
                           , Triangle = "Triangle"
                           , SW = "htest"
-                          , DW = "htest"
-                          , BP = "list")
-         #          , sealed = TRUE
+                          , BP = "htest")
+         # , sealed = TRUE
          # , validity = #some function
 )
 
@@ -50,16 +57,25 @@ TailFunction = function(x, Tail)
 #' 
 #' @include Triangle.R
 #' 
-#' @import lmtest
-#' @import stats
+#' @param Triangle A Triangle object
+#' @param Response Character vector indicating the response being measured
+#' @param Predictor Character vector indicating the variable used to predict the response
+#' @param FitCategory Character vector indicating the column used to categorize the predictor variable
+#' @param Intercept Boolean indicating whether or not to include an intercept
+#' @param Alpha Numeric indicating the parameter used to weight the predictors
+#' @param Tail Integer indicating the maximum development lag for grouping
+#' 
 newTriangleModel = function(Triangle
                             , Response
                             , Predictor
                             , FitCategory
                             , Intercept = FALSE
-                            , Alpha = NULL
+                            , Alpha = 0
                             , Tail = NULL)
 {
+  require(lmtest)
+  require(stats)
+  
   dfTriangleData = Triangle@TriangleData
   df = dfTriangleData[,c("OriginPeriod", "DevelopmentLag", "EvaluationDate", "DevInteger"
                          , "OriginPeriodStart", "OriginPeriodEnd", "CalendarPeriodStart"
@@ -74,7 +90,7 @@ newTriangleModel = function(Triangle
   
   df$FitCategory = df[,FitCategory]
   
-  if (is.null(Tail)) Tail = max(df$DevInteger)
+  if (is.null(Tail)) Tail = max(df$DevInteger) - 1
   
   if (FitCategory == "DevInteger"){
     df$FitCategory = TailFunction(df$FitCategory, Tail)
@@ -85,17 +101,21 @@ newTriangleModel = function(Triangle
   strFormula = paste0(Response, " ~ ", Predictor, ":FitCategory")
   
   if (Intercept){
-    strFormula = paste0(strFormula, " + 1")
+    strFormula = paste0(strFormula, " + 1:FitCategory")
   } else {
     strFormula = paste0(strFormula, " + 0")
   }
   
+  weights = 1 / df[,Predictor] ^ (alpha/2)
+  
   theFormula = as.formula(strFormula)
   
-  Fit = lm(theFormula, data = df)
+  Fit = lm(theFormula, data = df, weights = weights)
   
-  SW = shapiro.test(residuals(Fit))
-  DW = dwtest(Fit)
+  df$Residual = residuals(Fit)
+  df$Predicted = predict.lm(Fit)
+  
+  SW = shapiro.test(df$Residual)
   BP = bptest(Fit)
   
   TriangleModel = new("TriangleModel"
@@ -109,89 +129,7 @@ newTriangleModel = function(Triangle
                       , Formula = theFormula
                       , Triangle = Triangle
                       , SW = SW
-                      , DW = DW
                       , BP = BP)
   
   TriangleModel
 }
-
-# as.TriangleModel <- function(x, unit, ...) standardGeneric("as.TriangleModel")
-# 
-# setGeneric("as.TriangleModel")
-# 
-# setMethod("as.TriangleModel", signature("TriangleModel"), function(x, ...) x)
-# 
-# #' @export
-# setMethod("c", signature(x = "TriangleModel"), function(x, ...){
-#   elements <- lapply(list(...), as.TriangleModel)
-#   
-#   Triangles = c(x@Triangle, unlist(lapply(elements, slot, "Triangle")))
-#   Responses <- c(x@Response, unlist(lapply(elements, slot, "Response")))
-#   Predictors <- c(x@Predictor, unlist(lapply(elements, slot, "Predictor")))
-#   Groups <- c(x@Group, unlist(lapply(elements, slot, "Group"))) 
-#   Fits <- c(x@Fit, unlist(lapply(elements, slot, "Fit")))
-#   
-#   new("TriangleModel"
-#       , Triangle = Triangles
-#       , Response = Responses
-#       , Predictor = Predictors
-#       , Group = Groups
-#       , Fit = Fits)
-# })
-
-# #' @export
-# setMethod("rep", signature(x = "Period"), function(x, ...){
-#   new("Period", rep(x@.Data, ...), year = rep(x@year, ...), 
-#       month = rep(x@month, ...), day = rep(x@day, ...), 
-#       hour = rep(x@hour, ...), minute = rep(x@minute, ...))
-# })
-# 
-# 
-# #' @export
-# setMethod("[", signature(x = "TriangleModel"), 
-#           function(x, i, j, ..., drop = TRUE) {
-#             newTriangleModel(x@.Data[i], year = x@year[i], month = x@month[i], 
-#                 day = x@day[i], hour = x@hour[i], minute = x@minute[i])
-#           })
-# 
-# #' @export
-# setMethod("[[", signature(x = "TriangleModel"), 
-#           function(x, i, j, ..., exact = TRUE) {
-#             new("Period", x@.Data[i], year = x@year[i], month = x@month[i], 
-#                 day = x@day[i], hour = x@hour[i], minute = x@minute[i])
-#           })
-# 
-# #' @export
-# setMethod("[<-", signature(x = "TriangleModel", value = "TriangleModel"), 
-#           function(x, i, j, ..., value) {
-#             x@.Data[i] <- value@.Data
-#             x@year[i] <- value@year
-#             x@month[i] <- value@month
-#             x@day[i] <- value@day 
-#             x@hour[i] <- value@hour
-#             x@minute[i] <- value@minute
-#             x
-#           })
-# 
-# #' @export
-# setMethod("[[<-", signature(x = "TriangleModel", value = "TriangleModel"), 
-#           function(x, i, j, ..., value) {
-#             x@.Data[i] <- value@.Data
-#             x@year[i] <- value@year
-#             x@month[i] <- value@month
-#             x@day[i] <- value@day 
-#             x@hour[i] <- value@hour
-#             x@minute[i] <- value@minute
-#             x
-#           })
-# 
-# #' @export
-# setMethod("$", signature(x = "TriangleModel"), function(x, name) {
-#   slot(x, name)
-# })
-# 
-# #' @export
-# setMethod("$<-", signature(x = "TriangleModel"), function(x, name, value) {
-#   slot(x, name) <- value
-#   x
-# })
