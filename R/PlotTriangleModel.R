@@ -2,19 +2,16 @@
 #' 
 #' @export plotTriangleModel
 #' @include TriangleModel.R
-#' @param 
-#' x A TriangleModel object
-#' y Nuisance parameter
+#' @param objTriangleModel A TriangleModel object
+#' 
 #' @return None
+#' 
 #' @seealso \code{\link{PlotModelGoF}}, \code{\link{PlotModelFactors}}
 #' 
-plotTriangleModel = function(x, y,  ...)
+plotTriangleModel = function(objTriangleModel)
 {
   require(ggplot2)
   
-  objModel = x
-  qplot(objModel@Fit$coefficients)
+  qplot(objTriangleModel@Fit$coefficients)
   
 }
-
-setMethod("plot", c("TriangleModel"), definition = plotTriangleModel)

@@ -13,7 +13,7 @@
 #' 
 #' @seealso \code{\link{PlotModelFactors}}
 #' 
-PlotModelGoF = function(objTriangleModel,  ...)
+PlotModelGoF = function(objTriangleModel)
 {
   require(ggplot2)
   require(reshape2)

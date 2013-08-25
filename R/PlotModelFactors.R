@@ -14,7 +14,7 @@
 #' @export PlotModelFactors
 #' @include TriangleModel.R
 #' 
-PlotModelFactors = function(objTriangleModel,  ...)
+PlotModelFactors = function(objTriangleModel)
 {
   require(ggplot2)
   require(reshape2)

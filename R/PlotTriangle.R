@@ -3,22 +3,21 @@
 #' @export 
 #' @include Triangle.R
 #' 
-#' @param 
-#' x Triangle
-#' y The measure being plotted
-#' Predictor The variable used to predict the response
-#' Group The name of the group column used to group the data. The default is OriginPeriodStart
-#' Lines Draw lines to connect the observations?
-#' FitLines Draw a line of best fit? Note that fit lines will have an intercept
+#' @param objTriangle A triangle object
+#' @param Response The measure being plotted
+#' @param Predictor The variable used to predict the response
+#' @param Group The name of the group column used to group the data. The default is OriginPeriodStart
+#' @param Lines Draw lines to connect the observations?
+#' @param FitLines Draw a line of best fit? Note that fit lines will have an intercept
 #' 
-plotTriangle = function(x, y
-                        , Predictor, Response, Group = "OriginPeriodStart"
-                        , Lines = TRUE, FitLines = FALSE, ...)
+plotTriangle = function(objTriangle, Response
+                        , Predictor, Group = "OriginPeriodStart"
+                        , Lines = TRUE, FitLines = FALSE)
 {
   require(ggplot2)
   
   # TODO: allow for null parameters
-  df = x@TriangleData
+  df = objTriangle@TriangleData
 
   df$OriginGroup = factor(df[, Group])
   df$WhichMeasure = df[, Response]
@@ -33,7 +32,5 @@ plotTriangle = function(x, y
   if (FitLines) plt = plt + stat_smooth(method = lm, se = FALSE)
   
   plt
-  return (plt)  
+  return (plt)
 }
-
-setMethod(f = "plot", signature = "Triangle", definition = plotTriangle)
