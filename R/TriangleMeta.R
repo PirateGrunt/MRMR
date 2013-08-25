@@ -1,8 +1,6 @@
-#' HasGroups
-#' 
-#' Reports whether or not this triangle contains any subgroups
 HasGroups = function(aTriangle){
-  aTriangle@HasGroups
+  
+  length(aTriangle@Groups) >= 2
 }
 
 OriginDevMatch = function(objTriangle){
