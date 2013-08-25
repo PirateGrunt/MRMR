@@ -7,15 +7,16 @@
     OriginPeriods = NULL, Verbose = TRUE)
 }
 \arguments{
-  \item{LagValues}{Monkeys}
+  \item{LagValues}{Vector of development lags}
 
-  \item{DevelopmentPeriod}{Make}
+  \item{DevelopmentPeriod}{A period object indicating the
+  common time period between evaluations}
 
-  \item{EvaluationDates}{Very}
+  \item{EvaluationDates}{A vector of evaluation dates}
 
-  \item{OriginPeriods}{Nice}
+  \item{OriginPeriods}{A vector of origin periods}
 
-  \item{Verbose}{Pets}
+  \item{Verbose}{Show warnings?}
 }
 \value{
   A vector of intervals

@@ -9,5 +9,7 @@
 \references{
   \url{http://www.casact.org/research/index.cfm?fa=loss_reserves_data}
 }
+\keyword{NAIC}
+\keyword{data}
 \keyword{datasets}
 

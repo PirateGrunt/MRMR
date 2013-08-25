@@ -3,8 +3,7 @@
 \title{Create a new TriangleModel object}
 \usage{
   newTriangleModel(Triangle, Response, Predictor,
-    FitCategory, Intercept = FALSE, Alpha = NULL,
-    Tail = NULL)
+    FitCategory, Intercept = FALSE, Alpha = 0, Tail = NULL)
 }
 \arguments{
   \item{Triangle}{A Triangle object}
