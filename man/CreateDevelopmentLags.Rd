@@ -7,23 +7,15 @@
     OriginPeriods = NULL, Verbose = TRUE)
 }
 \arguments{
-  \item{OriginStart}{Either a vector of date-time objects,
-  or a vector of numbers indicating the year.}
+  \item{LagValues}{Monkeys}
 
-  \item{OriginEnd}{A vector of date-time objects. If this
-  argument is supplied, it is assumed that OriginStart
-  contains date-time objects.}
+  \item{DevelopmentPeriod}{Make}
 
-  \item{OriginLength}{A Period object. These are easily
-  created as shown in the example below. The default is a
-  period of one year. If OriginStart and OriginEnd are
-  supplied, this argument is ignored.}
+  \item{EvaluationDates}{Very}
 
-  \item{StartDay}{If OriginStart and OriginEnd are
-  supplied, this argument is ignored.}
+  \item{OriginPeriods}{Nice}
 
-  \item{StartMonth}{If OriginStart and OriginEnd are
-  supplied, this argument is ignored.}
+  \item{Verbose}{Pets}
 }
 \value{
   A vector of intervals

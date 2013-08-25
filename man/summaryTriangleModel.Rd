@@ -2,10 +2,10 @@
 \alias{summaryTriangleModel}
 \title{summaryTriangleModel}
 \usage{
-  summaryTriangleModel(x, ...)
+  summaryTriangleModel(objTriangleModel)
 }
 \arguments{
-  \item{x}{TriangleModel object}
+  \item{objTriangleModel}{TriangleModel object}
 }
 \value{
   A vector of intervals

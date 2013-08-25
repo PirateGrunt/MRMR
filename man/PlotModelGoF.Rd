@@ -2,7 +2,7 @@
 \alias{PlotModelGoF}
 \title{PlotModelGoF}
 \usage{
-  PlotModelGoF(objTriangleModel, ...)
+  PlotModelGoF(objTriangleModel)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}

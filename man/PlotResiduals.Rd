@@ -16,7 +16,4 @@
 \details{
   This function will produce four charts.
 }
-\examples{
-PlotResiduals(objTriangleModel)
-}
 

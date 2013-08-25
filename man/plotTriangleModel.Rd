@@ -2,10 +2,10 @@
 \alias{plotTriangleModel}
 \title{plotTriangleModel}
 \usage{
-  plotTriangleModel(x, y, ...)
+  plotTriangleModel(objTriangleModel)
 }
 \arguments{
-  \item{x}{A TriangleModel object y Nuisance parameter}
+  \item{objTriangleModel}{A TriangleModel object}
 }
 \value{
   None

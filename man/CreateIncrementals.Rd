@@ -5,20 +5,16 @@
   CreateIncrementals(dfTriangleData, measureCols, Groups)
 }
 \arguments{
-  \item{OriginPeriod}{Vector of intervals}
+  \item{dfTriangleData}{A data frame of triangle variables}
 
-  \item{Group}{A vector of groups}
+  \item{measureCols}{A character vector which holds column
+  names identifying stochastic measures}
 
-  \item{Variable}{A list of}
-
-  \item{StartDay}{If OriginStart and OriginEnd are
-  supplied, this argument is ignored.}
-
-  \item{StartMonth}{If OriginStart and OriginEnd are
-  supplied, this argument is ignored.}
+  \item{Groups}{A character vector which holds column names
+  identifying groups}
 }
 \value{
-  A vector of intervals
+  A data frame of measures which includes incrementals
 }
 \description{
   Create incrementals

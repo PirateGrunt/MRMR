@@ -5,7 +5,7 @@
   CompleteTriangle(objProjection)
 }
 \arguments{
-  \item{objProjection}{}
+  \item{objProjection}{A TriangleProjection object}
 }
 \value{
   A data frame with the sample data (the "upper triangle")

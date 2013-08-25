@@ -1,6 +1,6 @@
 \docType{data}
-\name{multiline}
-\alias{multiline}
+\name{Multiline}
+\alias{Multiline}
 \title{Multiline data}
 \description{
   This data set is taken from the NAIC data prepared by

@@ -24,6 +24,9 @@
 
   \item{StartMonth}{If OriginStart and OriginEnd are
   supplied, this argument is ignored.}
+
+  \item{Verbose}{Boolean indicating whether or not to
+  display warning messages.}
 }
 \value{
   A vector of intervals
@@ -46,6 +49,7 @@
 }
 \examples{
 # Case 1
+library(lubridate)
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
 OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
 

@@ -2,7 +2,7 @@
 \alias{PlotModelFactors}
 \title{PlotModelFactors}
 \usage{
-  PlotModelFactors(objTriangleModel, ...)
+  PlotModelFactors(objTriangleModel)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}
