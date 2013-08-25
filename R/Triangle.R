@@ -7,18 +7,6 @@ is.Triangle = function(object)
 checkTriangle = function(object)
 {
   errors = character()
-#   numOPs = length(unique(object@OriginPeriod))
-#   numDevs = length(unique(object@DevelopmentLag))
-#   numGroups = length(unique(object@Group))
-#   maxRows = numDevs * numOPs * numGroups
-#   if ((nrow(object@TriangleData)) > maxRows){
-#     paste0("The number of origin periods and lags suggests that you forgot to add a grouping field.")
-#     paste0("Number of origin periods: ", numOPs)
-#     paste0("Number of development lags: ", numDevs)
-#     paste0("Number of groups: ", numGroups)
-#     paste0("OP * Dev * Groups = ", maxRows)
-#     paste0("Number of records in TriangleData: ", nrow(object@TriangleData))
-#   }
   if (length(errors) == 0) TRUE else errors
 }
 
@@ -32,7 +20,6 @@ checkTriangle = function(object)
 #' One will rarely, if ever use the setClass method directly. The function \code{\link{newTriangle}} will generally be used to create a new Triangle object
 #' 
 #' @seealso \code{\link{newTriangle}}
-#' 
 #' 
 #' @name Triangle-class
 #' @rdname Triangle-class
@@ -48,13 +35,25 @@ setClass("Triangle"
                           , Groups = "character")
 #          , sealed = TRUE
 #         , validity = #some function
-         )
+)
 
 #' Create a Triangle object.
 #' @param TriangleData A dataframe 
-#' @param TriangleName The name of the triangle
-#' @param OriginPeriodType A character string which describes the type of origin period. 
-#' @param OriginPeriodInterval
+#' @param OriginPeriods The name of the column in the TriangleData which holds the origin period
+#' @param DevelopmentLags The column which holds the development lags
+#' @param OriginEnd Meh
+#' @param OriginLength If origin period is not an interval, this is used to construct the origin period.
+#' @param StartDay If origin period is not an interval, this is used to construct the origin period.
+#' @param StartMonth If origin period is not an interval, this is used to construct the origin period.
+#' @param DevelopmentPeriod If DevelopmentLags is not a period object, this is used to contruct DevelopmentLags.
+#' @param EvaluationDates A vector of dates corresponding to the data in TriangleData
+#' @param OriginPeriodType A character value describing the type of origin period.
+#' @param TriangleName A character value used to refer to the Triangle object
+#' @param StaticMeasures A character vector which names the static measures in the Triangle object.
+#' @param StochasticMeasures A character vector which names the stochastic measures in the Triangle object.
+#' @param Groups A character vector which names the column which contains grouping data.
+#' @param Cumulative Boolean indicating if the stochastic measures are cumulative or incremental.
+#' @param Verbose Boolean indicating whether or not warnings should be displayed.
 #' 
 #' @export newTriangle
 #' @include TriangleAdjustMeasures.R
@@ -63,22 +62,22 @@ setClass("Triangle"
 #' @include CreateOriginPeriods.R
 #' 
 # User-friendly constructor
-newTriangle = function(OriginPeriods = NULL
-                    , OriginEnd = NULL
-                    , OriginLength = years(1)
-                    , StartDay = 1
-                    , StartMonth = 1
-                    , DevelopmentLags = NULL
-                    , DevelopmentPeriod = months(1)
-                    , EvaluationDates = NULL
-                    , OriginPeriodType = "Accident Year"
-                    , TriangleName = NULL
-                    , TriangleData = NULL
-                    , StaticMeasures = NULL
-                    , StochasticMeasures = NULL
-                    , Groups = NULL
-                    , Cumulative = TRUE
-                    , Verbose = TRUE)
+newTriangle = function(TriangleData
+                       , OriginPeriods = NULL
+                       , DevelopmentLags = NULL
+                       , OriginEnd = NULL
+                       , OriginLength = years(1)
+                       , StartDay = 1
+                       , StartMonth = 1
+                       , DevelopmentPeriod = months(1)
+                       , EvaluationDates = NULL
+                       , OriginPeriodType = "Accident Year"
+                       , TriangleName = NULL
+                       , StaticMeasures = NULL
+                       , StochasticMeasures = NULL
+                       , Groups = NULL
+                       , Cumulative = TRUE
+                       , Verbose = TRUE)
 {
   arguments <- as.list(match.call())
   
@@ -98,8 +97,12 @@ newTriangle = function(OriginPeriods = NULL
   
   CommonDevInterval = DevelopmentLags[order(DevelopmentLags)]
   CommonDevInterval = CommonDevInterval[1]
-  DevInteger = DevelopmentLags / CommonDevInterval
-
+  if(Verbose){
+    DevInteger = DevelopmentLags / CommonDevInterval  
+  } else {
+    DevInteger = suppressMessages(DevelopmentLags / CommonDevInterval)
+  }
+  
   if(is.null(EvaluationDates)) {
     EvaluationDates = CreateEvaluationDates(OriginPeriods, DevelopmentLags)
   } else {
@@ -130,7 +133,11 @@ newTriangle = function(OriginPeriods = NULL
     dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[Groups])
   }
   
-  if (!is.null(StaticMeasures)) dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[StaticMeasures])
+  if (!is.null(StaticMeasures)) {
+    dfNewTriangleData = cbind(dfNewTriangleData, TriangleData[StaticMeasures])
+  } else {
+    StaticMeasures = ""
+  }
   
   if (is.null(StochasticMeasures)) stop ("You've not supplied any stochastic measures for this triangle. Idiot.")
 
@@ -148,7 +155,7 @@ newTriangle = function(OriginPeriods = NULL
     stochasticMeasureNames = c(stochasticMeasureNames, gsub("Incremental","Cumulative", stochasticMeasureNames))
   }
   
-#  dfNewTriangleData = CreatePriors(dfNewTriangleData, stochasticMeasureNames, Groups)
+  dfNewTriangleData = CreatePriors(dfNewTriangleData, stochasticMeasureNames, Groups)
   
   if (is.null(TriangleName)) TriangleName = ""
   
@@ -165,41 +172,3 @@ newTriangle = function(OriginPeriods = NULL
   
   tri
 }
-
-# setMethod("c", signature(x = "Triangle"), function(x,  ...){
-#   
-#   elements = list(...)
-# #  TriangleDatas = lapply(elements, slot, "TriangleData"))
-#   TriangleNames = c(x@TriangleName, unlist(lapply(elements, slot, "TriangleName")))
-#   OriginPeriodTypes = c(x@OriginPeriodType, unlist(lapply(elements, slot, "OriginPeriodType")))
-#   Measures = c(x@Measures, unlist(lapply(elements, slot, "Measures")))
-#   Groups = c(x@Groups, unlist(lapply(elements, slot, "Groups")))
-#   
-#   new("Triangle"
-# #      , TriangleData = TriangleDatas
-#       , TriangleName = TriangleNames
-#       , OriginPeriodType = OriginPeriodTypes
-#       , Measures = Measures
-#       , Groups = Groups)
-# })
-# 
-# # elements = list(tri1, tri2)
-# # TriangleDatas = lapply(elements, slot, "TriangleData")
-# # TriangleNames = unlist(lapply(elements, slot, "TriangleName"))
-# # OriginPeriodTypes = unlist(lapply(elements, slot, "OriginPeriodType"))
-# # Measures = unlist(lapply(elements, slot, "Measures"))
-# # Groups = unlist(lapply(elements, slot, "Groups"))
-# # 
-# # mojo = as.data.frame(TriangleDatas[[1]])
-# 
-# mojo = new("Triangle"
-# #    , TriangleData = as.data.frame(TriangleDatas)
-#     , TriangleName = "tri1"
-#     , OriginPeriodType = "AY"
-#     , Measures = c("1", "2", "3")
-#     , Groups = c("monkey", "zebra"))
-# 
-# mojo1 = mojo
-# mojo2 = mojo
-# 
-# monkey = c(mojo1, mojo2)
