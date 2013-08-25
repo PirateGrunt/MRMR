@@ -64,6 +64,7 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
 #' @param OriginLength A Period object. These are easily created as shown in the example below. The default is a period of one year. If OriginStart and OriginEnd are supplied, this argument is ignored.
 #' @param StartDay If OriginStart and OriginEnd are supplied, this argument is ignored.
 #' @param StartMonth If OriginStart and OriginEnd are supplied, this argument is ignored.
+#' @param Verbose Boolean indicating whether or not to display warning messages.
 #' 
 #' @return A vector of intervals
 #' 
@@ -72,6 +73,7 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
 #' @examples
 #'
 #' # Case 1
+#' library(lubridate)
 #' OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
 #' OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
 #' 
@@ -88,7 +90,9 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
 #' OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1), StartDay = 1, StartMonth = 1)
 #' OriginPeriods
 #' 
-CreateOriginPeriods = function(OriginStart, OriginEnd = NULL, OriginLength = years(1), StartDay = 1, StartMonth = 1, Verbose = FALSE)
+CreateOriginPeriods = function(OriginStart, OriginEnd = NULL
+                               , OriginLength = years(1), StartDay = 1
+                               , StartMonth = 1, Verbose = FALSE)
 {
   if(is.null(OriginStart))
   {

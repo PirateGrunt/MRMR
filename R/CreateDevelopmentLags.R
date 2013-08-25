@@ -36,16 +36,15 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
 #'    and the origin periods. We will assume months as the default period. The user may pass in another.
 #' @export CreateDevelopmentLags
 #' 
-#' @param OriginStart Either a vector of date-time objects, or a vector of numbers indicating the year.
-#' @param OriginEnd A vector of date-time objects. If this argument is supplied, it is assumed that OriginStart contains date-time objects.
-#' @param OriginLength A Period object. These are easily created as shown in the example below. The default is a period of one year. If OriginStart and OriginEnd are supplied, this argument is ignored.
-#' @param StartDay If OriginStart and OriginEnd are supplied, this argument is ignored.
-#' @param StartMonth If OriginStart and OriginEnd are supplied, this argument is ignored.
+#' @param LagValues Vector of development lags
+#' @param DevelopmentPeriod A period object indicating the common time period between evaluations
+#' @param EvaluationDates A vector of evaluation dates
+#' @param OriginPeriods A vector of origin periods
+#' @param Verbose Show warnings?
 #' 
 #' @return A vector of intervals
 #' 
 #' @seealso \code{\link{CreateDevelopmentLags}}, \code{\link{CreateEvaluationDates}}
-
 #' @examples
 #' library(lubridate)
 #' 

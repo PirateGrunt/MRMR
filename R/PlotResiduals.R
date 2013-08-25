@@ -15,9 +15,6 @@
 #' @return 
 #' This function does not return a value.
 #' 
-#' @examples
-#' PlotResiduals(objTriangleModel)
-
 PlotResiduals = function(objTriangleModel){
   fit = objTriangleModel@Fit
 

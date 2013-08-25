@@ -1,10 +1,15 @@
 #' ProjectToDate
 #' 
-#' @export ProjectToDate
 #' @include TriangleModel.R
+#' 
+#' @export
 #' 
 #' @description
 #' This function 
+#' 
+#' @param objTriangleModel A TriangleModel object
+#' @param lOriginYears A list of origin years
+#' @param AsOfDate A date to which to project
 #' 
 #' @return
 #' A data frame which has projected dates and columns for the new stochastic values

@@ -5,7 +5,7 @@
 #' 
 #' @export CompleteTriangle
 #' @include TriangleProjection.R
-#' @param objProjection
+#' @param objProjection A TriangleProjection object
 #' @return A data frame with the sample data (the "upper triangle") bound with the projected data (the "lower triangle").
 #' 
 CompleteTriangle = function(objProjection)
