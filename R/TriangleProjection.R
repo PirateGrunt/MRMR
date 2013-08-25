@@ -23,12 +23,18 @@ setClass("TriangleProjection"
 #' 
 #' @export 
 #' 
+#' @param objTriangleModel A TriangleModel object
+#' @param ProjectToDev Boolean indicating whether one is projecting to a maximum 
+#'        development interval. If this paramter is FALSE, there must be an argument for AsOfDate
+#' @param MaxDev The maximum development interval to which to project.
+#' @param AsOfDate The date to which one wants to project.
+#' 
 #' @include Triangle.R
 #' @include TriangleModel.R
 TriangleProjection = function(objTriangleModel
                               , ProjectToDev = TRUE
                               , MaxDev = 10
-                              , AsOfDate = mdy("12/31/2010"))
+                              , AsOfDate)
 {
   dfLatest = LatestDiagonal(objTriangleModel@Triangle)
   
