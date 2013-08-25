@@ -3,15 +3,17 @@
 #' @export summaryTriangleModel
 #' @include TriangleModel.R
 #' 
-#' @param x TriangleModel object
+#' @param objTriangleModel TriangleModel object
 #' 
 #' @return A vector of intervals
 #' 
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
 #' 
-summaryTriangleModel = function(x, ...)
+summaryTriangleModel = function(objTriangleModel)
 {
-  summary(x@Fit)
+  print(objTriangleModel@BP)
+  print(objTriangleModel@SW)
+  print(objTriangleModel@DW)
   
 }
 
