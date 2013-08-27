@@ -1,4 +1,8 @@
-Version 0.1.1 (2013-02-01)
+Version 0.1.1-3 (2013-08-27)
+------------------------------------------------------------------------------
+* Corrected error in summary method of TriangleModel object.
+
+Version 0.1.1-2 (2013-08-25)
 ------------------------------------------------------------------------------
 
-  * Documentation added
+  * CRAN submission
