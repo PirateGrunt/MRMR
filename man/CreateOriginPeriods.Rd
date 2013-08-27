@@ -44,8 +44,8 @@
   We need to have a common period to establish the end
   date. 3. The origin periods are passed in as parts of a
   date.  This will typically happen if we know the year,
-  but not the month or day. In this case, the user may pass
-  in month and day values
+  but not the month or day. In this case , the user may
+  pass in month and day values
 }
 \examples{
 # Case 1
@@ -63,7 +63,8 @@ OriginPeriods
 
 # Case 3
 OriginStartYear = c(2000, 2000, 2001)
-OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1), StartDay = 1, StartMonth = 1)
+OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1)
+                                     , StartDay = 1, StartMonth = 1)
 OriginPeriods
 }
 \seealso{

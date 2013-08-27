@@ -57,12 +57,14 @@ OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
 OriginPeriods = CreateOriginPeriods(OriginStart, OriginEnd)
 
 EvaluationDates = c(mdy("12/31/2000"), mdy("12/31/2001"), mdy("12/31/2001"))
-DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
+                                       , EvaluationDates = EvaluationDates
                                        , OriginPeriods = OriginPeriods)
 DevelopmentLags
 
 DevelopmentPeriod = years(1)
-DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
+                                       , EvaluationDates = EvaluationDates
                                        , OriginPeriods = OriginPeriods)
 DevelopmentLag
 }
