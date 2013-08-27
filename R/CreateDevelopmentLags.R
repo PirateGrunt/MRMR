@@ -24,13 +24,16 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
 
 #' Create triangle development lags
 #' 
-#' If the triangle dataframe does not record development lags as lubridate periods, they must be created. 
+#' If the triangle dataframe does not record development lags as lubridate periods, they must be 
+#' created. 
 #' Development lags may be established one of three ways:
 #' 1. The development lags are passed in as lubridate periods.
-#'    Everything's cool. The evaluation dates are established by adding the periods to the starting point
+#'    Everything's cool. The evaluation dates are established by adding the periods to the starting 
+#'    point
 #'    of the origin periods.
 #' 2. The development lags are passed in as integers, with a presumed time period.
-#'    The program will establish lubridate period objects using the integers and time periods and then proceed 
+#'    The program will establish lubridate period objects using the integers and time periods and then 
+#'    proceed 
 #'    as above.
 #' 3. An evaluation date is passed in. Here we must take the difference between the evaluation dates
 #'    and the origin periods. We will assume months as the default period. The user may pass in another.
@@ -65,12 +68,14 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
 #' OriginPeriods = CreateOriginPeriods(OriginStart, OriginEnd)
 #' 
 #' EvaluationDates = c(mdy("12/31/2000"), mdy("12/31/2001"), mdy("12/31/2001"))
-#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
+#'                                        , EvaluationDates = EvaluationDates
 #'                                        , OriginPeriods = OriginPeriods)
 #' DevelopmentLags
 #' 
 #' DevelopmentPeriod = years(1)
-#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1), EvaluationDates = EvaluationDates
+#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
+#'                                        , EvaluationDates = EvaluationDates
 #'                                        , OriginPeriods = OriginPeriods)
 #' DevelopmentLag
 CreateDevelopmentLags = function(LagValues, DevelopmentPeriod = months(1), EvaluationDates = NULL, OriginPeriods = NULL, Verbose = TRUE)
