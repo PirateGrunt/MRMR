@@ -17,5 +17,5 @@ summaryTriangleModel = function(objTriangleModel)
   
 }
 
-#setMethod("summary", signature = "TriangleModel", definition = summaryTriangleModel)
-setMethod("summary", definition = summaryTriangleModel)
+#setMethod("summary", signature = "objTriangleModel", definition = summaryTriangleModel)
+#setMethod("summary", definition = summaryTriangleModel)
