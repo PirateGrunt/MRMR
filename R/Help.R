@@ -19,8 +19,9 @@
 #' A TriangleProjection is a prediction based on a TriangleModel. A TriangleModel may have more than one projection.
 #' 
 #'
-#' @import lubridate ggplot2 plyr reshape2 stats lmtest
 #' @docType package
 #' @name MRMR
 #' @aliases MRMR MRMR-package
+#' @importFrom(plyr, daply)
+#' @importFrom(plyr, dlply)
 NULL
