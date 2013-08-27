@@ -73,9 +73,6 @@ newTriangleModel = function(Triangle
                             , Alpha = 0
                             , Tail = NULL)
 {
-  require(lmtest)
-  require(stats)
-  
   dfTriangleData = Triangle@TriangleData
   df = dfTriangleData[,c("OriginPeriod", "DevelopmentLag", "EvaluationDate", "DevInteger"
                          , "OriginPeriodStart", "OriginPeriodEnd", "CalendarPeriodStart"
@@ -85,7 +82,7 @@ newTriangleModel = function(Triangle
   
   if (length(FitCategory) > 1){
     # do something
-    error("Not yet configured for multiple groups.")
+    stop("Not yet configured for multiple groups.")
   }
   
   df$FitCategory = df[,FitCategory]
@@ -106,7 +103,7 @@ newTriangleModel = function(Triangle
     strFormula = paste0(strFormula, " + 0")
   }
   
-  weights = 1 / df[,Predictor] ^ (alpha/2)
+  weights = 1 / df[,Predictor] ^ (Alpha/2)
   
   theFormula = as.formula(strFormula)
   

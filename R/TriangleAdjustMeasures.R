@@ -12,8 +12,6 @@
 #' 
 CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 {
-  require(plyr)
-  
   incrColNames = gsub("Cumulative", "Incremental", measureCols)
   
   lOriginYear = dlply(dfTriangleData, c(Groups, "OriginPeriodStart"))
@@ -48,8 +46,6 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 #' 
 CreateCumulative = function(dfTriangleData, measureCols, Groups)
 {
-  require(plyr)
-  
   cumulColNames = gsub("Incremental", "Cumulative", measureCols)
   
   lOriginYear = dlply(dfTriangleData, c(Groups, "OriginPeriodStart"))
@@ -84,7 +80,6 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
 #' 
 CreatePriors = function(dfTriangleData, measureCols, Groups)
 {
-  require(plyr)
   cumulCols = grep("*Cumulative*", measureCols)
   cumulCols = measureCols[cumulCols]
   incrCols = grep("*Incremental*", measureCols)
