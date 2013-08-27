@@ -10,8 +10,6 @@
 #' 
 plotTriangleModel = function(objTriangleModel)
 {
-  require(ggplot2)
-  
   qplot(objTriangleModel@Fit$coefficients)
   
 }

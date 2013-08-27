@@ -3,9 +3,6 @@
 
 ProjectToDev = function(objTriangleModel, lOriginYears, MaxDev)
 {
-  
-  require(lubridate)
-  
   objTriangle = objTriangleModel@Triangle
   DevelopmentInterval = objTriangle@DevelopmentInterval
   

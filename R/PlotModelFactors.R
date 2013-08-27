@@ -16,8 +16,6 @@
 #' 
 PlotModelFactors = function(objTriangleModel)
 {
-  require(ggplot2)
-  require(reshape2)
   
   fit = objTriangleModel@Fit
   dfCoef = as.data.frame(summary(fit)$coefficients)
@@ -34,6 +32,8 @@ PlotModelFactors = function(objTriangleModel)
   mdf = suppressMessages(melt(dfY, value.name = "y"))
   mdf$x = rep(x, ncol(dfY))
   
+  y = NULL
+  variable = NULL
   plt = ggplot(mdf, aes(x, y, col=variable)) + geom_line()
   
   plt

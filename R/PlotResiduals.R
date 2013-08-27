@@ -57,6 +57,7 @@ PlotResiduals = function(objTriangleModel){
   abline(0,0)
   abline(3, 0, lty = "dashed")
   abline(-3, 0, lty = "dashed")
+  OriginPeriodStart = NULL
   means = daply(dfModelData, .(OriginPeriodStart), function(df) mean(df$residuals))
   originPeriods = unique(originPeriod)
   lines(originPeriods, means, col="red", type="l")
@@ -65,6 +66,7 @@ PlotResiduals = function(objTriangleModel){
   abline(0,0)
   abline(3, 0, lty = "dashed")
   abline(-3, 0, lty = "dashed")
+  CalendarPeriodStart = NULL
   means = daply(dfModelData, .(CalendarPeriodStart), function(df) mean(df$residuals))
   calPeriods = unique(calendarPeriod)
   lines(calPeriods, means, col="red", type="l")

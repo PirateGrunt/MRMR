@@ -15,9 +15,6 @@
 #' 
 PlotModelGoF = function(objTriangleModel)
 {
-  require(ggplot2)
-  require(reshape2)
-  
   fit = objTriangleModel@Fit
   
   fstat = summary(fit)$fstatistic
@@ -29,6 +26,7 @@ PlotModelGoF = function(objTriangleModel)
   x = seq(xlow, xhigh, length.out = 200)
    
   df = data.frame(x = x, y = df(x, df1, df2))
+  y = NULL
   plt = ggplot(df, aes(x, y)) + geom_line() + geom_vline(xintercept = fstat[1])
   plt
   

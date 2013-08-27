@@ -14,8 +14,6 @@ plotTriangle = function(objTriangle, Response
                         , Predictor, Group = "OriginPeriodStart"
                         , Lines = TRUE, FitLines = FALSE)
 {
-  require(ggplot2)
-  
   # TODO: allow for null parameters
   df = objTriangle@TriangleData
 
@@ -25,6 +23,9 @@ plotTriangle = function(objTriangle, Response
   
   plotTitle = paste0(Response, " by ", Predictor, " grouped by ", Group)
   
+  WhichTime = NULL
+  WhichMeasure = NULL
+  OriginGroup = NULL
   plt = ggplot(df, aes(x = WhichTime, y = WhichMeasure, group = OriginGroup, colour = OriginGroup)) 
   plt = plt + geom_point() + labs(title = plotTitle) + xlab(Predictor) + ylab(Response)
   

@@ -40,6 +40,9 @@ plotSerialCorrelation = function(objTriangleModel){
   lstReturn = FitSerialCorrelation(objTriangleModel)
   df = lstReturn$df
   fit = lstReturn$fit
+  PriorResidual = NULL
+  Residual = NULL
+  EvalGroup = NULL
   plt = ggplot(df, aes(x = PriorResidual, y = Residual, group = EvalGroup, colour = EvalGroup)) + geom_point()
   plt = plt + stat_smooth(method = lm, se = FALSE)
   print(plt)

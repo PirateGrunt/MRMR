@@ -15,9 +15,6 @@
 #' A data frame which has projected dates and columns for the new stochastic values
 ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
 {
-  
-  require(lubridate)
-  
   objTriangle = objTriangleModel@Triangle
   DevelopmentInterval = objTriangle@DevelopmentInterval
   
