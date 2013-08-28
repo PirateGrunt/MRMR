@@ -39,7 +39,20 @@ Download CLRS</a>
 <p>From within R Studio, perform the following command:</p>
 
 <p><code>install.packages("SOME_DIRECTORY/Downloads/MRMR_CLRS.tar.gz", repos = NULL, type = "source")</code></p>
-<p>where SOME_DIRERCTORY is the directory where the file has been downloaded.</p>
+<p>where SOME_DIRECTORY is the directory where the file has been downloaded.</p>
+
+<p>Note that you may also install the package via the user interface.</p>
+<ol>
+  <li>From the "Tools" menu, click "Install Packages".</li>
+  <li>If necessary, change the "Install from" option to "Package Archive File (.zip; .tar.gz)</li>
+  <li>Click the "Browse" button and navigate to the location where you have downloaded the file "MRMR_CLRS.tar.gz".</li>
+  <li>Click the "Install" button</li>
+</ol>
+
+<p>Whichever method you choose, you may ensure that the package has been properly installed by issuing the 
+following command at the R console: <code>pring(require(MRMR))</code>.</p>
+<p>You should see TRUE displayed as the output at the console. If you do not, please contact Brian for help: 
+<a href="mailto:BFannin@RedwoodsGroup.com?Subject=MRMR%20Install">BFannin@RedwoodsGroup.com</a>.</p>
         </section>
 
         <aside id="sidebar">
