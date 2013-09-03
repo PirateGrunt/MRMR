@@ -34,7 +34,7 @@ setClass("TriangleProjection"
 TriangleProjection = function(objTriangleModel
                               , ProjectToDev = TRUE
                               , MaxDev = 10
-                              , AsOfDate)
+                              , AsOfDate = NULL)
 {
   dfLatest = LatestDiagonal(objTriangleModel@Triangle)
   
@@ -60,8 +60,9 @@ TriangleProjection = function(objTriangleModel
     dfProjection[objTriangleModel@Response] = ProjectStaticValues(objTriangleModel, dfProjection)
   }
   
-  
   row.names(dfProjection) = NULL
+  
+  if(is.null(AsOfDate)) AsOfDate = mdy("01-01-1900")
   
   proj = new("TriangleProjection"
              , TriangleModel = objTriangleModel

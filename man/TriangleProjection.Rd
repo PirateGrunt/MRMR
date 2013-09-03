@@ -3,7 +3,7 @@
 \title{TriangleProjection}
 \usage{
   TriangleProjection(objTriangleModel, ProjectToDev = TRUE,
-    MaxDev = 10, AsOfDate)
+    MaxDev = 10, AsOfDate = NULL)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}
