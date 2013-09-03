@@ -17,16 +17,17 @@ plotTriangle = function(objTriangle, Response
   # TODO: allow for null parameters
   df = objTriangle@TriangleData
 
-  df$OriginGroup = factor(df[, Group])
-  df$WhichMeasure = df[, Response]
-  df$WhichTime = df[,Predictor]
+  df$WhichGroup = factor(df[, Group])
+  df$WhichResponse = df[, Response]
+  df$WhichPredictor = df[,Predictor]
+  
+  df = df[!is.na(df$WhichPredictor), ]
+  df = df[!is.na(df$WhichResponse), ]
+  df = df[!is.na(df$WhichGroup), ]
   
   plotTitle = paste0(Response, " by ", Predictor, " grouped by ", Group)
   
-  WhichTime = NULL
-  WhichMeasure = NULL
-  OriginGroup = NULL
-  plt = ggplot(df, aes(x = WhichTime, y = WhichMeasure, group = OriginGroup, colour = OriginGroup)) 
+  plt = ggplot(df, aes(x = WhichPredictor, y = WhichResponse, group = WhichGroup, colour = WhichGroup)) 
   plt = plt + geom_point() + labs(title = plotTitle) + xlab(Predictor) + ylab(Response)
   
   if (Lines) plt = plt + geom_line() 
