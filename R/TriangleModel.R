@@ -80,6 +80,8 @@ newTriangleModel = function(Triangle
   df = cbind(df, dfTriangleData[Response])
   df = cbind(df, dfTriangleData[Predictor])
   
+  df = df[!is.na(df[Predictor]), ]
+  
   if (length(FitCategory) > 1){
     # do something
     stop("Not yet configured for multiple groups.")
