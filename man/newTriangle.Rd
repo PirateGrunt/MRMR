@@ -15,12 +15,14 @@
   \item{TriangleData}{A dataframe}
 
   \item{OriginPeriods}{The name of the column in the
-  TriangleData which holds the origin period}
+  TriangleData which holds the origin period.}
 
   \item{DevelopmentLags}{The column which holds the
-  development lags}
+  development lags.}
 
-  \item{OriginEnd}{Meh}
+  \item{OriginEnd}{If the OriginPeriods argument refers to
+  the start date of an origin period, this column holds the
+  end dates.}
 
   \item{OriginLength}{If origin period is not an interval,
   this is used to construct the origin period.}
@@ -35,13 +37,13 @@
   period object, this is used to contruct DevelopmentLags.}
 
   \item{EvaluationDates}{A vector of dates corresponding to
-  the data in TriangleData}
+  the data in TriangleData.}
 
   \item{OriginPeriodType}{A character value describing the
   type of origin period.}
 
   \item{TriangleName}{A character value used to refer to
-  the Triangle object}
+  the Triangle object.}
 
   \item{StaticMeasures}{A character vector which names the
   static measures in the Triangle object.}
