@@ -13,6 +13,8 @@ Depends:
     lmtest,
     methods,
     plyr
+Suggests:
+    testthat
 Collate:
     'Help.R'
     'TriangleAdjustMeasures.R'
@@ -36,3 +38,4 @@ Collate:
     'data.R'
     'PlotResiduals.R'
     'SerialCorrelation.R'
+    'GetTriangleData.R'
