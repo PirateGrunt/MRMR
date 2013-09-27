@@ -1,4 +1,10 @@
- 
+#' is.Triangle
+#' @description
+#' Tests whether the object is a triangle
+#' @return 
+#' TRUE if the object is a triangle, FALSE if it is not
+#' @export
+#' @param object The object to be tested
 is.Triangle = function(object)
 {
   is(object, "Triangle")
@@ -39,16 +45,16 @@ setClass("Triangle"
 
 #' Create a Triangle object.
 #' @param TriangleData A dataframe 
-#' @param OriginPeriods The name of the column in the TriangleData which holds the origin period
-#' @param DevelopmentLags The column which holds the development lags
-#' @param OriginEnd Meh
+#' @param OriginPeriods The name of the column in the TriangleData which holds the origin period.
+#' @param DevelopmentLags The column which holds the development lags.
+#' @param OriginEnd If the OriginPeriods argument refers to the start date of an origin period, this column holds the end dates.
 #' @param OriginLength If origin period is not an interval, this is used to construct the origin period.
 #' @param StartDay If origin period is not an interval, this is used to construct the origin period.
 #' @param StartMonth If origin period is not an interval, this is used to construct the origin period.
 #' @param DevelopmentPeriod If DevelopmentLags is not a period object, this is used to contruct DevelopmentLags.
-#' @param EvaluationDates A vector of dates corresponding to the data in TriangleData
+#' @param EvaluationDates A vector of dates corresponding to the data in TriangleData.
 #' @param OriginPeriodType A character value describing the type of origin period.
-#' @param TriangleName A character value used to refer to the Triangle object
+#' @param TriangleName A character value used to refer to the Triangle object.
 #' @param StaticMeasures A character vector which names the static measures in the Triangle object.
 #' @param StochasticMeasures A character vector which names the stochastic measures in the Triangle object.
 #' @param Groups A character vector which names the column which contains grouping data.
@@ -171,4 +177,14 @@ newTriangle = function(TriangleData
             , Groups = Groups)
   
   tri
+}
+
+TestDataFrame = function(){
+  dfTest = data.frame(AccidentYear = c(2002, 2002, 2002, 2003, 2003, 2004)
+             , Month = c(12, 24, 36, 12, 24, 12)
+             , Paid = c(2318,  7932, 13822, 1743,  6240, 2221)
+             , Reported = c(12811, 20370, 26656, 9651, 16995, 16995)
+             , EP = c( 61183,  61183,  61183,  69175,  69175,  99322))
+  
+  dfTest
 }
