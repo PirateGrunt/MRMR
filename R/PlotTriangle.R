@@ -27,6 +27,9 @@ plotTriangle = function(objTriangle, Response
   
   plotTitle = paste0(Response, " by ", Predictor, " grouped by ", Group)
   
+  WhichPredictor = NULL
+  WhichResponse = NULL
+  WhichGroup = NULL
   plt = ggplot(df, aes(x = WhichPredictor, y = WhichResponse, group = WhichGroup, colour = WhichGroup)) 
   plt = plt + geom_point() + labs(title = plotTitle) + xlab(Predictor) + ylab(Response)
   
