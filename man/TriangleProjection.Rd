@@ -2,8 +2,8 @@
 \alias{TriangleProjection}
 \title{TriangleProjection}
 \usage{
-  TriangleProjection(objTriangleModel, ProjectToDev = TRUE,
-    MaxDev = 10, AsOfDate = NULL)
+TriangleProjection(objTriangleModel, ProjectToDev = TRUE, MaxDev = 10,
+  AsOfDate = NULL)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}
@@ -19,6 +19,6 @@
   \item{AsOfDate}{The date to which one wants to project.}
 }
 \description{
-  This will construct a TriangleProjection object
+This will construct a TriangleProjection object
 }
 

@@ -2,8 +2,8 @@
 \alias{GetTriangleData}
 \title{GetTriangleData}
 \usage{
-  GetTriangleData(Triangle, OriginPeriodStart = NULL,
-    DevInteger = NULL, EvaluationDate = NULL, Measure)
+GetTriangleData(Triangle, OriginPeriodStart = NULL, DevInteger = NULL,
+  EvaluationDate = NULL, Measure)
 }
 \arguments{
   \item{Triangle}{A Triangle object}
@@ -21,9 +21,9 @@
   measures to return.}
 }
 \value{
-  A data frame
+A data frame
 }
 \description{
-  This function will return data values from a triangle.
+This function will return data values from a triangle.
 }
 

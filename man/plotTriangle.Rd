@@ -2,9 +2,8 @@
 \alias{plotTriangle}
 \title{plot.Triangle}
 \usage{
-  plotTriangle(objTriangle, Response, Predictor,
-    Group = "OriginPeriodStart", Lines = TRUE,
-    FitLines = FALSE)
+plotTriangle(objTriangle, Response, Predictor, Group = "OriginPeriodStart",
+  Lines = TRUE, FitLines = FALSE)
 }
 \arguments{
   \item{objTriangle}{A triangle object}
@@ -23,6 +22,6 @@
   lines will have an intercept}
 }
 \description{
-  plot.Triangle
+plot.Triangle
 }
 

@@ -2,7 +2,7 @@
 \alias{FormMeasureNames}
 \title{Form measures}
 \usage{
-  FormMeasureNames(Measures, Cumulative = TRUE)
+FormMeasureNames(Measures, Cumulative = TRUE)
 }
 \arguments{
   \item{Measures}{A character vector of stochastic measure
@@ -12,6 +12,6 @@
   names are cumulative or incremental}
 }
 \description{
-  Form measures
+Form measures
 }
 

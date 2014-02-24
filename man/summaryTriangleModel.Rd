@@ -2,19 +2,18 @@
 \alias{summaryTriangleModel}
 \title{summaryTriangleModel}
 \usage{
-  summaryTriangleModel(objTriangleModel)
+summaryTriangleModel(objTriangleModel)
 }
 \arguments{
   \item{objTriangleModel}{TriangleModel object}
 }
 \value{
-  A vector of intervals
+A vector of intervals
 }
 \description{
-  summaryTriangleModel
+summaryTriangleModel
 }
 \seealso{
-  \code{\link{CreateCumulative}},
-  \code{\link{CreatePriors}}
+\code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
 }
 

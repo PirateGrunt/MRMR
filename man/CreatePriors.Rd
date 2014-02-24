@@ -2,7 +2,7 @@
 \alias{CreatePriors}
 \title{Create priors}
 \usage{
-  CreatePriors(dfTriangleData, measureCols, Groups)
+CreatePriors(dfTriangleData, measureCols, Groups)
 }
 \arguments{
   \item{dfTriangleData}{A data frame of triangle variables}
@@ -14,13 +14,13 @@
   identifying groups}
 }
 \value{
-  A data frame of measures which includes prior values
+A data frame of measures which includes prior values
 }
 \description{
-  Create priors
+Create priors
 }
 \seealso{
-  \code{\link{CreateIncrementals}},
-  \code{\link{CreateCumulative}}
+\code{\link{CreateIncrementals}},
+\code{\link{CreateCumulative}}
 }
 

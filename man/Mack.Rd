@@ -3,7 +3,6 @@
 \alias{Mack}
 \title{Mack data}
 \description{
-  RAA data from Mack's paper
+RAA data from Mack's paper
 }
-\keyword{datasets}
 

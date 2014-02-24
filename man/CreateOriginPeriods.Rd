@@ -2,9 +2,8 @@
 \alias{CreateOriginPeriods}
 \title{CreateOriginPeriods}
 \usage{
-  CreateOriginPeriods(OriginStart, OriginEnd = NULL,
-    OriginLength = years(1), StartDay = 1, StartMonth = 1,
-    Verbose = FALSE)
+CreateOriginPeriods(OriginStart, OriginEnd = NULL, OriginLength = years(1),
+  StartDay = 1, StartMonth = 1, Verbose = FALSE)
 }
 \arguments{
   \item{OriginStart}{Either a vector of date-time objects,
@@ -29,23 +28,23 @@
   display warning messages.}
 }
 \value{
-  A vector of intervals
+A vector of intervals
 }
 \description{
-  This will create a set of origin period values
+This will create a set of origin period values
 }
 \details{
-  If the triangle dataframe does not have lubridate
-  intervals, they must be created. Origin periods may be
-  established one of three ways: 1. The origin periods are
-  passed in as POSIX dates.  This is a simple matter of
-  forming the interval using lubridate. 2. The origin
-  periods are passed in with a start date, but no end date.
-  We need to have a common period to establish the end
-  date. 3. The origin periods are passed in as parts of a
-  date.  This will typically happen if we know the year,
-  but not the month or day. In this case , the user may
-  pass in month and day values
+If the triangle dataframe does not have lubridate
+intervals, they must be created. Origin periods may be
+established one of three ways: 1. The origin periods are
+passed in as POSIX dates.  This is a simple matter of
+forming the interval using lubridate. 2. The origin periods
+are passed in with a start date, but no end date.  We need
+to have a common period to establish the end date. 3. The
+origin periods are passed in as parts of a date.  This will
+typically happen if we know the year, but not the month or
+day. In this case , the user may pass in month and day
+values
 }
 \examples{
 # Case 1
@@ -68,7 +67,7 @@ OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1)
 OriginPeriods
 }
 \seealso{
-  \code{\link{CreateDevelopmentLags}},
-  \code{\link{CreateEvaluationDates}}
+\code{\link{CreateDevelopmentLags}},
+\code{\link{CreateEvaluationDates}}
 }
 

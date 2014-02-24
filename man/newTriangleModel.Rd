@@ -2,8 +2,8 @@
 \alias{newTriangleModel}
 \title{Create a new TriangleModel object}
 \usage{
-  newTriangleModel(Triangle, Response, Predictor,
-    FitCategory, Intercept = FALSE, Alpha = 0, Tail = NULL)
+newTriangleModel(Triangle, Response, Predictor, FitCategory,
+  Intercept = FALSE, Alpha = 0, Tail = NULL)
 }
 \arguments{
   \item{Triangle}{A Triangle object}
@@ -27,6 +27,6 @@
   lag for grouping}
 }
 \description{
-  Create a new TriangleModel object
+Create a new TriangleModel object
 }
 

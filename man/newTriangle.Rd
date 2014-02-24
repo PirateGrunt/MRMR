@@ -2,14 +2,12 @@
 \alias{newTriangle}
 \title{Create a Triangle object.}
 \usage{
-  newTriangle(TriangleData, OriginPeriods = NULL,
-    DevelopmentLags = NULL, OriginEnd = NULL,
-    OriginLength = years(1), StartDay = 1, StartMonth = 1,
-    DevelopmentPeriod = months(1), EvaluationDates = NULL,
-    OriginPeriodType = "Accident Year",
-    TriangleName = NULL, StaticMeasures = NULL,
-    StochasticMeasures = NULL, Groups = NULL,
-    Cumulative = TRUE, Verbose = TRUE)
+newTriangle(TriangleData, OriginPeriods = NULL, DevelopmentLags = NULL,
+  OriginEnd = NULL, OriginLength = years(1), StartDay = 1,
+  StartMonth = 1, DevelopmentPeriod = months(1), EvaluationDates = NULL,
+  OriginPeriodType = "Accident Year", TriangleName = NULL,
+  StaticMeasures = NULL, StochasticMeasures = NULL, Groups = NULL,
+  Cumulative = TRUE, Verbose = TRUE)
 }
 \arguments{
   \item{TriangleData}{A dataframe}
@@ -61,6 +59,6 @@
   should be displayed.}
 }
 \description{
-  Create a Triangle object.
+Create a Triangle object.
 }
 

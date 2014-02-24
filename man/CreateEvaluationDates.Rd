@@ -2,7 +2,7 @@
 \alias{CreateEvaluationDates}
 \title{Create triangle evaluation dates}
 \usage{
-  CreateEvaluationDates(OriginPeriod, DevelopmentLag)
+CreateEvaluationDates(OriginPeriod, DevelopmentLag)
 }
 \arguments{
   \item{OriginPeriod}{A vector of interval objects}
@@ -10,12 +10,12 @@
   \item{DevelopmentLag}{A vector of period objects}
 }
 \value{
-  A vector of intervals
+A vector of intervals
 }
 \description{
-  Triangle evaluation dates are established by adding
-  development lags to the starting point of the origin
-  periods.
+Triangle evaluation dates are established by adding
+development lags to the starting point of the origin
+periods.
 }
 \examples{
 library(lubridate)
@@ -29,7 +29,7 @@ EvaluationDates = CreateEvaluationDates(OriginPeriod, DevelopmentLag)
 EvaluationDates
 }
 \seealso{
-  \code{\link{CreateDevelopmentLags}},
-  \code{\link{CreateOriginPeriods}}
+\code{\link{CreateDevelopmentLags}},
+\code{\link{CreateOriginPeriods}}
 }
 

@@ -2,19 +2,18 @@
 \alias{plotTriangleModel}
 \title{plotTriangleModel}
 \usage{
-  plotTriangleModel(objTriangleModel)
+plotTriangleModel(objTriangleModel)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}
 }
 \value{
-  None
+None
 }
 \description{
-  plotTriangleModel
+plotTriangleModel
 }
 \seealso{
-  \code{\link{PlotModelGoF}},
-  \code{\link{PlotModelFactors}}
+\code{\link{PlotModelGoF}}, \code{\link{PlotModelFactors}}
 }
 

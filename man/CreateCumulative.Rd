@@ -2,7 +2,7 @@
 \alias{CreateCumulative}
 \title{Create cumulative}
 \usage{
-  CreateCumulative(dfTriangleData, measureCols, Groups)
+CreateCumulative(dfTriangleData, measureCols, Groups)
 }
 \arguments{
   \item{dfTriangleData}{A data frame of triangle variables}
@@ -14,13 +14,13 @@
   identifying groups}
 }
 \value{
-  A data frame of measures with cumulatives included
+A data frame of measures with cumulatives included
 }
 \description{
-  Create cumulative
+Create cumulative
 }
 \seealso{
-  \code{\link{CreateIncrementals}},
-  \code{\link{CreatePriors}}
+\code{\link{CreateIncrementals}},
+\code{\link{CreatePriors}}
 }
 

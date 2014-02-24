@@ -2,18 +2,18 @@
 \alias{PlotResiduals}
 \title{PlotResiduals}
 \usage{
-  PlotResiduals(objTriangleModel)
+PlotResiduals(objTriangleModel)
 }
 \arguments{
   \item{objTriangleModel}{A TriangleModel object}
 }
 \value{
-  This function does not return a value.
+This function does not return a value.
 }
 \description{
-  This will produce a 2x2 set of residual graphs.
+This will produce a 2x2 set of residual graphs.
 }
 \details{
-  This function will produce four charts.
+This function will produce four charts.
 }
 
