@@ -36,3 +36,11 @@ is.StaticMeasure = function(objTriangle, MeasureName){
 #   groups = unique(aTriangle@TriangleData$Group)
 #   groups
 # }
+
+OriginPeriodNames = function(){
+  c("OriginPeriodStart", "OriginPeriodEnd", "OriginPeriod")
+}
+
+DevelopmentPeriodNames = function(){
+  c("DevelopmentLag", "DevInteger", "EvaluationDate")
+}

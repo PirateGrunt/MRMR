@@ -1,4 +1,4 @@
-#' plot.Triangle
+#' plotTriangle
 #' 
 #' @export 
 #' @include Triangle.R
@@ -39,3 +39,11 @@ plotTriangle = function(objTriangle, Response
   plt
   return (plt)
 }
+
+#' plot
+#' 
+setMethod(f = "plot"
+          , signature(x="Triangle", y="missing")
+          , definition = function(x, ...){
+            plotTriangle(objTriangle = x, ...)
+            })

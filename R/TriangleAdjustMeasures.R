@@ -19,15 +19,22 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
   lOriginYear = lapply(lOriginYear, function(x) {
     x = x[order(x$OriginPeriodStart, x$EvaluationDate),]
     theMeasures = x[measureCols]
+    
     if (nrow(theMeasures) == 1) {
       incrementals = theMeasures
     } else {
-      incrementals = as.data.frame(apply(theMeasures, 2, diff))
+      if (nrow(theMeasures) == 2) {
+          incrementals = apply(theMeasures, 2, diff)
+          incrementals = as.data.frame(t(incrementals))
+        } else {
+          incrementals = as.data.frame(apply(theMeasures, 2, diff))
+        }
       incrementals = rbind(theMeasures[1,], incrementals)
     }
     names(incrementals) = incrColNames
     x = cbind(x, incrementals)
   })
+  
   dfMeasures = do.call("rbind", lOriginYear)
   row.names(dfMeasures) = NULL
   

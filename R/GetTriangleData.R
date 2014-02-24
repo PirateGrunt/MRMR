@@ -38,21 +38,22 @@ GetTriangleData = function(Triangle, OriginPeriodStart = NULL, DevInteger = NULL
 }
 
 mojo = TestDataFrame()
-myTriangle = newTriangle(TriangleData = mojo
-                         , OriginPeriods = AccidentYear
-                         , DevelopmentLags = Month
-                         , Cumulative = TRUE
-                         , StochasticMeasures = c("Paid")
-                         , StaticMeasures = c("EP")
-                         , Verbose = FALSE)
-cazart = GetTriangleData(myTriangle, OriginPeriodStart = mdy("1-1-2002"), Measure = c("IncrementalPaid", "PriorPaid"))
-cazart
+# myTriangle = newTriangle(TriangleData = mojo
+#                          , OriginPeriods = AccidentYear
+#                          , DevelopmentLags = Month
+#                          , Cumulative = TRUE
+#                          , StochasticMeasures = c("Paid")
+#                          , StaticMeasures = c("EP")
+#                          , Verbose = FALSE)
 
-cazart = GetTriangleData(myTriangle, OriginPeriodStart = mdy("1-1-2002"), DevInteger = 2, Measure = c("IncrementalPaid", "PriorPaid"))
-cazart
-
-cazart = GetTriangleData(myTriangle, DevInteger = 2, Measure = c("IncrementalPaid", "PriorPaid"))
-cazart
-
-cazart = GetTriangleData(myTriangle, EvaluationDate = ymd("2004-12-31"), Measure = c("IncrementalPaid", "PriorPaid"))
-cazart
+# cazart = GetTriangleData(myTriangle, OriginPeriodStart = mdy("1-1-2002"), Measure = c("IncrementalPaid", "PriorPaid"))
+# cazart
+# 
+# cazart = GetTriangleData(myTriangle, OriginPeriodStart = mdy("1-1-2002"), DevInteger = 2, Measure = c("IncrementalPaid", "PriorPaid"))
+# cazart
+# 
+# cazart = GetTriangleData(myTriangle, DevInteger = 2, Measure = c("IncrementalPaid", "PriorPaid"))
+# cazart
+# 
+# cazart = GetTriangleData(myTriangle, EvaluationDate = ymd("2004-12-31"), Measure = c("IncrementalPaid", "PriorPaid"))
+# cazart
