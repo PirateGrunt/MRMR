@@ -1,6 +1,6 @@
 \name{plotTriangle}
 \alias{plotTriangle}
-\title{plot.Triangle}
+\title{plotTriangle}
 \usage{
 plotTriangle(objTriangle, Response, Predictor, Group = "OriginPeriodStart",
   Lines = TRUE, FitLines = FALSE)
@@ -22,6 +22,6 @@ plotTriangle(objTriangle, Response, Predictor, Group = "OriginPeriodStart",
   lines will have an intercept}
 }
 \description{
-plot.Triangle
+plotTriangle
 }
 

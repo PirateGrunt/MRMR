@@ -12,13 +12,6 @@
 #' @return
 #' A data frame
 #' 
-#' @example
-#'  x = 1:50
-#'  y = 5 + 3*x + rnorm(50)
-#'  fit = lm(y~x)
-#'  summary(fit)
-#'  fit = RenameCoefficients(fit, c("Intercept", "Slope"))
-#'  summary(fit)
 #'  
 RenameCoefficients = function(Fit, Names){
   coef = Fit$coefficients
@@ -27,3 +20,11 @@ RenameCoefficients = function(Fit, Names){
   
   Fit
 }
+
+# @example
+#  x = 1:50
+#  y = 5 + 3*x + rnorm(50)
+#  fit = lm(y~x)
+#  summary(fit)
+#  fit = RenameCoefficients(fit, c("Intercept", "Slope"))
+#  summary(fit)
