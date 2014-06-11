@@ -12,32 +12,7 @@ Depends:
     stats,
     lmtest,
     methods,
-    plyr
+    plyr,
+    XLConnect
 Suggests:
     testthat
-Collate:
-    'TriangleAdjustMeasures.R'
-    'CreateOriginPeriods.R'
-    'CreateEvaluationDates.R'
-    'CreateDevelopmentLags.R'
-    'Triangle.R'
-    'TriangleModel.R'
-    'TriangleProjection.R'
-    'CompleteTriangle.R'
-    'GetTriangleData.R'
-    'Help.R'
-    'LatestDiagonal.R'
-    'PlotModelFactors.R'
-    'PlotModelGoF.R'
-    'PlotResiduals.R'
-    'PlotTriangle.R'
-    'PlotTriangleModel.R'
-    'ProjectToDate.R'
-    'ProjectToDev.R'
-    'ProjectValues.R'
-    'RenameCoefficients.R'
-    'SerialCorrelation.R'
-    'SummaryTriangleModel.R'
-    'TriangleAccessors.R'
-    'TriangleMeta.R'
-    'data.R'
