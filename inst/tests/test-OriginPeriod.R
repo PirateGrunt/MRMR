@@ -1,55 +1,172 @@
 context("OriginPeriod")
 
-dummyOriginPeriod = function{
-  startDates = seq(as.Date("2002/01/01"), as.Date("2013/12/31"), by="1 year")
-  endDates = startDates + as.period(1, "year") - days(1)
-  length = as.period(1, "year")
-  moniker = paste0("AY ", as.character(year(startDates)))
-  type = "Accident"
-}
+# Dummy data
+startDates = seq(as.Date("2001/01/01"), as.Date("2010/12/31"), by="1 year")
+endDates = startDates + as.period(1, "year") - days(1)
+period = as.period(1, "year")
+moniker =  paste0("AY ", as.character(year(startDates)))
+type = "Accident"
 
-test_that("Multiple stochastic measures", {
-  myTriangle = newTriangle(TriangleData = TestDataFrame()
-                           , OriginPeriods = AccidentYear
-                           , DevelopmentLags = Month
-                           , Cumulative = FALSE
-                           , StochasticMeasures = c("Paid", "Reported")
-                           , StaticMeasures = c("EP")
-                           , Verbose = FALSE)
+test_that("Construction", {
+  x = OriginPeriod(startDates)
   
-  expect_true("IncrementalReported" %in% colnames(df))
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, endDates)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, Period=period)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, period)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, endDates, Moniker=moniker)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, endDates, Type=type)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, endDates, Moniker=moniker, Type=type)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, Period=period, Moniker=moniker, Type=type)
+  expect_true(is.OriginPeriod(x))
+  
+  x = OriginPeriod(startDates, Type="Accident")
+  expect_true(is.OriginPeriod(x))
+  
+  # This won't work! R assumes that the unnamed argument is meant to be Period, so
+  # it will dispatch the default method
+  expect_error(OriginPeriod(startDates, endDates, moniker, type))
+  
+  # integers
+  accidentYears = seq(2001:2010)
+  x = OriginPeriod(accidentYears, StartMonth = 7, StartDay = 1, Moniker=moniker)
+  expect_true(is.OriginPeriod(x))
+  
+  expect_true(month(x$StartDate[1]) == 7)
+  
+  x = OriginPeriod(accidentYears, Type=type, Moniker=moniker)
+  expect_true(is.OriginPeriod(x))
+  expect_true(month(x$StartDate[1]) == 1)
+  
+  x = OriginPeriod(accidentYears)
+  expect_true(is.OriginPeriod(x))
+  
+  # semi-annual
+  startDates = seq(as.Date("2001/01/01"), as.Date("2005/12/31"), by="6 months")
+  endDates = startDates + as.period(6, "months") - days(1)
+  x = OriginPeriod(startDates, endDates)
+  expect_true(is.OriginPeriod(x))
+  
+  expect_true(length(x) == 10)
+  
+  op = OriginPeriod(StartDate = as.Date("2001-01-01"), EndDate = as.Date("2010-07-01")
+                    , Period=as.period(6, "months"))
+  expect_true(is.OriginPeriod(op))
+  
+  op = OriginPeriod(StartDate = as.Date("2001-01-01"), Period=as.period(6, "months")
+                    , NumPeriods=20)
+  expect_true(is.OriginPeriod(op))
 })
 
+test_that("Accessors", {
+  x = OriginPeriod(seq(2001:2010))
+  
+  y = x[1]
+  expect_true(is.OriginPeriod(y))
+  expect_true(length(y) == 1)
 
-x = OriginPeriod(startDates)
-x = OriginPeriod(startDates, endDates)
-x = OriginPeriod(startDates, Length=length)
-x = OriginPeriod(startDates, length)
-x = OriginPeriod(startDates, endDates, Moniker=moniker)
-x = OriginPeriod(startDates, endDates, Type=type)
-x = OriginPeriod(startDates, endDates, Moniker=moniker, Type=type)
-x = OriginPeriod(startDates, Length=length, Moniker=moniker, Type=type)
-# This won't work! R assumes that the unnamed argument is meant to be length, so
-# it will dispatch the default method
-x = OriginPeriod(startDates, endDates, moniker, type)
+  y = x[2:3]
+  expect_true(is.OriginPeriod(y))
+  expect_true(length(y) == 2)
+  
+  y = x["2004-01-01"]
+  expect_true(is.OriginPeriod(y))
+  expect_true(length(y) == 1)
+  
+  y = x[c("2004-01-01", "2005-01-01")]
+  expect_true(is.OriginPeriod(y))
+  expect_true(length(y) == 2)
+  
+  y = x[c(1, 8)]
+  expect_true(is.OriginPeriod(y))
+  expect_true(length(y) == 2)
+  
+  y = x$StartDate
+  expect_true(is.Date(y))
+  
+  y = x$Type
+  expect_true(is.character(y))
+  
+  y = x$Moniker[3]
+  expect_true(is.character(y))
+  
+})
 
-startDates.y = seq(as.Date("2014/01/01"), as.Date("2015/12/31"), by="1 year")
-endDates.y = startDates.y + as.period(1, "year") - days(1)
-moniker.y = paste0("AY ", as.character(year(startDates.y)))
-type = "Accident"
-y = OriginPeriod(startDates.y, Length=length, Moniker=moniker.y, Type="Accident")
+test_that("Assignment", {
+  x = OriginPeriod(seq(2001:2010))
+  
+  x$Type = "Report"
+  expect_true(x$Type == "Report")
+  
+  x$Moniker[3] ="blah"
+  expect_true(x$Moniker[3] == "blah")
 
-z = rbind(x, y)
-z = c(x, y)
+  expect_error(x$Moniker[5:6] <- "blah")
+  
+  x$Moniker[5:6] = c("AY 2005", "AY 2006")
+  
+  expect_error(x$Moniker[] <- "blah")
+  expect_error(x$Moniker <- seq(2001:2010))
+  
+  x$Moniker[] = as.character(seq(1, length(x)))
+  expect_true(x$Moniker[1] == 1)
+})
 
-accidentYears = seq(2002:2013)
-x = OriginPeriod(accidentYears, Type=type, Moniker=moniker)
-x = OriginPeriod(accidentYears, StartMonth = 7, StartDay = 1)
+test_that("Comparison", {
+  
+  x = OriginPeriod(seq(2001, 2005))
+  y = OriginPeriod(seq(2002, 2006))
+  expect_true(x != y)
+  expect_true(x == x)
+})
 
-x = OriginPeriod(startDates, Type="Accident")
+test_that("Conversion", {
+  x = OriginPeriod(seq(2001, 2005))
+  z = as.data.frame(x)
+  expect_true(is.data.frame(z))
+})
 
-startDates = seq(as.Date("2002/01/01"), as.Date("2013/12/31"), by="6 months")
-endDates = startDates + as.period(6, "months") - days(1)
-moniker = paste0("H", ifelse(month(startDates) == 1, "1", "2"), as.character(year(startDates)))
+test_that("Concatenate", {
+  x = OriginPeriod(startDates)
+  y = OriginPeriod(max(startDates) + as.period(1, "year"))
+  
+  z = rbind(x, y)
+  expect_true(length(z) == length(x) + length(y))
+  
+  z = c(x, y)
+  expect_true(length(z) == length(x) + length(y))
+  
+  expect_error(z <- rbind(x, x))
+  
+  x = OriginPeriod(startDates)
+  x = Grow(x, Length=2)
+})
+ 
+test_that("Persistence", {
+  startDates = seq(as.Date("2001/01/01"), as.Date("2010/12/31"), by="1 year")
+  endDates = startDates + as.period(1, "year") - days(1)
+  period = as.period(1, "year")
+  moniker =  paste0("AY ", as.character(year(startDates)))
+  type = "Accident"
+  
+  op = OriginPeriod(startDates, as.period(1, "years"), Moniker=moniker, Type=type)
+  
+  write.excel(op, "OriginPeriod.xlsx", overwrite=TRUE)
+  
+})
 
-x = OriginPeriod(startDates, endDates, Moniker=moniker)
+#=============================================
+# rep, subset, arithmetic ?
