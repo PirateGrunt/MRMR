@@ -124,3 +124,14 @@ TestDataFrame = function(){
   
   dfTest
 }
+
+#' 
+#' @param x A Triangle object
+#' @aliases as.data.frame
+# setGeneric("as.data.frame")
+# 
+# #' @export
+# setMethod("as.data.frame", signature("Triangle"), function(x, ...){
+#   x@TriangleData
+# })
+# 

@@ -1,5 +1,9 @@
 #=====================
 # Triangle name
+TriangleName = function(x, TriangleName){
+  print(TriangleName)
+}
+
 setGeneric("TriangleName")
 
 setMethod("TriangleName", signature("Triangle"), function(x){

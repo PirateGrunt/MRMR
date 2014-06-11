@@ -7,7 +7,7 @@ Triangle = function(OriginPeriods
                     , TriangleName
                     , OriginPeriodType
                     , df
-                    ...){
+                    , ...){
   tri = new("Triangle"
             , TriangleData = data.frame()
             , TriangleName = character()
