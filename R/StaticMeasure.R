@@ -65,13 +65,6 @@ FactorsToStrings = function(df){
   df
 }
 
-ComposeDataFrame = function(op, measures, levels){
-  op = as.data.frame(op)
-  df = merge(op, levels, all=TRUE, sort=FALSE)
-  df = cbind(df, measures)
-  df  
-}
-
 KernelDataFrame = function(op, levels){
   op = as.data.frame(op)
   op = op[, c("StartDate", "EndDate", "Moniker")]
@@ -87,22 +80,6 @@ EmptyMeasureColumns = function(nrow, names){
   colnames(df) = names
   df
 }
-
-# CharacterToDataFrame = function(strIn, prefix){
-#   
-#   if (missing(prefix)) prefix = "Measure"
-#   
-#   if ("names" %in% names(attributes(strIn))) {
-#     names = attributes(strIn)$names
-#   } else {
-#     names = paste0(prefix, 1:(length(strIn)))
-#   }
-#   
-#   df = data.frame(matrix(strIn, nrow=1))
-#   colnames(df) = names
-#   df
-# }
-
 
 #************************************************************************************************************************
 # 1. Class Definition ====
@@ -126,24 +103,10 @@ setClass("StaticMeasure"
 )
 #************************************************************************************************************************
 # 2. Construction ====
-# StaticMeasure = function(OriginPeriod, Measure, Level){
-#   stop("You must use a specific constructor method to create a StaticMeasure object. 
-#        Is it possible you forgot to provide a formal argument name?")
-# }
 
 setGeneric("StaticMeasure", function(OriginPeriod, Measure, Level, .data, ...) {
   standardGeneric("StaticMeasure")
 })
-
-# #' @export
-# I'm not ready to implement this yet. It's not wholly clear how we can cleanly specify which columns will be used
-# to create the OriginPeriod object
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "character", Measure="character", Level="character", .data="data.frame")
-#           , definition=function(OriginPeriod, Measure, Level, .data){
-#             
-#             
-#             
-# })
 
 #' @export 
 setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY", Level="ANY", .data="ANY")
@@ -199,80 +162,6 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
             sm
 })
 
-
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="character", Level="character", .data="data.frame")
-#           , definition=function(OriginPeriod, Measure, Level, .data){
-#             
-#             Level = unique(.data[, Level, drop=FALSE])
-#             
-#             sm = new("StaticMeasure"
-#                      , OriginPeriod = OriginPeriod
-#                      , Measure = Measure
-#                      , Level = Level
-#                      , .data = .data)
-#             sm
-# })
-# 
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="character", Level="data.frame", .data="data.frame")
-#           , definition=function(OriginPeriod, Measure, Level, .data){
-#             
-#             Level = FactorsToStrings(Level)
-#             
-#             df = KernelDataFrame(OriginPeriod, Level)
-#             .data = .data[, Measure]
-#             sm = new("StaticMeasure"
-#                      , OriginPeriod = OriginPeriod
-#                      , Measure = Measure
-#                      , Level = Level
-#                      , .data = cbind(df, .data))
-#             sm
-# })
-# 
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="character", Level="data.frame", .data="missing")
-#           , definition=function(OriginPeriod, Measure, Level){
-#           
-#             Level = FactorsToStrings(Level)
-#             
-#             df = KernelDataFrame(OriginPeriod, Level)
-#             
-#             if (length(Measure) != 0) df = cbind(df, EmptyMeasureColumns(nrow(df), Measure))
-#             
-#             sm = new("StaticMeasure"
-#                      , OriginPeriod = OriginPeriod
-#                      , Measure = Measure
-#                      , Level = Level
-#                      , .data = df)
-#             sm
-# })
-# 
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="character", Level="character", .data="missing")
-#           , definition=function(OriginPeriod, Measure, Level){
-#             
-#             Level = CharacterToDataFrame(Level, "Level")
-#             
-#             sm = StaticMeasure(OriginPeriod, Measure, Level=Level)
-#             sm
-# })
-# 
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="missing", Level="data.frame", .data="missing")
-#           , definition=function(OriginPeriod, Level){
-#             sm = StaticMeasure(OriginPeriod, Level=Level, Measure=character())            
-# })
-# 
-# #' @export
-# setMethod("StaticMeasure", signature=c(OriginPeriod = "OriginPeriod", Measure="missing", Level="character", .data="missing")
-#           , definition=function(OriginPeriod, Level){
-#             
-#             Level = CharacterToDataFrame(Level, "Level")
-#             
-#             sm = StaticMeasure(OriginPeriod, Level=Level)
-#             sm
-#           })
 #************************************************************************************************************************
 # 3. Properties ====
 #' @export
@@ -367,16 +256,6 @@ setMethod("[", signature(x="StaticMeasure"), definition=function(x, i, j, k){
   }
   level = LevelNames(x)[k]
   
-#     level = data.frame(x@Level)
-#   } else {
-#     if (is.character(k)) {
-#       z = as.matrix(sapply(x@Level, function(y) y %in% k))
-#       k = which(rowSums(z) != 0)  
-#     }
-#     
-#     level = data.frame(x@Level[k, ])
-#   }
-
   df = as.data.frame(x)
   keepCols = c("StartDate", "EndDate", "Moniker", level, measure)
   df = df[df$StartDate %in% op$StartDate, keepCols]
@@ -472,15 +351,9 @@ setMethod("$<-", signature(x = "StaticMeasure"), function(x, name, value) {
 
 #************************************************************************************************************************
 # 6. Conversion ====
+
 #' @export
 setMethod("as.data.frame", signature("StaticMeasure"), function(x, ...){
-#   dfOP = as.data.frame(x@OriginPeriod)
-#   dfX = dfOP
-#   for (i in 2:(nrow(x@.data) / nrow(dfOP))) {
-#     dfX = rbind(dfX, dfOP)
-#   }
-#   df = cbind(dfX, x@.data)
-#   df
   x@.data
 })
 
@@ -557,6 +430,7 @@ setMethod("c", signature(x="StaticMeasure"), definition=function(x, ...){
 # AddGroup = function(StaticMeasure, df){
 #   
 # }
+
 # Addition of a measure may be done via cbind
 # AddMeasure = function(StaticMeasure, df){
 #   
