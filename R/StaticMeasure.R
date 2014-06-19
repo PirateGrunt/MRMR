@@ -431,6 +431,47 @@ setMethod("c", signature(x="StaticMeasure"), definition=function(x, ...){
 #************************************************************************************************************************
 # 8. Persistence ====
 
+#' @export
+setMethod("write.csv", signature=c(x="StaticMeasure"), definition=function(x, file, row.names){
+  df = as.data.frame(x)
+  write.csv(df, ...)
+})
+
+#' @export
+setMethod("write.excel", signature=c(object = "StaticMeasure", file="character", overwrite="logical")
+          , definition=function(object, file, overwrite=FALSE, byGroup=TRUE, sheetName){
+            
+            if (file.exists(file) & !overwrite){
+              stop("Excel file already exists. Either enter a new filename or set the overwrite parameter to TRUE.")
+            }
+            
+            wbk = loadWorkbook(file, create=TRUE)
+            
+            writeSheet = function(wbk, shtName, df){
+              createSheet(wbk, name=shtName)
+              writeWorksheet(wbk, df, shtName, startRow = 1, header=TRUE)
+            }
+            
+            df = as.data.frame(object)
+            
+            if (byGroup){
+              lstGroups = split(df, df[, LevelNames(object)])
+              dfLevel = df[, LevelNames(object)]
+              dfLevel = unique(dfLevel)
+              sheetNames = do.call(paste, c(dfLevel[names(dfLevel)], sep = ""))
+              for (i in 1:(length(lstGroups))){
+                writeSheet(wbk, sheetNames[i], lstGroups[[i]])
+              }
+            } else {
+              if (missing(sheetName)) sheetName = "StaticMeasure"
+              
+              writeSheet(wbk, sheetName, df)
+            }
+            
+            saveWorkbook(wbk)
+            
+})
+
 #************************************************************************************************************************
 # 9. Display ====
 #' @export
