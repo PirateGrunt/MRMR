@@ -177,6 +177,18 @@ test_that("Concatenate", {
   
 })
 
+test_that("Persistence", {
+  sm.CA = StaticMeasure(op, Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
+                        , Level=c(Line = "GL", ClassGroup = "PremOps", State = "CA"))
+  sm.NY = StaticMeasure(op, Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
+                        , Level=c(Line = "GL", ClassGroup = "PremOps", State = "NY"))
+  sm.TX = StaticMeasure(op, Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
+                        , Level=c(Line = "GL", ClassGroup = "PremOps", State = "TX"))
+  z = c(sm.CA, sm.NY, sm.TX)
+  
+  write.excel(z, "StaticMeasure.xlsx", overwrite=TRUE)
+  
+})
 # sm.CA = new("StaticMeasure", OriginPeriod = op, Measure = df.CA, Level = dfLevel.CA)
 # sm.NY = StaticMeasure(OriginPeriod = op, Measure = df.NY, Level = dfLevel.NY)
 # sm.TX = StaticMeasure(op, df.TX, dfLevel.TX)
