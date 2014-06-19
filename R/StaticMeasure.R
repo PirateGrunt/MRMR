@@ -170,10 +170,6 @@ setMethod("length", signature(x="StaticMeasure"), definition=function(x){
   nrow(x@.data)
 })
 
-setGeneric("MeasureNames", function(x){
-  standardGeneric("MeasureNames")
-})
-
 #' @export
 setMethod("MeasureNames", signature(x="StaticMeasure"), definition=function(x){
   x@Measure
@@ -186,10 +182,6 @@ setMethod("MeasureNames<-", signature(x="StaticMeasure", value="character"), def
   colnames(x@.data)[whichCols] = value
   x@Measure = value
   x
-})
-
-setGeneric("LevelNames", function(x){
-  standardGeneric("LevelNames")
 })
 
 #' @export
