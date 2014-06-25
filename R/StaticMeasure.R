@@ -157,7 +157,12 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
               if (missing(Data)) {
                 Data = cbind(df, EmptyMeasureColumns(nrow(df), Measure))
               } else {
-                missingMeasure = 
+                missingMeasure = setdiff(Measure, colnames(df))
+                missingMeasure = intersect(missingMeasure, Measure)
+                if (length(missingMeasure) != 0) {
+                  missingMeasure = EmptyMeasureColumns(nrow(df), missingMeasure)
+                  Data = cbind(Data, missingMeasure)
+                }
                 Data = cbind(df, Data[, Measure, drop=FALSE])
               }
             }
