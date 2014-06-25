@@ -106,32 +106,5 @@ setClass("Triangle"
                           , StaticMeasures = "character"
                           , StochasticMeasures = "character"
                           , Groups = "character")
-#          , sealed = TRUE
          , validity = checkTriangle
 )
-
-
-#=================================
-# Test data frame
-#
-# This data frame is used for testthat
-TestDataFrame = function(){
-  dfTest = data.frame(AccidentYear = c(2002, 2002, 2002, 2003, 2003, 2004)
-             , Month = c(12, 24, 36, 12, 24, 12)
-             , Paid = c(2318,  7932, 13822, 1743,  6240, 2221)
-             , Reported = c(12811, 20370, 26656, 9651, 16995, 16995)
-             , EP = c( 61183,  61183,  61183,  69175,  69175,  99322))
-  
-  dfTest
-}
-
-#' 
-#' @param x A Triangle object
-#' @aliases as.data.frame
-# setGeneric("as.data.frame")
-# 
-# #' @export
-# setMethod("as.data.frame", signature("Triangle"), function(x, ...){
-#   x@TriangleData
-# })
-# 

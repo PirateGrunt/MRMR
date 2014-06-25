@@ -32,6 +32,10 @@ should make this clear.
 
 If the user does not specify level attributes, the default value of "All" is used.
 
+The number of levels of a StaticMeasure will determine its length. A StaticMeasure may be thought of as containing a list, wherein each
+element of the list holds a data frame. The OriginPeriod and Measure properties ensure that each data frame will contain comparable
+information.
+
 \strong{StaticMeasure construction}
 To construct
 

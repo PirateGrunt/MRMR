@@ -467,9 +467,9 @@ setMethod("c", signature(x="OriginPeriod"), function(x, ...){
 
 #' @export
 setMethod("Grow", signature=c(object="OriginPeriod", Length="numeric"), definition=function(object, Length){
-  startDates = max(object@StartDate) 
-  startDates = startDates + object@Period * (1:Length)
-  op = OriginPeriod(StartDate = startDates, Type=object@Type, Period=object@Period)
+  startDates = max(object@StartDate)  + object@Period * (1:Length)
+  moniker = paste("New moniker", (1:Length))
+  op = OriginPeriod(StartDate = startDates, Type=object@Type, Period=object@Period, Moniker=moniker)
   op = c(object, op)
   op
 })

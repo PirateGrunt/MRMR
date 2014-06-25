@@ -1,9 +1,26 @@
+#' StaticMeasure
+#'     +---Level
+#'         +----Measure
+#'         +----OriginPeriod
+#'         
+#' StochasticMeasure
+#'     +---Level
+#'         +----Measure
+#'         +----OriginPeriod
+#'         +----EvaluationDate
+#'         
 context("StaticMeasure")
 
 # Sample data
 op = OriginPeriod(StartDate = as.Date("2001-01-01"), Period=as.period(1, "years"), NumPeriods=10)
 op$Moniker = paste0("AY ", as.character(year(op$StartDate)))
 op$Type = "Accident Year"
+
+sm = StaticMeasure(OriginPeriod = op
+                   , Level=list(Line = "GL", Subline = c("PremOps", "Products"), State = c("CA", "TX"))
+                   , Measure = c("EarnedPremium", "IncurredLoss")
+                   , Data = data.frame(EarnedPremium=seq(from=10000, to=19000, by=1000)
+                                       , IncurredLoss = 0.75*seq(from=10000, to=19000, by=1000)))
 
 EarnedPremium.CA = seq(from=10000, to=19000, by=1000)
 IncurredLoss.CA = EarnedPremium.CA * 0.75
@@ -18,12 +35,25 @@ dfLevel.CA = data.frame(Line = "GL", ClassGroup = "PremOps", State = "CA", strin
 dfLevel.NY = data.frame(Line = "GL", ClassGroup = "PremOps", State = "NY")
 dfLevel.PR = data.frame(Line = "GL", ClassGroup = "PremOps", Territory = "PR")
 
+GenericStaticMeasure = function(){
+  op = OriginPeriod(StartDate = as.Date("2001-01-01"), Period=as.period(1, "years"), NumPeriods=10)
+  op$Moniker = paste0("AY ", as.character(year(op$StartDate)))
+  op$Type = "Accident Year"
+  
+  dfLevel.CA = data.frame(Line = "GL", ClassGroup = "PremOps", State = "CA", stringsAsFactors = FALSE)
+  
+  sm = StaticMeasure(OriginPeriod = op, Measure = c("EarnedPremium", "IncurredLoss"), Level = dfLevel.CA)
+  sm$EarnedPremium = seq(from=10000, to=19000, by=1000)
+  sm$IncurredLoss = sm$EarnedPremium * 0.75
+  sm
+}
 
 test_that("Construction", {
 
   # This will produce garbage. Must think of a way to address this.
-  x = new("StaticMeasure", OriginPeriod = op, Measure = names(df.CA), Level = dfLevel.CA)
-  expect_true(is.StaticMeasure(x))
+  # Why does this produce garbage? Because we're not actually calling one of our constructors.
+#   x = new("StaticMeasure", OriginPeriod = op, Measure = names(df.CA), Level = dfLevel.CA)
+#   expect_true(is.StaticMeasure(x))
   
   x = StaticMeasure(OriginPeriod = op, Measure = names(df.NY), Level = dfLevel.NY)
   expect_true(is.StaticMeasure(x))
@@ -47,118 +77,140 @@ test_that("Construction", {
   
   dfData = merge(dfLevel.CA, df.CA)
   
-  x = StaticMeasure(op, .data = dfData
+  x = StaticMeasure(op, Data = dfData
                     , Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
                     , Level=c("Line", "ClassGroup", "State"))
 })
 
+# Properties
+
 test_that("Accessors", {
-  sm.CA = x = StaticMeasure(op, Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
-                            , Level=c(Line = "GL", ClassGroup = "PremOps", State = "CA"))
 
-  x = sm.CA[1]
+  sm = StaticMeasure(OriginPeriod = op
+                     , Level=list(Line = "GL", Subline = c("PremOps", "Products"), State = c("CA", "TX"))
+                     , Measure = c("EarnedPremium", "IncurredLoss")
+                     , Data = data.frame(EarnedPremium=seq(from=10000, to=19000, by=1000)
+                                         , IncurredLoss = 0.75*seq(from=10000, to=19000, by=1000)))
+  
+  # Test $ accessors
+  x = sm$EarnedPremium
+  expect_true(length(x) == 40)
+  
+  x = sm$State
+  expect_true(length(x) == nrow(sm@Data))
+  
+  x = sm$Line
+  expect_true(length(x) == nrow(sm@Data))
+  
+  x = sm$CA
+  expect_true(is.StaticMeasure(x))
+  expect_true(LevelNames(x) == c("Line", "Subline", "State"))
+  expect_true(x$State == "CA")
+  
+  x = sm$"AY 2004"
+  expect_true(is.StaticMeasure(x))
+  
+  x = sm$EarnedPremium[sm$State == "CA"]
+  State(sm)
+  
+  # Test [[. This is more or less the same. However, when we use integer indexing, we will likely return an error, except in the unlikely event that
+  # the user has supplied a vector, which return a single Level attribute.
+  x = sm[["State", , FALSE]]
+  expect_true(length(x) == nrow(sm@Data))
+  x = sm[["State", UniqueAttribute=TRUE]]
+  expect_true(x == c("CA", "TX"))
+  x = sm[["State", UniqueAttribute=FALSE]]
+  
+  x = sm[["CA"]]
+  expect_true(is.StaticMeasure(x))
+  expect_true(LevelNames(x) == c("Line", "Subline", "State"))
+  expect_true(x$State == "CA")
+  
+  x = sm[[c(3,2)]]
   expect_true(is.StaticMeasure(x))
   expect_true(length(x) == 1)
   
-  x = sm.CA[1:3]
-  expect_true(length(x) == 3)
+  x = sm[[1]]
+  expect_true(length(x) != 1)
   
-  x = sm.CA[c(1, 5)]
-  expect_true(length(x) == 2)
-  
-  x = sm.CA["AY 2004"]
+  # Test [
+  x = sm[OriginPeriod = "AY 2004"]
   expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 1)
+  
+  x = sm[OriginPeriod="AY 2004", sm$State=="CA"]
+  expect_true(is.StaticMeasure(x))
+  x = sm[sm$State=="CA", OriginPeriod="AY 2004"]
+  
+  x = sm[sm$State == "CA", OriginPeriod = "AY 2004"]
+  expect_true(is.StaticMeasure(x))
+  
+  x = sm[sm$State == "CA", OriginPeriod = sm$OriginPeriod$Moniker[4]]
+  
+  # This won't work. The 4th element of the OriginPeriod object is an OriginPeriod object
+  x = sm[sm$State == "CA", OriginPeriod = sm$OriginPeriod[4]]
+  
+  x = sm[sm$State == "CA", OriginPeriod = c("AY 2004", "AY 2005")]
+  
+  x = sm[sm$State == "CA", "EarnedPremium", OriginPeriod = "AY 2004"]
+  
+  x = sm[sm$State == "CA", "EarnedPremium"]
+  
+  # This will basically produce BS
+  x = sm[1]
+  
+})
 
-  x = sm.CA[c("AY 2001", "AY 2004")]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 2)
-  
-  x = sm.CA[, "EarnedPremium"]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 10)
-  
-  x = sm.CA[, , "Line"]
-  x = sm.CA[, , c("Line", "State")]
-  
-  sm.Multi = StaticMeasure(OriginPeriod = op, Measure = names(df.CA), Level = rbind(dfLevel.CA, dfLevel.NY))
-  x = sm.Multi[1]
-  
-  x = sm.Multi[, , "NY"]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 10)
-  
-  x = sm.Multi[, , 2]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 10)
-  
-  x = sm.Multi[, , c("NY", "GL")]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 20)
- 
-  x = sm.Multi[, , c("NY", "CA")]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 20)
-  
-  x = sm.Multi[sm.Multi@OriginPeriod$StartDate <= as.Date("2004/1/1"), "IncurredLoss", "CA"]
-  expect_true(is.StaticMeasure(x))
-  expect_true(length(x) == 4)
-  
-  sm.Multi[, 1]
-  sm.Multi[, 2]
-  sm.Multi[, 1:2]
-  sm.Multi[, c(1,2)]
-  sm.Multi[1, c(1,2)]
-  sm.Multi[1:2, c(1,2)]
+test_that("Assignment", {
 
-  sm.Multi["AY 2004", , ]
-  sm.Multi["AY 2004", , "CA"]
-  sm.Multi["AY 2004", c(1,2)]
-
-  sm.CA[1:5, 1, k=1]
-  x = sm.CA[, "EarnedPremium", ]
-  sm.CA[, 2, ]
-  sm.CA["AY 2004", "EarnedPremium", ]
-  sm.CA["AY 2004", "EarnedPremium", "CA"]
+  # Highly experimental. This will be used when I figure out how and if to create dynamic functions.
+  # State(sm)[1] = "TX"
   
-  sm.CA$LossRatio = sm.CA$IncurredLoss / sm.CA$EarnedPremium
+  # Test $ assignment
+  sm$State[sm$State == "CA"] = "NY"
+  
+  sm$State[sm$State == "NY"] = "CA"
+  
+  # This should produce an error
+  sm$State = "WV"
+  
+  sm$State[1:20] = "NY"
+  
+  LevelNames(sm)[LevelNames(sm) == "State"] = "Territory"
+  sm$Territory[1:20] = "BC"
+  
+  LevelNames(sm)[LevelNames(sm) == "Territory"] = "State"
+  sm$State[1:20] = "NY"
+  
+  sm$EarnedPremium[sm$State == "NY"] = sm$EarnedPremium[sm$State == "NY"] * 1.05
+  
+  #sm$OriginPeriod = #something
+    
+  sm$LossRatio = sm$IncurredLoss / sm$EarnedPremium
   y = MeasureNames(sm.CA)
   expect_true(length(y) == 3)
   expect_true("EarnedPremium" %in% y)
   expect_true("IncurredLoss" %in% y)
   expect_true("LossRatio" %in% y)
   
-  sm.CA$EarnedPremium[1] = 20000
-  sm.CA$EarnedPremium = EarnedPremium.CA
-  expect_true(sm.CA$EarnedPremium[1] == 20000)
-  sm.CA$EarnedPremium = sm.CA$EarnedPremium * 1.37
+  sm$EarnedPremium[1] = 20000
+  expect_true(sm$EarnedPremium[1] == 20000)
+
+  sm[, "EarnedPremium"] = 4
+  sm[, "EarnedPremium", OriginPeriod = "AY 2004"] = 400
   
-  sm.CA$State[1] = "TX"
-  expect_true(sm.CA$State[1] == "TX")
+  sm[sm$State=="CA" & sm$Subline=="PremOps", c("IncurredLoss", "EarnedPremium"), OriginPeriod = "AY 2004"] = c(4, 6)
+  sm[sm$State=="CA" & sm$Subline=="PremOps"
+     , c("IncurredLoss", "EarnedPremium")] = c(seq(1000, by=1000, length.out=10), seq(2000, by=500, length.out=10))
   
-  sm.CA$State = "CA"
+  LevelNames(sm) = c("Bereich", "Abteiling", "Bundesstaat")
   
-  sm.Multi$State
-  sm.Multi$State[1] = "TX"
-  sm.Multi$Line[1] = "Liability"
-  
-#  sm.CA[1, "EarnedPremium"] = 20000
-#   sm.CA[sm.CA$]
-#   
-#   sm.CA[1, "State"] = "TX"
-#   
-#   sm.CA[]
 })
 
 # Comparison
 
-# Properties
-
 test_that("Conversion", {
-  sm.CA = StaticMeasure(OriginPeriod = op, Measure = names(df.CA), Level = dfLevel.CA)
-  df = as.data.frame(sm.CA)
-  #df = as.data.frame(sm.Multi)
-  
+  df = as.data.frame(sm)
+  expect_true(class(df) == "data.frame")
 })
 
 test_that("Concatenate", {
@@ -168,12 +220,15 @@ test_that("Concatenate", {
                             , Level=c(Line = "GL", ClassGroup = "PremOps", State = "NY"))
   sm.TX = StaticMeasure(op, Measure = c("EarnedPremium", "IncurredLoss", "LossRatio")
                         , Level=c(Line = "GL", ClassGroup = "PremOps", State = "TX"))
+
   z = rbind(sm.CA, sm.NY)
-  expect_true(length(z) == length(sm.CA))
-  expect_true(length(z) == length(sm.NY))
+  expect_true(length(z) == 2)
   
   z = c(sm.CA, sm.NY)
+  expect_true(length(z) == 2)
+  
   z = c(sm.CA, sm.NY, sm.TX)
+  expect_true(length(z) == 3)
   
 })
 
@@ -189,6 +244,7 @@ test_that("Persistence", {
   write.excel(z, "StaticMeasure.xlsx", overwrite=TRUE)
   
 })
+
 # sm.CA = new("StaticMeasure", OriginPeriod = op, Measure = df.CA, Level = dfLevel.CA)
 # sm.NY = StaticMeasure(OriginPeriod = op, Measure = df.NY, Level = dfLevel.NY)
 # sm.TX = StaticMeasure(op, df.TX, dfLevel.TX)

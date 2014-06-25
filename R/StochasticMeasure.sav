@@ -60,7 +60,7 @@ checkStochasticMeasure = function(object)
 setClass("StochasticMeasure"
          , representation(OriginPeriod = "OriginPeriod"
                           , Measure = "character"
-                          , Level  "list"
+                          , Level = "list"
                           , EvaluationDate = "Date"
                           , .data = "data.frame")
 )

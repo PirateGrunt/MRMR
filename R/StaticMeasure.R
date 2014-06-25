@@ -39,6 +39,10 @@
 #' 
 #' If the user does not specify level attributes, the default value of "All" is used.
 #' 
+#' The number of levels of a StaticMeasure will determine its length. A StaticMeasure may be thought of as containing a list, wherein each
+#' element of the list holds a data frame. The OriginPeriod and Measure properties ensure that each data frame will contain comparable 
+#' information.
+#' 
 #' \strong{StaticMeasure construction}
 #' To construct
 #' 
@@ -68,7 +72,7 @@ FactorsToStrings = function(df){
 KernelDataFrame = function(op, levels){
   op = as.data.frame(op)
   op = op[, c("StartDate", "EndDate", "Moniker")]
-  df = merge(op, expand.grid(levels))
+  df = merge(op, expand.grid(levels, stringsAsFactors=FALSE))
   df
 }
 
@@ -99,25 +103,26 @@ setClass("StaticMeasure"
          , representation(OriginPeriod = "OriginPeriod"
                           , Measure = "character"
                           , Level = "list"
-                          , .data = "data.frame")
+                          , Data = "data.frame")
+         , validity = checkStaticMeasure
 )
 #************************************************************************************************************************
 # 2. Construction ====
 
-setGeneric("StaticMeasure", function(OriginPeriod, Measure, Level, .data, ...) {
+setGeneric("StaticMeasure", function(OriginPeriod, Measure, Level, Data, ...) {
   standardGeneric("StaticMeasure")
 })
 
 #' @export 
-setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY", Level="ANY", .data="ANY")
-          , definition=function(OriginPeriod, Measure, Level, .data) {
+setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY", Level="ANY", Data="ANY")
+          , definition=function(OriginPeriod, Measure, Level, Data) {
             
             if (missing(Level)) {
               stop("Cannot create a static measure without knowing the levels")
             }
             
-            if (!missing(.data) & class(Level) == "character") {
-              Level = .data[, Level, drop=FALSE]
+            if (!missing(Data) & class(Level) == "character") {
+              Level = Data[, Level, drop=FALSE]
             }
             
             if (class(Level) == "data.frame") {
@@ -136,7 +141,9 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
             
             if (missing(Measure)) {
               Measure = character()
-            } 
+            } else if(class(Measure) != "character"){
+              Measure = as.character(Measure)
+            }
             
             if (length(intersect(Measure, names(Level)) != 0)){
               warning("You're using the same name(s) for both measures and levels.")
@@ -145,12 +152,13 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
             df = KernelDataFrame(OriginPeriod, Level)
             
             if (length(Measure) == 0){
-              .data = df
+              Data = df
             } else {
-              if (missing(.data)) {
-                .data = cbind(df, EmptyMeasureColumns(nrow(df), Measure))
+              if (missing(Data)) {
+                Data = cbind(df, EmptyMeasureColumns(nrow(df), Measure))
               } else {
-                .data = cbind(df, .data[, Measure, drop=FALSE])
+                missingMeasure = 
+                Data = cbind(df, Data[, Measure, drop=FALSE])
               }
             }
             
@@ -158,7 +166,7 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
                      , OriginPeriod = OriginPeriod
                      , Measure = Measure
                      , Level = Level
-                     , .data = .data)
+                     , Data = Data)
             sm
 })
 
@@ -166,8 +174,16 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
 # 3. Properties ====
 #' @export
 setMethod("length", signature(x="StaticMeasure"), definition=function(x){
-  # TODO: This should reflect the total number of rows
-  nrow(x@.data)
+  if (length(x@Level) < 1) {
+    return (0)
+  }
+  
+  iLength = 1
+  for (i in 1:length(x@Level)){
+    iLength = iLength * length(x@Level[[i]])
+  }
+  
+  iLength
 })
 
 #' @export
@@ -178,8 +194,8 @@ setMethod("MeasureNames", signature(x="StaticMeasure"), definition=function(x){
 #' @export
 setMethod("MeasureNames<-", signature(x="StaticMeasure", value="character"), definition=function(x, value){
   oldNames = x@Measure
-  whichCols = colnames(x@.data) %in% oldNames
-  colnames(x@.data)[whichCols] = value
+  whichCols = colnames(x@Data) %in% oldNames
+  colnames(x@Data)[whichCols] = value
   x@Measure = value
   x
 })
@@ -192,8 +208,8 @@ setMethod("LevelNames", signature(x="StaticMeasure"), definition=function(x){
 #' @export
 setMethod("LevelNames<-", signature(x="StaticMeasure", value="character"), definition=function(x, value){
   oldNames = LevelNames(x)
-  whichCols = colnames(x@.data) %in% oldNames
-  colnames(x@.data)[whichCols] = value
+  whichCols = colnames(x@Data) %in% oldNames
+  colnames(x@Data)[whichCols] = value
   names(x@Level) = value
   x
 })
@@ -211,130 +227,245 @@ setMethod("show", signature(object="StaticMeasure"), definition=function(object)
 #************************************************************************************************************************
 # 4. Accessors ====
 # Accessors extract from OriginPeriod, Level and Measure
-#' @export 
-setMethod("[", signature(x="StaticMeasure"), definition=function(x, i, j, k){
-  
-  if(missing(i)) i = NA
-  if(missing(j)) j = NA
-  if(missing(k)) k = NA
-  
-  # if the origin period is not specified, then return all of them
-  if (any(is.na(i))) {
-    i = 1:(length(x@OriginPeriod))
-  }
-  
-  op = x@OriginPeriod
-  if (class(i) == "character") {
-    i = which(op@Moniker == i)
-  } 
-  
-  op = op[i]
-  
-  if (any(is.na(j))) {
-    j = 1:(length(x@Measure))
-  }
-  
-  if (class(j) == "character") {
-    j = match(j, x@Measure)
-  } 
-  measure = x@Measure[j]
 
-  if (any(is.na(k))) {
-    k = names(x@Level)
+SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
+  
+  if (length(name) > 1) stop("Cannot access more than one value at a time. Use the `[` operator for multiple access.")
+  
+  if (name %in% slotNames(x)){
+    return (slot(x, name))
   }
   
-  if (class(k) == "character") {
-    k = match(k, LevelNames(x))
+  # First check to see if this corresponds to the name of a measure
+  if (name %in% MeasureNames(x)){
+    return (x@Data[, name])
+  } 
+  
+  if (name %in% LevelNames(x)) {
+    if (UniqueAttribute) {
+     return (x@Level[[name]]) 
+    } else {
+      return (x@Data[, name])
+    }
+  } 
+  
+  # The name is not a measure or level name. Check to see if it corresponds to one of the values in the Level list.
+  lst = x@Level
+  for (i in 1:length(lst)){
+    level = lst[[i]]
+    if (name %in% level){
+      df = x@Data[[names(lst)[i]]]
+      whichRows = (df == name)
+      df = x@Data[whichRows, ]
+      row.names(df) = NULL
+      lst[[i]] = name
+      sm = StaticMeasure(OriginPeriod = x@OriginPeriod, Level = lst, Measure = x@Measure, Data = df)
+      return(sm)
+    }
   }
-  level = LevelNames(x)[k]
   
-  df = as.data.frame(x)
-  keepCols = c("StartDate", "EndDate", "Moniker", level, measure)
-  df = df[df$StartDate %in% op$StartDate, keepCols]
+  if (name %in% x@OriginPeriod@Moniker){
+    df = x@Data[x@Data$Moniker == name, ]
+    row.names(df) = NULL
+    op = x@OriginPeriod[name]
+    sm = StaticMeasure(OriginPeriod = op, Level = x@Level, Measure = x@Measure, Data = df)
+    return(sm)
+  }
   
-  sm = StaticMeasure(op, measure, level, df)
-  sm
+  stop("Name does not correspond to any measure, level, level attribute or OriginPeriod moniker.")
+}
+
+#' The dollar sign will return a single element. The object returned depends on the character used with this method. MRMR will search
+#' through the object data as follows: it will first try to match against slot names. It will then try to match against MeasureNames. 
+#' If a match is found, that vector will be returned. It will then search through Level data. If the character is the name of a level, 
+#' the vector returned will be the attributes of that level. If the character is an attribute, then it will return a St*Measure object 
+#' with data for that single attribute. Finally, MRMR will attempt to match against the moniker for the OriginPeriod.
+#' 
+#' Example:
+#' sm$MyMeasure 
+#' Returns a vector of numeric data.
+#' 
+#' sm$State
+#' Returns a vector of the states which have been defined.
+#' 
+#' sm$CA
+#' Returns a St*Measure object for State == 'CA'.
+#' 
+#' sm$"AY 2004"
+#' Returns a St*Measure object for OriginPeriod == "AY 2004".
+#' @export
+setMethod("$", signature(x = "StaticMeasure"), function(x, name) {
+
+  SingleAccessStaticMeasure(x, name, FALSE)
+  
 })
 
-setMethod("[<-", signature(x = "StaticMeasure", value = "StaticMeasure"), definition=function(x, i, j, k, ..., value) {
+#' [[
+#' Double brackets will return a single element. When a character is passed, the behavior is identical to the `$` operator.
+#' When passing an integer index, MRMR will return a St*Measure object which corresponds to the first element in the Level list.
+#' 
+#' @export
+setMethod("[[", signature(x = "StaticMeasure"), function(x, i, UniqueAttribute=TRUE) {
   
-  if (j %in% MeasureNames) changeMeasure = TRUE
-  if (k %in% LevelNames) changeLevel = TRUE
+  if (class(i) == "numeric"){
+      i = x@Level[[i]]  
+  } 
   
-  if (changeMeasure & changeLevel) {
-    stop("Cannot set measures and levels simultaneously.")
+  SingleAccessStaticMeasure(x, i, UniqueAttribute)
+  
+})
+
+#' [
+#' Single brackets will return a set of St*Measure objects. 
+#' 
+#' At present, all Levels will be returned. There is not yet a mechanism to consolidate Levels.
+#' @export 
+setMethod("[", signature(x="StaticMeasure"), definition=function(x, i, j, OriginPeriod, drop=TRUE){
+
+  df = x@Data
+  op = x@OriginPeriod
+  
+  if(missing(i)) {
+    i = rep(TRUE, nrow(df))
   }
   
-  if (!changeMeasure & !changeLevel) {
-    stop("Must change either measure or level.")
-  }
-  
-  if (changeLevel) {
-    df = x@Level
-    df[, ]
-  }
-  # if the origin period is not specified, then return all of them
-  if (any(is.na(i))) {
-    i = 1:(length(x@OriginPeriod))
-  }
-  
-  op = x@OriginPeriod[i]
-  
-  if (any(is.na(j))) j = colnames(x@Measure)
-  
-  if (any(is.na(k))) {
-    level = data.frame(x@Level)
-    measureIndex = 1:(nrow(x@Level))
+  if (missing(j)) {
+    j = x@Measure
   } else {
-    if (is.character(k)) {
-      z = as.matrix(sapply(x@Level, function(y) y %in% k))
-      k = which(rowSums(z) != 0)  
+    whichCols = intersect(colnames(df), j)
+    if (length(whichCols) == 0){
+      stop ("Improper Measure specification. No columns returned.")
     }
-    
-    level = data.frame(x@Level[k, ])
-    measureIndex = k
+    whichCols = c(whichCols, LevelNames(x))
+    whichCols = c("StartDate", "EndDate", "Moniker", whichCols)
+    df = df[, whichCols]
   }
   
-  measureIndex = (measureIndex - 1) * length(x@OriginPeriod)
-  measureIndex = c(sapply(measureIndex, function(x) x + i))
-  measure = x@Measure[measureIndex, j, drop=FALSE]
+  if (!missing(OriginPeriod)){
+    op = x@OriginPeriod[OriginPeriod]
+    i = i & (df$Moniker %in% op$Moniker)
+  }
   
-  sm = StaticMeasure(op, measure, level)
-  x
+  df = df[i, drop]
+  
+  if (class(df) == "data.frame"){
+    sm = StaticMeasure(op, Level=LevelNames(x), Measure=j, Data=df)  
+    return (sm)
+  } else {
+    return (df)
+  }
+  
 })
 
 #' @export
-setMethod("$", signature(x = "StaticMeasure"), function(x, name) {
-  if (name %in% slotNames(x)){
-    slot(x, name)
-  } else if (name %in% MeasureNames(x)){
-    x@.data[, name]
-  } else if (name %in% LevelNames(x)) {
-    x@Level[[name]]
-  } else {
-    stop("Name does not correspond to any slot, level or measure.")
+setMethod("[<-", signature(x = "StaticMeasure"), definition=function(x, i, j, OriginPeriod, ..., value) {
+
+  df = x@Data
+  
+  if(missing(i)) {
+    i = rep(TRUE, nrow(df))
   }
-})
- 
-setMethod("$<-", signature(x = "StaticMeasure"), function(x, name, value) {
   
-  if (length(name) > 1) stop("Cannot assign more than one value at a time.")
+  op = x@OriginPeriod
+  if (!missing(OriginPeriod)){
+    i = i & (df$Moniker %in% op["AY 2004"]$Moniker)
+  }
   
-  if (name %in% slotNames(x)){
-    stop("Slot names may not be used as value names.")
-  } else if (name %in% MeasureNames(x)){
-    x@.data[name] = value
-  } else if (name %in% LevelNames(x)) {
-    x@Level[[name]] = value
-    x = StaticMeasure(OriginPeriod = x@OriginPeriod, Level = x@Level, Measure = MeasureNames(x), .data = x@.data)
+  if (missing(j)) {
+    j = c(MeasureNames(x), LevelNames(x))
   } else {
-    if (length(value) == nrow(x@.data)) {
-      x@.data = cbind(x@.data, value)
-      colnames(x@.data)[length(colnames(x@.data))] = name  
+    whichCols = intersect(colnames(df), j)
+    if (length(whichCols) == 0){
+      stop ("Improper column specification. Please ensure that the columns exist.")
     }
   }
+
+  df[i, whichCols] = value
   
-  x
+  sm = StaticMeasure(op, Level=LevelNames(x), Measure=MeasureNames(x), Data=df)  
+  
+})
+
+#' The dollar sign will assign to a single element. The object assigned depends on the character used with this method. MRMR will search
+#' through the object data as follows: it will first try to match against slot names. It will then try to match against MeasureNames. 
+#' If a match is found, that vector will be returned. It will then search through Level data. If the character is the name of a level, 
+#' the vector returned will be the attributes of that level. If the character is an attribute, then it will return a St*Measure object 
+#' with data for that single attribute. Finally, MRMR will attempt to match against the moniker for the OriginPeriod.
+#' 
+#' Example:
+#' sm$MyMeasure = myVector
+#' 
+#' sm$State = myVector
+#' 
+#' sm$CA = myStMeasure
+#' 
+#' sm$"AY 2004" = myStMeasure
+setMethod("$<-", signature(x = "StaticMeasure"), function(x, name, value) {
+  
+  if (length(name) > 1) stop("Cannot assign more than one value at a time. Use the `[` operator for multiple assignment.")
+  
+  # 1. Check to see if we're assigning a slot
+  if (name %in% slotNames(x)){
+    slot(x, name) = value
+    
+    return(x)
+  } 
+  
+  # 2. Next check to see if we're assigning a Measure
+  if (name %in% MeasureNames(x)){
+    x@Data[name] = value
+    
+    return(x)
+  }  
+  
+  # 3. Check if we're assigning a Level
+  if (name %in% LevelNames(x)) {
+#     if (length(value) != length(x@Level[[name]])) {
+#       stop ("Cannot assign Level of different length.")
+#     }
+    x@Data[name] = value
+    # We call the constructor so that the data frame will repopulate with the proper Level attributes.
+    x = StaticMeasure(OriginPeriod = x@OriginPeriod, Level = LevelNames(x), Measure = MeasureNames(x), Data = x@Data)
+    
+    return (x)
+  }
+
+#   # 4. Check to assign based on Level element
+#   lst = x@Level
+#   for (i in 1:length(lst)){
+#     level = lst[[i]]
+#     if (name %in% level){
+#       sm = x[Level != name]
+#       sm = c(sm, value)
+# 
+#       return(sm)
+# 
+#     }
+#   }
+#   
+#   # 5. Check to assign based on OriginPeriod
+#   if (name %in% x@OriginPeriod@Moniker){
+#     sm = x[OriginPeriod != name]
+#     sm = c(sm, value)
+#     
+#     return(sm)
+#     
+#   }
+  
+  # 6. This isn't a slot, it isn't a Level, it isn't a Level attribute and it isn't an OriginPeriod.
+  # Must be a new Measure
+  if (length(value) == nrow(x@Data)) {
+    x@Data = cbind(x@Data, value)
+    colnames(x@Data)[length(colnames(x@Data))] = name  
+    x@Measure = c(name, x@Measure)
+    
+    return(x)
+    
+  }
+  
+  # If we reach this point, something has gone wrong
+  stop("Unexpected assignment failure. Contact package author.")
+  return (NULL)
   
 })
 
@@ -346,7 +477,7 @@ setMethod("$<-", signature(x = "StaticMeasure"), function(x, name, value) {
 
 #' @export
 setMethod("as.data.frame", signature("StaticMeasure"), function(x, ...){
-  x@.data
+  x@Data
 })
 
 setMethod("as.formula", signature(object="StaticMeasure"), definition=function(object){
@@ -384,10 +515,10 @@ JoinStaticMeasureElements = function(elements){
   }
   levelNames = levelNames[[1]
                           ]
-  .data = lapply(elements, slot, ".data")
-  .data = do.call(rbind, .data)  
+  Data = lapply(elements, slot, "Data")
+  Data = do.call(rbind, Data)  
 
-  x = StaticMeasure(OriginPeriod = OriginPeriod, Measure=Measures, Level=levelNames, .data=.data)
+  x = StaticMeasure(OriginPeriod = OriginPeriod, Measure=Measures, Level=levelNames, Data=Data)
   x
 }
 
@@ -418,24 +549,19 @@ setMethod("c", signature(x="StaticMeasure"), definition=function(x, ...){
   sm
 })
 
-# Addition of a group may be done via rbind and c()
-# AddGroup = function(StaticMeasure, df){
+# setMethod("Grow", signature=c(object="StaticMeasure", Length="numeric"), definition=function(object, Length){
+#   op = Grow(object@OriginPeriod, Length)
 #   
-# }
-
-# Addition of a measure may be done via cbind
-# AddMeasure = function(StaticMeasure, df){
-#   
-# }
+#   sm = StaticMeasure()
+# })
 
 #************************************************************************************************************************
 # 8. Persistence ====
 
-#' @export
-setMethod("write.csv", signature=c(x="StaticMeasure"), definition=function(x, file, row.names){
-  df = as.data.frame(x)
-  write.csv(df, ...)
-})
+# setMethod("write.csv", signature=c(x="StaticMeasure"), definition=function(x, file, row.names){
+#   df = as.data.frame(x)
+#   write.csv(df, ...)
+# })
 
 #' @export
 setMethod("write.excel", signature=c(object = "StaticMeasure", file="character", overwrite="logical")
@@ -477,7 +603,7 @@ setMethod("write.excel", signature=c(object = "StaticMeasure", file="character",
 #' @export
 setMethod("plot", signature(x="StaticMeasure", y="missing"), definition = function(x, facetFormula, ...){
             
-  df = x@.data
+  df = x@Data
             
   mdf = melt(df, id.vars=c("StartDate", "EndDate", "Moniker", LevelNames(x)), measure.vars=MeasureNames(x))
   
