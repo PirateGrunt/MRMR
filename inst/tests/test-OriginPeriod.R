@@ -23,8 +23,8 @@ test_that("Construction", {
   x = OriginPeriod(startDates, Period=period)
   expect_true(is.OriginPeriod(x))
   
-  x = OriginPeriod(startDates, period)
-  expect_true(is.OriginPeriod(x))
+#   x = OriginPeriod(startDates, period)
+#   expect_true(is.OriginPeriod(x))
   
   x = OriginPeriod(startDates, endDates, Moniker=moniker)
   expect_true(is.OriginPeriod(x))
@@ -169,7 +169,7 @@ test_that("Persistence", {
   moniker =  paste0("AY ", as.character(year(startDates)))
   type = "Accident"
   
-  op = OriginPeriod(startDates, as.period(1, "years"), Moniker=moniker, Type=type)
+  op = OriginPeriod(startDates, Period=as.period(1, "years"), Moniker=moniker, Type=type)
   
   write.excel(op, "OriginPeriod.xlsx", overwrite=TRUE)
   
