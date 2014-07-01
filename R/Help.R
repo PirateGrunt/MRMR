@@ -22,6 +22,4 @@
 #' @docType package
 #' @name MRMR
 #' @aliases MRMR MRMR-package
-# @importFrom(plyr, daply)
-# @importFrom(plyr, dlply)
 NULL

@@ -10,9 +10,14 @@ Depends:
     ggplot2,
     lubridate,
     stats,
-    lmtest,
     methods,
-    plyr,
     XLConnect
 Suggests:
     testthat
+Collate:
+    'Help.R'
+    'NewGenerics.R'
+    'OriginPeriod.R'
+    'StaticMeasure.R'
+    'StochasticMeasure.R'
+    'Triangle.R'

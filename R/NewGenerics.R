@@ -6,7 +6,7 @@ setGeneric("Grow", def=function(object, Length, ...){
   standardGeneric("Grow")
 })
 
-setGeneric("MeasureNames", function(x, value){
+setGeneric("MeasureNames", function(x, value, ...){
   standardGeneric("MeasureNames")
 })
 

@@ -1,5 +1,6 @@
-#'
 #' OriginPeriod class
+#' 
+#' @include NewGenerics.R
 #' 
 #' @docType class
 #' 
@@ -29,6 +30,7 @@ NULL
 
 #**********************************************************************************************
 # 0. Helper functions ====
+
 MonthsBetween = function(StartDate, EndDate){
   diff = as.double(EndDate - StartDate)
   diff = round(diff / 30)
@@ -39,6 +41,11 @@ MeanMonths = function(Periods){
   z = month(Periods)
   z = mean(z)
   z = as.period(z, unit="months")
+}
+
+InferPeriod = function(StartDate, EndDate){
+  Period = MonthsBetween(StartDate, EndDate)
+  Period = MeanMonths(Period)
 }
 
 DefaultPeriod = function(){
@@ -102,124 +109,65 @@ setClass("OriginPeriod"
 
 #**********************************************************************************************
 # 2. Constructors ====
-setGeneric("OriginPeriod", function(StartDate , EndDate , Period, ...) {
+setGeneric("OriginPeriod", function(StartDate, EndDate, Period, ...) {
   standardGeneric("OriginPeriod")
 })
 
-# OriginPeriod = function(StartDate 
-#                         , EndDate 
-#                         , Period
-#                         , ...){
-#   stop("You must use a specific constructor method to create an OriginPeriod object. 
-#        Is it possible you forgot to provide a formal argument name? 
-#        For example, monikers and type must be explicity named in the function signature:
-#        OriginPeriod(start, end, Moniker=yourMoniker, Type=yourType")
-# }
-# 
-# setGeneric("OriginPeriod")
-
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "missing", EndDate = "missing", Period = "missing")
-          , function(StartDate, EndDate, Moniker, Type){
-            
-            if (missing(Moniker)) {Moniker = character()}
-            if (missing(Type)) {Type = character()}
-            
-            op = new("OriginPeriod"
-                     , StartDate = as.Date("1900/1/1")
-                     , EndDate = as.Date("1900/1/1")
-                     , Period = period(0)
-                     , Moniker = Moniker
-                     , Type = Type)
-            op
-})
-
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "Date", Period = "Period")
-          , function(StartDate, EndDate, Period, Type, Moniker){
+#' @export
+#' 
+setMethod("OriginPeriod", signature=c(StartDate="ANY", EndDate="ANY", Period="ANY")
+          , definition = function(StartDate, EndDate, Period, Moniker, Type, Verbose=FALSE, NumPeriods, StartMonth, StartDay){
             
             if (missing(Type)) {Type = character()}
             
-            if (length(StartDate) != 1){
-              warning("Calling standard constructor with StartDate and EndDate vectors. Period will be ignored.")
-              op = OriginPeriod(StartDate, EndDate)
-              return (op)
-            }
-            
-            # Very lazy way of working with periods
-            daysBetween = difftime(EndDate, StartDate, units="days")
-            periodsBetween = suppressMessages(daysBetween / (Period / days(1)))
-            periodsBetween = floor(as.numeric(periodsBetween))
-            
-            StartDate = StartDate + Period * (0:(periodsBetween-1))
-            
-            if (StartDate[periodsBetween] < EndDate) StartDate[periodsBetween+1] = StartDate[periodsBetween]+Period
-            
-            EndDate = StartDate + Period - days(1)
-            
-            if (missing(Moniker)) {Moniker = DefaultMoniker(StartDate)}
-            op = new("OriginPeriod"
-                     , StartDate = StartDate
-                     , EndDate = EndDate
-                     , Period = Period
-                     , Moniker = Moniker
-                     , Type = Type)
-            op
-})
-
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "missing", Period = "missing")
-          , function(StartDate, EndDate, Moniker, Type, Verbose=FALSE){
-            
-            if (missing(Moniker)) {
-              Moniker = DefaultMoniker(StartDate)
-              if (Verbose) warning("No Moniker has been specified. Defaulting to a blank Moniker.")
-            }
-            if (missing(Type)) {Type = character()}
-            
-            Period = DefaultPeriod()
-            EndDate = StartDate + Period - days(1)
-            
-            op = new("OriginPeriod"
-                     , StartDate = StartDate
-                     , EndDate = EndDate
-                     , Period = Period
-                     , Moniker = Moniker
-                     , Type = Type)
-            op
-})
-
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "Date", Period = "missing")
-          , definition=function(StartDate, EndDate, Moniker, Type, Verbose=FALSE){
-            
-            if(length(StartDate) != length(EndDate)){ stop("Start and end dates are not of equal length") }
-            if (missing(Moniker)) {
-              Moniker = DefaultMoniker(StartDate)
-              if (Verbose) warning("No Moniker has been specified. Defaulting to a blank Moniker.")
-            }
-            if (missing(Type)) {Type = character()}
-            
-            Period = MonthsBetween(StartDate, EndDate)
-            Period = MeanMonths(Period)
-            
-            op = new("OriginPeriod"
-                     , StartDate = StartDate
-                     , EndDate = EndDate
-                     , Period = Period
-                     , Moniker = Moniker
-                     , Type = Type)
-  op
-})
-
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "missing", Period = "Period")
-          , definition=function(StartDate, Period, Moniker, Type, Verbose=FALSE, NumPeriods){
-            
-            if (missing(Type)) {Type = character()}
-            
-            if(length(StartDate) == 1){
-              StartDate = StartDate + Period * (0:(NumPeriods-1))
+            if (class(StartDate) == "Date") {
+              if (missing(Period)) {
+                if (missing(EndDate)){
+                  # Missing Period and EndDate. We'll construct using the default period.
+                  Period = DefaultPeriod()
+                } else {
+                  # Period is missing, but we have EndDate. We can infer the period based on the months
+                  # between StartDate and EndDate
+                  Period = InferPeriod(StartDate, EndDate)
+                }
+              } else { # Period is present
+                if (missing(EndDate)) {
+                  # This is a special case. The StartDate and Period are present. User has only given one element
+                  # for the StartDate and has also given an argument for the NumPeriods. We'll grow the StartDate
+                  # vector accordingly. Otherwise, we'll drop out and accept that this is an OriginPeriod with 
+                  # only one date.
+                  if (length(StartDate) == 1 & !missing(NumPeriods)){
+                    StartDate = StartDate + Period * (0:(NumPeriods-1))
+                  }
+                } else {
+                  # StartDate, EndDate and Period are all here. This means one of two things:
+                  #     1. The user wants a single element from StartDate and EndDate to signify the first and 
+                  #        last dates which have a common Period between them.
+                  #     2. Otherwise, it means that the user has passed in a superfluous Period argument.
+                  if (length(StartDate) == 1){
+                    # Estimate the number of elements between StartDate and EndDate
+                    # Very lazy way of working with periods
+                    daysBetween = difftime(EndDate, StartDate, units="days")
+                    periodsBetween = suppressMessages(daysBetween / (Period / days(1)))
+                    periodsBetween = floor(as.numeric(periodsBetween))
+                    
+                    StartDate = StartDate + Period * (0:(periodsBetween-1))
+                    
+                    if (StartDate[periodsBetween] < EndDate) StartDate[periodsBetween+1] = StartDate[periodsBetween]+Period
+                    
+                  } else {
+                    if (verbose) warning("Calling standard constructor with StartDate and EndDate vectors. Period will be ignored.")
+                    Period = InferPeriod(StartDate, EndDate)
+                  }
+                } # Check missing period
+              } # class(StartPeriod == "Date")
+            } else if (class(StartDate) == "integer") {
+              if(missing(StartMonth)) {StartMonth = 1}
+              if(missing(StartDay)) {StartDay = 1}
+              
+              StartDate = ymd(paste(StartDate, StartMonth, StartDay, sep="/"))
+              StartDate = as.Date(StartDate)
+              if(missing(Period)) Period = DefaultPeriod()
             }
             
             EndDate = StartDate + Period - days(1)
@@ -238,48 +186,18 @@ setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "missing", P
             op
 })
 
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "Period", Period = "missing")
-          , definition=function(StartDate, EndDate, Moniker, Type, Verbose=FALSE){
-            
-            # This is perverse, but necessary. R will match arguments based on position first, then
-            # by name. If a user passes in two un-named arguments, the second of which is class= Period,
-            # We have to match by indicating that the second argument- named EndDate in the generic
-            # signature- is a period. We must instantly swap Period and EndDate to return to normal.
-            if (missing(Moniker)) {
-              Moniker = DefaultMoniker(StartDate)
-              if (Verbose) warning("No Moniker has been specified. Defaulting to a blank Moniker.")
-            }
-            if (missing(Type)) {Type = character()}
-            op = OriginPeriod(StartDate, Period=EndDate, Moniker=Moniker, Type=Type)
-})
+# setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "Date", Period = "Period")
+#           , function(StartDate, EndDate, Period, Type, Moniker){
 
-#' @export 
-setMethod("OriginPeriod", signature=c(StartDate = "integer", EndDate = "missing", Period = "missing")
-          , definition=function(StartDate, Moniker, Type, StartDay, StartMonth, Verbose=FALSE){
-            
-            if(missing(StartMonth)) {StartMonth = 1}
-            if(missing(StartDay)) {StartDay = 1}
-            
-            StartDate = ymd(paste(StartDate, StartMonth, StartDay, sep="/"))
-            StartDate = as.Date(StartDate)
-            Period = DefaultPeriod()
-            EndDate = StartDate + Period - days(1)
-            
-            if (missing(Moniker)) {
-              Moniker = DefaultMoniker(StartDate)
-              if (Verbose) warning("No Moniker has been specified. Defaulting to a blank Moniker.")
-            }
-            if (missing(Type)) {Type = character()}
-            
-            op = new("OriginPeriod"
-                     , StartDate = StartDate
-                     , EndDate = EndDate
-                     , Period = Period
-                     , Moniker = Moniker
-                     , Type = Type)
-            op
-})
+# setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "Date", Period = "missing")
+#           , definition=function(StartDate, EndDate, Moniker, Type, Verbose=FALSE){
+ 
+# setMethod("OriginPeriod", signature=c(StartDate = "Date", EndDate = "missing", Period = "Period")
+#           , definition=function(StartDate, Period, Moniker, Type, Verbose=FALSE, NumPeriods){
+#             
+# setMethod("OriginPeriod", signature=c(StartDate = "integer", EndDate = "missing", Period = "missing")
+#           , definition=function(StartDate, Moniker, Type, ){
+
 
 #**********************************************************************************************
 # 3. Properties ====
