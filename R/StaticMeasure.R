@@ -97,15 +97,12 @@ SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
   
   if (length(name) > 1) stop("Cannot access more than one value at a time. Use the `[` operator for multiple access.")
   
+  # 1. Is it a slot?
   if (name %in% slotNames(x)){
     return (slot(x, name))
   }
   
-  # First check to see if this corresponds to the name of a measure
-  if (name %in% MeasureNames(x)){
-    return (x@Data[, name])
-  } 
-  
+  # 2. Is it a LevelName?
   if (name %in% LevelNames(x)) {
     if (UniqueAttribute) {
       return (x@Level[[name]]) 
@@ -114,6 +111,13 @@ SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
     }
   } 
   
+  # 3. Is it a data column?
+  # First check to see if this corresponds to the name of a column
+  if (name %in% colnames(x@Data)){
+    return (x@Data[, name])
+  } 
+  
+  # 4. Is it an element of one of the levels?
   # The name is not a measure or level name. Check to see if it corresponds to one of the values in the Level list.
   lst = x@Level
   for (i in 1:length(lst)){
@@ -129,6 +133,7 @@ SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
     }
   }
   
+  # 5. Are we looking for an OriginPeriod?
   if (name %in% x@OriginPeriod@Moniker){
     df = x@Data[x@Data$Moniker == name, ]
     row.names(df) = NULL
@@ -137,7 +142,7 @@ SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
     return(sm)
   }
   
-  stop("Name does not correspond to any measure, level, level attribute or OriginPeriod moniker.")
+  stop("Name does not correspond to any slot, level, level attribute, data column or OriginPeriod moniker.")
   
 }
 
@@ -589,10 +594,26 @@ setMethod("c", signature(x="StaticMeasure"), definition=function(x, ...){
   sm
 })
 
-# setMethod("Grow", signature=c(object="StaticMeasure", Length="numeric"), definition=function(object, Length){
-#   op = Grow(object@OriginPeriod, Length)
-#   
-#   sm = StaticMeasure()
+# setMethod("Grow", signature=c(object="StaticMeasure", Length="numeric")
+#           , definition=function(object, Length, newdata, OriginPeriodSort){
+#             
+#             op = Grow(object@OriginPeriod, Length)
+#             
+#             if (missing(OriginPeriodSort)) OriginPeriodSort = "StartDate"
+#             colnames(df)[colnames(df) == OriginPeriodSort] = "StartDate"
+#             
+#             if (missing(newdata)) {
+#               
+#             } else {
+#               newdata = newdata[, colnames(newdata) %in% colnames(sm@Data)]
+#             }
+#             
+#             newdata = rbind(sm@Data, newdata)
+#             
+#             sm = StaticMeasure(OriginPeriod = op
+#                                , Measure = sm@Measure
+#                                , Level = sm@Level
+#                                , Data = newdata)
 # })
 
 #************************************************************************************************************************
@@ -676,9 +697,9 @@ setMethod("plot", signature(x="StaticMeasure", y="missing")
     facetRow = length(unique(mdf[, facetCols]))
     FacetRow = floor(sqrt(facetRow)) + 1
     
-    plt = plt + facet_wrap(FacetFormula, facetRow)  
+    plt = plt + facet_wrap(FacetFormula, facetRow, scales="free")  
   } else {
-    plt = plt + facet_grid(FacetFormula)
+    plt = plt + facet_grid(FacetFormula, scales="free")
   }
   
   plt

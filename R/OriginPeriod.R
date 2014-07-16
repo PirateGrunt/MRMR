@@ -1,5 +1,6 @@
 #' OriginPeriod class
 #' 
+#' @include HelperFunctions.R
 #' @include NewGenerics.R
 #' 
 #' @docType class
@@ -384,7 +385,7 @@ setMethod("c", signature(x="OriginPeriod"), function(x, ...){
 })
 
 #' @export
-setMethod("Grow", signature=c(object="OriginPeriod", Length="numeric"), definition=function(object, Length){
+setMethod("Grow", signature=c(object="OriginPeriod"), definition=function(object, Length){
   startDates = max(object@StartDate)  + object@Period * (1:Length)
   moniker = paste("New moniker", (1:Length))
   op = OriginPeriod(StartDate = startDates, Type=object@Type, Period=object@Period, Moniker=moniker)

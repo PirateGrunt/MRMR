@@ -9,10 +9,10 @@ URL = paste0(URL.stem, "wkcomp_pos.csv")
 dfWC = read.csv(URL, stringsAsFactors=FALSE)
 
 NewColnames = c("GroupCode"
-             , "GroupName"
+             , "Company"
              , "AccidentYear"
              , "DevelopmentYear"
-             , "DevelopmentLag"
+             , "Lag"
              , "CumulativeIncurred"
              , "CumulativePaid"
              , "IBNR"
@@ -27,21 +27,22 @@ colnames(dfWC) = NewColnames
 rm(URL.stem, URL, NewColnames)
 
 # Fetch the top 10 insurers
-TenPPA = aggregate(dfPPA$NetEP, by=list(dfPPA$GroupName), sum)
-TenPPA = TenPPA[order(TenPPA[,2], decreasing=TRUE), ]
-TenPPA = TenPPA[1:10, 1]
+TopPPA = aggregate(dfPPA$NetEP, by=list(dfPPA$Company), sum)
+TopPPA = TopPPA[order(TopPPA[,2], decreasing=TRUE), ]
+TopPPA = TopPPA[1:20, 1]
 
-TenWC = aggregate(dfWC$NetEP, by=list(dfWC$GroupName), sum)
-TenWC = TenWC[order(TenWC[,2], decreasing=TRUE), ]
-TenWC = TenWC[1:10, 1]
+TopWC = aggregate(dfWC$NetEP, by=list(dfWC$Company), sum)
+TopWC = TopWC[order(TopWC[,2], decreasing=TRUE), ]
+TopWC = TopWC[1:20, 1]
 
-companies = intersect(TenWC, TenPPA)
+companies = intersect(TopWC, TopPPA)
+companies = companies[companies != "State Farm Mut Grp"]
 
-rm(TenPPA, TenWC)
-dfSubPPA = subset(dfPPA, GroupName %in% companies)
+rm(TopPPA, TopWC)
+dfSubPPA = subset(dfPPA, Company %in% companies)
 dfSubPPA$Line = "Personal Auto"
 
-dfSubWC = subset(dfWC, GroupName %in% companies)
+dfSubWC = subset(dfWC, Company %in% companies)
 dfSubWC$Line = "Workers Comp"
 
 # Form the OriginPeriod
@@ -53,43 +54,61 @@ op = OriginPeriod(StartDate = as.Date(paste0(min(ay),"-01-01"))
                   , Moniker = paste("AY", ay))
 
 rm(ay)
+
+save(dfPPA, dfSubPPA, dfSubWC, dfWC, companies, op, file = "./data/NAIC.rda")
+
+load("./data/NAIC.rda")
+
 # Form a StaticMeasure
 smPPA = StaticMeasure(OriginPeriod = op
-                   , Level=list(GroupName=companies, Line="PPA")
+                   , Level=list(Company=companies, Line="PPA")
                    , Measure=c("DirectEP", "NetEP")
-                   , Data=dfSubPPA[dfSubPPA$DevelopmentLag == 1, ])
+                   , Data=dfSubPPA[dfSubPPA$Lag == 1, ])
 
 smWC = StaticMeasure(OriginPeriod = op
-                      , Level=list(GroupName=companies, Line="WC")
+                      , Level=list(Company=companies, Line="WC")
                       , Measure=c("DirectEP", "NetEP")
-                      , Data=dfSubWC[dfSubWC$DevelopmentLag == 1, ])
+                      , Data=dfSubWC[dfSubWC$Lag == 1, ])
 
 smMulti = c(smPPA, smWC)
+save(smPPA, smWC, smMulti, file="./data/smMulti.rda")
+load("./data/smMulti.rda")
 
 # Form a StochasticMeasure
 scmWC = StochasticMeasure(OriginPeriod = op
-                        , Level=list(GroupName=companies)
-                        , Measure = c("CumulativeIncurred", "CumulativePaid")
+                        , Level=list(Company=companies
+                                     , Line="WC")
+                        , Measure = c("CumulativeIncurred"
+                                      , "CumulativePaid")
                         , DevPeriod = as.period(1, "year")
-                        , DevIntervals = 1:10
-                        , Cumulative=TRUE
+                        , Lags=1:10
                         , Data=dfSubWC
                         , OriginPeriodSort = "AccidentYear"
-                        , DevIntervalSort = "DevelopmentLag")
+                        , EvaluationDates=seq.Date(
+                          as.Date("1988-12-31")
+                          , as.Date("2006-12-31"), by="1 year"))
 
 scmPPA = StochasticMeasure(OriginPeriod = op
-                          , Level=list(GroupName=companies)
-                          , Measure = c("CumulativeIncurred", "CumulativePaid")
-                          , DevPeriod = as.period(1, "year")
-                          , DevIntervals = 1:10
-                          , Cumulative=TRUE
-                          , Data=dfSubPPA
-                          , OriginPeriodSort = "AccidentYear"
-                          , DevIntervalSort = "DevelopmentLag")
+                           , Level=list(Company=companies, Line="PPA")
+                           , Measure = c("CumulativeIncurred", "CumulativePaid")
+                           , DevPeriod = as.period(1, "year")
+                           , Data=dfSubPPA
+                           , Lags=1:10
+                           , OriginPeriodSort = "AccidentYear"
+                           , FirstEvaluationDate=as.Date("1988-12-31")
+                           , LastEvaluationDate=as.Date("2006-12-31"))
 
 scmMulti = c(scmWC, scmPPA)
+scmMulti = rbind(scmWC, scmPPA)
+
+save(scmWC, scmPPA, scmMulti, file="./data/scmMulti.rda")
+load("./data/scmMulti.rda")
 
 # Form a triangle
 triWC = Triangle(smWC, scmWC, "Workers Comp Triangle")
+triPPA = Triangle(smPPA, scmPPA, "Personal Auto Triangle")
+triMulti = c(triWC, triPPA)
+triMulti = Triangle(smMulti, scmMulti, "Multi-line triangle")
 
-triMulti = Triangle(smMulti, scmMulti, "Multiline NAIC data")
+save(triWC, triPPA, triMulti, file="./data/triMulti.rda")
+load("./data/triMulti.rda")

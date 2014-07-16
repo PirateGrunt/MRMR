@@ -49,45 +49,53 @@ checkTriangle = function(object)
 setClass("Triangle"
          , representation(StaticMeasure="StaticMeasure"
                           , StochasticMeasure="StochasticMeasure"
-                          , Name="character"
-                          , Data="data.frame")
+                          , Name="character")
+#                          , Data="data.frame")
          , validity = checkTriangle
 )
 
 #************************************************************************************************************************
 # 2. Construction ====
 
-setGeneric("Triangle", function(StaticMeasure, StochasticMeasure, Name, ...) {
+setGeneric("Triangle", function(StaticMeasure, StochasticMeasure, ...) {
   standardGeneric("Triangle")
 })
 
 #' @export
 setMethod("Triangle", signature=c(StaticMeasure="StaticMeasure"
-                                  , StochasticMeasure="StochasticMeasure"
-                                  , Name="character")
-          , definition=function(StaticMeasure="StaticMeasure"
-                                , StochasticMeasure="StochasticMeasure"
-                                , Name="character"){
+                                  , StochasticMeasure="StochasticMeasure")
+          , definition=function(StaticMeasure
+                                , StochasticMeasure
+                                , Name){
+            
+            if (missing(Name)) Name = "Please give me a name"
             
             # TODO: Add checks to ensure that Static and Stochastic Measures are compatible
             
-            df = merge(as.data.frame(StochasticMeasure), as.data.frame(StaticMeasure))
+#            if (nrow(df) == 0) warning("No data was matched between the Static and Stochastic measures.")
+            
             tri = new("Triangle"
                       , StaticMeasure=StaticMeasure
                       , StochasticMeasure=StochasticMeasure
-                      , Name=Name
-                      , Data=df)
+                      , Name=Name)
             
 })
 #************************************************************************************************************************
 # 3. Properties ====
+
+#' @export
+StochasticMeasureNames = function(x, Stem=TRUE){
+  MeasureNames(x@StochasticMeasure, Stem=Stem)
+}
+
+#' @export
+StaticMeasureNames = function(x){
+  MeasureNames(x@StaticMeasure)
+}
+
 #' @export
 setMethod("MeasureNames", signature(x="Triangle"), definition=function(x, Stem=TRUE){
-  if (Stem){
-    strNames = c(MeasureNames(x@StaticMeasure), MeasureNames(x@StochasticMeasure, Stem=TRUE))
-  } else {
-    strNames = c(MeasureNames(x@StaticMeasure), MeasureNames(x@StochasticMeasure, Stem=FALSE))
-  }
+  strNames = c(MeasureNames(x@StaticMeasure), MeasureNames(x@StochasticMeasure, Stem=Stem))
   
   strNames
   
@@ -101,7 +109,66 @@ setMethod("LevelNames", signature(x="Triangle"), definition=function(x){
 
 #************************************************************************************************************************
 # 4. Accessors ====
+#' @export
+setMethod("$", signature(x = "Triangle"), function(x, name) {
+  if (length(name) > 1) stop("Cannot access more than one value at a time. Use the `[` operator for multiple access.")
+  
+  scm = x@StochasticMeasure
+  
+  # 1. Is it a slot?
+  if (name %in% slotNames(x)){
+    return (slot(x, name))
+  }
+  
+  # 2. Is it a LevelName?
+  if (name %in% LevelNames(x)) {
+    return (scm@Data[, name])
+  } 
+  
+  # 3. Is it a StochasticMeasure column?
+  dfSCM = scm@Data
+  if (name %in% colnames(dfSCM)){
+    return (dfSCM[, name])
+  }
+  
+})
 
+#' @export
+setMethod("[", signature(x="Triangle"), definition=function(x, i, j, drop=TRUE){
+  
+  scm = x@StochasticMeasure
+  scm = scm[i, ]
+  
+  sm = x@StaticMeasure
+  scmCore = scm@Data
+  scmCore = scmCore[, c("StartDate", LevelNames(scm))]
+  scmCore = unique(scmCore)
+  dfSM = merge(sm@Data, scmCore)
+  sm = StaticMeasure(scm$OriginPeriod, MeasureNames(sm), LevelNames(sm), dfSM)
+
+  tri = Triangle(sm, scm, x@Name)
+})
+
+#' @export 
+setMethod("UpperTriangle", signature(object="Triangle"), definition=function(object){
+  # The upper triangle is all observations on or before the first evaluation for the most recent element of the OriginPeriod 
+  #scm = UpperTriangle(x@StochasticMeasure)
+  evalDate = object$EvaluationDate[object$StartDate == max(object$StartDate)]
+  tri = object[object$EvaluationDate <= min(evalDate)]
+  tri
+})
+
+#' @export
+setMethod("LatestDiagonal", signature(object="Triangle"), definition=function(object){
+  tri = object[object$EvaluationDate == max(object$EvaluationDate)]
+  tri
+})
+
+setMethod("Diagonal", signature(object="Triangle", EvaluationDate="ANY")
+          , definition=function(object, EvaluationDate){
+            tri = object[object$EvaluationDate == EvaluationDate]
+            tri
+})
 #************************************************************************************************************************
 # 5. Comparison ====
 
@@ -109,15 +176,15 @@ setMethod("LevelNames", signature(x="Triangle"), definition=function(x){
 # 6. Conversion ====
 #' @export
 setMethod("as.data.frame", signature("Triangle"), function(x, ...){
-  x@Data
+  df = merge(as.data.frame(x@StochasticMeasure), as.data.frame(x@StaticMeasure), sort=FALSE)
+  df
 })
 
 #' @export
 melt.Triangle = function(data){
-  df = data@Data
-#  measure = MeasureNames(data, Stem=FALSE)
-  mdf = melt(df, id.vars=c("StartDate", "EndDate", "Moniker", "EvaluationDate", "DevIntervals", LevelNames(data))
-             #             , measure.vars=c(IncrementalMeasureNames(measure), CumulativeMeasureNames(measure), PriorMeasureNames(measure))
+#  df = data@Data
+  df = as.data.frame(data)
+  mdf = melt(df, id.vars=c("StartDate", "EndDate", "Moniker", "EvaluationDate", "Lag", LevelNames(data))
              , variable.name="Measure")
   mdf
 }
@@ -151,22 +218,20 @@ setMethod("plot", signature(x="Triangle", y="missing")
           , definition = function(x
                                   , Response
                                   , Predictor
-                                  , Group = "Moniker"
+                                  , Group = "Lag"
                                   , FitLines = FALSE
                                   , IncludeIntercept = FALSE
-                                  , FacetFormula
-                                  , plotTitle
-                                  , xlab
-                                  , ylab){
+                                  , FacetFormula){
+            df = as.data.frame(x)
+            df = df[!is.na(df[Predictor]), ]
             
-            if (missing(Group)) Group = "Moniker"
+            if (missing(Group)){
+              Group = "Lag"
+              df$Lag = as.factor(df$Lag)
+            } 
             
-            mdf = melt(x)
-            
-            #plotTitle = paste0(Response, " by ", Predictor, " grouped by ", Group)
-            
-            plt = ggplot(mdf, aes_string(x = Predictor, y = Response, group = Group, colour = Group)) 
-            plt = plt + geom_point() + xlab(Predictor) + ylab(Response)
+            plt = ggplot(df, aes_string(x = Predictor, y = Response, group = Group, colour = Group)) 
+            plt = plt + geom_point()
             
             if (FitLines){
               if (IncludeIntercept){
@@ -174,7 +239,21 @@ setMethod("plot", signature(x="Triangle", y="missing")
               } else {
                 plt = plt + stat_smooth(method = lm, se = FALSE, formula=y~0+x)
               }
-            } 
+            }
+            
+            if (missing(FacetFormula)){
+              facetCols = LevelNames(x)
+              
+              FacetFormula = paste(facetCols, collapse="+")
+              FacetFormula = as.formula(paste("~", FacetFormula))
+              
+              facetRow = length(unique(df[, facetCols]))
+              facetRow = floor(sqrt(facetRow)) + 1
+              
+              plt = plt + facet_wrap(FacetFormula, facetRow, scales="free")  
+            } else {
+              if (FacetFormula != "none") plt = plt + facet_grid(FacetFormula, scales="free")
+            }
             
             plt
 })

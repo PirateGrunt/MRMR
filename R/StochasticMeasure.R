@@ -1,8 +1,8 @@
 #' StochasticMeasure class
 #'
+#' @include HelperFunctions.R
 #' @include NewGenerics.R
 #' @include OriginPeriod.R
-#' 
 #' 
 #' @docType class
 #' 
@@ -48,13 +48,21 @@ NULL
 
 #************************************************************************************************************************
 # 0. Helpers ====
-StochasticKernelDataFrame = function(op, levels, devIntervals){
+StochasticKernelDataFrame = function(op, levels, EvalDates, Lags, DevPeriod){
   op = as.data.frame(op)
   op = op[, c("StartDate", "EndDate", "Moniker")]
   
-  levels$DevIntervals = devIntervals
+  levels$EvaluationDate = EvalDates
+#  levels$Lag = Lags
   df = merge(op, expand.grid(levels, stringsAsFactors=FALSE))
-  df = OrderStochasticMeasureData(df, "Moniker", "DevIntervals", levels)
+  
+  df = subset(df, EvaluationDate > StartDate)
+  
+  df$Lag = GetLags(df, DevPeriod)
+  df = subset(df, Lag %in% Lags)
+  df = subset(df, Lag >= 1)
+  
+#   df = OrderStochasticMeasureData(df, "Moniker", "EvaluationDate", levels)
   df
 }
 
@@ -64,14 +72,17 @@ OrderStochasticMeasureData = function(df, opSort, devSort, levels){
   df
 }
 
-GetEvaluationDates = function(df, period){
-  EvaluationDate = df$StartDate + df$DevIntervals * period - days(1)
-  EvaluationDate
-}
-
-GetDevIntervals = function(df, EvalDates, period){
-  devIntervals = (EvalDates + days(1) - df$StartDate) / period
-  devIntervals
+# GetEvaluationDates = function(df, period){
+#   EvaluationDate = df$StartDate + df$Lag * period - days(1)
+#   EvaluationDate
+# }
+# 
+GetLags = function(df, period){
+  Lags = difftime(df$EvaluationDate, df$StartDate, units="days")
+  Lags = suppressMessages(Lags / (period / days(1)))
+  Lags = round(Lags)
+  Lags = as.integer(Lags)
+  Lags
 }
 
 CumulativeMeasureNames = function(Measure){
@@ -85,26 +96,36 @@ IncrementalMeasureNames = function(Measure){
 }
 
 PriorMeasureNames = function(Measure){
+  Measure = CleanStochasticMeasure(Measure)
   paste0("PriorCumulative", Measure)
 }
 
 CleanStochasticMeasure = function(Measure){
   Measure = gsub("*cumulative*", "", Measure, ignore.case = TRUE)
   Measure = gsub("*incremental*", "", Measure, ignore.case = TRUE)
+  Measure = gsub("*prior*", "", Measure, ignore.case = TRUE)
   Measure = unique(Measure)
 }
 
-CreatePriors = function(df, Measure)
+CreatePriors = function(df, Level, Measure)
 {
   cumulCols = CumulativeMeasureNames(Measure)
   incrCols = IncrementalMeasureNames(Measure)
+  priorCols = PriorMeasureNames(Measure)
   
   priors = df[cumulCols] - df[incrCols]
+  colnames(priors) = priorCols
+  df = cbind(df, priors)
   
-  priors[df$DevIntervals == min(df$DevIntervals), ] = NA
+  lstDF = split(df, f = df[, c("StartDate", names(Level))], drop=FALSE)
+  lstDF = lapply(lstDF, function(x){
+    x[x$EvaluationDate == min(x$EvaluationDate), priorCols] = NA
+    x
+  })
+  df = do.call("rbind", lstDF)
   
-  colnames(priors) = PriorMeasureNames(Measure)
-  
+  df = OrderStochasticMeasureData(df, "StartDate", "Lag", Level)
+  priors = df[priorCols]
   priors
 
 }
@@ -127,7 +148,7 @@ CreateCumulative = function(df, Level, Measure)
     names(cumulatives) = cumulCols
     x = cbind(x, cumulatives)
   })
-  df = do.call("rbind", lOriginYear)
+  df = do.call("rbind", lstDF)
   row.names(df) = NULL
   
   df
@@ -167,6 +188,69 @@ CreateIncrementals = function(df, Level, Measure)
   
 }
 
+SingleAccessStochasticMeasure = function(x, name, UniqueAttribute=FALSE){
+  
+  if (length(name) > 1) stop("Cannot access more than one value at a time. Use the `[` operator for multiple access.")
+  
+  # 1. Is it a slot?
+  if (name %in% slotNames(x)){
+    return (slot(x, name))
+  }
+  
+  # 2. Is it a LevelName?
+  if (name %in% LevelNames(x)) {
+    if (UniqueAttribute) {
+      return (x@Level[[name]]) 
+    } else {
+      return (x@Data[, name])
+    }
+  } 
+  
+  # 3. Is it a data column?
+  # First check to see if this corresponds to the name of a measure
+  if (name %in% colnames(x@Data)){
+    return (x@Data[, name])
+  } 
+  
+  # 4. Is it an element of one of the levels?
+  # The name is not a measure or level name. Check to see if it corresponds to one of the values in the Level list.
+  lst = x@Level
+  for (i in 1:length(lst)){
+    level = lst[[i]]
+    if (name %in% level){
+      df = x@Data[[names(lst)[i]]]
+      whichRows = (df == name)
+      df = x@Data[whichRows, ]
+      row.names(df) = NULL
+      lst[[i]] = name
+      sm = StochasticMeasure(OriginPeriod = x@OriginPeriod
+                             , Level = lst
+                             , Measure = x@Measure
+                             , DevPeriod = x@DevPeriod
+                             , EvaluationDates = df$EvaluationDate
+                             , Data = df)
+      return(sm)
+    }
+  }
+  
+  # 5. Are we looking for an OriginPeriod?
+  if (name %in% x@OriginPeriod@Moniker){
+    df = x@Data[x@Data$Moniker == name, ]
+    row.names(df) = NULL
+    op = x@OriginPeriod[name]
+    sm = StochasticMeasure(OriginPeriod = op
+                           , Level = lst
+                           , Measure = CumulativeMeasureNames(x@Measure)
+                           , DevPeriod = x@DevPeriod
+                           , EvaluationDates = df$EvaluationDate
+                           , Data = df)
+    return(sm)
+  }
+  
+  stop("Name does not correspond to any slot, level, level attribute, data column or OriginPeriod moniker.")
+  
+}
+
 #************************************************************************************************************************
 # 1. Class Definition ====
 #' @export
@@ -183,24 +267,28 @@ checkStochasticMeasure = function(object)
 
 setClass("StochasticMeasure"
          , representation(OriginPeriod = "OriginPeriod"
-                          , Measure = "character"
                           , Level = "list"
+                          , Measure = "character"
                           , DevPeriod = "Period"
-                          , DevIntervals = "integer"
+#                          , EvaluationDates = "Date"
                           , Data = "data.frame")
 )
 #************************************************************************************************************************
 # 2. Construction ====
-setGeneric("StochasticMeasure", function(OriginPeriod, Measure, Level, DevPeriod, DevIntervals, Data, ...) {
+setGeneric("StochasticMeasure", function(OriginPeriod, Level, Measure, DevPeriod, EvaluationDates, Data, ...) {
   standardGeneric("StochasticMeasure")
 })
 
+# 
+
 #' @export
 setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
-          , definition=function(OriginPeriod, Measure, Level, DevPeriod, DevIntervals, Data
+          , definition=function(OriginPeriod, Level, Measure, DevPeriod, EvaluationDates, Data
+                                , Lags
+                                , Cumulative=TRUE
                                 , FirstEvaluationDate, LastEvaluationDate
-                                , OriginPeriodSort, DevIntervalSort
-                                , Cumulative=TRUE){
+                                , OriginPeriodSort="StartDate"
+                                , LagSort="Lag"){
             
             # 0. See if we can run
             if (missing(Level)) {
@@ -210,6 +298,9 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
             if (missing(DevPeriod)) {
               stop("Cannot create a StochasticMeasure object without knowing the development period.")
             }
+            
+            if (missing(OriginPeriodSort)) OriginPeriodSort = "StartDate"
+            if (missing(LagSort)) LagSort = "Lag"
             
             # 1. Clean up Level attributes
             if (!missing(Data) & class(Level) == "character") {
@@ -231,7 +322,6 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
             }
             
             # 2. Clean up measures
-            
             if (missing(Measure)) {
               Measure = character()
             } else if(class(Measure) != "character"){
@@ -246,7 +336,24 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
             }
             
             # 3. Build the kernel data frame
-            dfKernel = StochasticKernelDataFrame(OriginPeriod, Level, DevIntervals)
+            if(missing(EvaluationDates)){
+              if (missing(FirstEvaluationDate)) FirstEvaluationDate = min(OriginPeriod$EndDate)
+              if (missing(LastEvaluationDate)) LastEvaluationDate = max(OriginPeriod$EndDate)
+              EvaluationDates = DateSequence(FirstEvaluationDate, LastEvaluationDate, DevPeriod)
+            }
+            
+            EvaluationDates = unique(EvaluationDates)
+            Lags = unique(Lags)
+            
+            dfKernel = StochasticKernelDataFrame(OriginPeriod, Level, EvaluationDates, Lags, DevPeriod)
+#            dfKernel$Lag = GetLags(dfKernel, DevPeriod)
+            
+#             if (missing(MaxLag)){
+#               MaxLag = dfKernel$Lag[dfKernel$StartDate == min(dfKernel$StartDate)]
+#               MaxLag = max(MaxLag)
+#             }
+
+#            dfKernel = subset(dfKernel, Lag <= MaxLag)
             
             # 4. Add the measures
             if (length(Measure) == 0){
@@ -264,25 +371,17 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
                   missingMeasure = EmptyMeasureColumns(nrow(dfKernel), missingMeasure)
                   dfKernel = cbind(dfKernel, missingMeasure)
                 }
-                if (!missing(OriginPeriodSort) & !missing(DevIntervalSort)){
-                  Data = Data[, c(Measure, names(Level), OriginPeriodSort, DevIntervalSort), drop=FALSE]
-                  Data = OrderStochasticMeasureData(Data, OriginPeriodSort, DevIntervalSort, Level)
-                } else {
-                  Data = Data[, Measure, drop=FALSE]
+                  Data = Data[, c(Measure, names(Level), OriginPeriodSort, LagSort), drop=FALSE]
+                if (nrow(Data) != nrow(dfKernel)) {
+#                   warning("Length of 'Data' argument is not consistent with OriginPeriod and EvaluationDates. Did you forget to pass in the Evaluation Dates?") 
+#                   return(dfKernel)
+                  stop("Length of 'Data' argument is not consistent with OriginPeriod and EvaluationDates. Did you forget to pass in the Evaluation Dates?")
                 }
+                Data = OrderStochasticMeasureData(Data, OriginPeriodSort, LagSort, Level)
+                dfKernel = OrderStochasticMeasureData(dfKernel, "StartDate", "Lag", Level)
                 Data = cbind(dfKernel, Data[, Measure, drop=FALSE])
               }
             }
-            
-            # 5. Add the evaluation dates
-            Data$EvaluationDate = GetEvaluationDates(Data, DevPeriod)
-            
-            # Subset to the appropriate portion of the triangle
-            if (missing(LastEvaluationDate)) LastEvaluationDate = max(OriginPeriod$EndDate)
-            if (missing(FirstEvaluationDate)) FirstEvaluationDate = min(OriginPeriod$EndDate)
-            
-            Data = subset(Data, EvaluationDate >= FirstEvaluationDate)
-            Data = subset(Data, EvaluationDate <= LastEvaluationDate)
             
             # Create required cumulative and incurred
             # Must normalize the meaure names accordingly
@@ -297,10 +396,9 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
             
             # Form the prior
             Measure = CleanStochasticMeasure(Measure)
-            Data = cbind(Data, CreatePriors(Data, Measure))
-            
-            # Add a factor column for the DevInterval. We'll need this when plotting
-            Data$DevIntervalFactor = as.factor(Data$DevIntervals)
+            dfPrior = CreatePriors(Data, Level, Measure)
+            Data = OrderStochasticMeasureData(Data, "StartDate", "Lag", Level)
+            Data = cbind(Data, dfPrior)
             
             row.names(Data) = NULL
             
@@ -309,7 +407,7 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
                       , Measure = Measure
                       , Level = Level
                       , DevPeriod = DevPeriod
-                      , DevIntervals = DevIntervals
+#                       , EvaluationDates = EvaluationDates
                       , Data = Data)
 })
 
@@ -331,10 +429,11 @@ setMethod("length", signature(x="StochasticMeasure"), definition=function(x){
 
 #' @export
 setMethod("MeasureNames", signature(x="StochasticMeasure"), definition=function(x, Stem=TRUE){
-  if (Stem){
-    strNames = x@Measure
-  } else {
-    strNames = c(IncrementalMeasureNames(measure), CumulativeMeasureNames(measure), PriorMeasureNames(measure))
+  
+  strNames = x@Measure
+  
+  if (!Stem) {
+    strNames = c(IncrementalMeasureNames(strNames), CumulativeMeasureNames(strNames), PriorMeasureNames(strNames))
   }
   
   strNames
@@ -358,19 +457,98 @@ setMethod("show", signature(object="StochasticMeasure"), definition=function(obj
 
 #************************************************************************************************************************
 # 4. Accessors ====
-#' @export 
-setMethod("[", signature(x="StochasticMeasure"), definition=function(x, i, j, k){
+#' @export
+setMethod("$", signature(x = "StochasticMeasure"), function(x, name) {
+  
+  SingleAccessStochasticMeasure(x, name, FALSE)
   
 })
 
-setMethod("[<-", signature(x = "StochasticMeasure"), definition=function(x, i, j, k, ..., value) {
+#' @export
+setMethod("[[", signature(x = "StochasticMeasure"), function(x, i, UniqueAttribute=TRUE) {
+  
+  if (class(i) == "numeric"){
+    i = x@Level[[i]]  
+  } 
+  
+  SingleAccessStochasticMeasure(x, i, UniqueAttribute)
+  
 })
 
-setMethod("$", signature(x = "StochasticMeasure"), function(x, name) {
+#' @export 
+setMethod("[", signature(x="StochasticMeasure"), definition=function(x, i, j, ..., OriginPeriod, EvaluationDate, Lag, drop=TRUE){
+  
+  df = x@Data
+  op = x@OriginPeriod
+  
+  if(missing(i)) {
+    i = rep(TRUE, nrow(df))
+  }
+  
+  if (missing(j)) {
+    j = CumulativeMeasureNames(x@Measure)
+  } else {
+    whichCols = intersect(colnames(df), j)
+    if (length(whichCols) == 0){
+      stop ("Improper Measure specification. No columns returned.")
+    }
+    j = CumulativeMeasureNames(j)
+    whichCols = c(whichCols, LevelNames(x))
+    whichCols = c("StartDate", "EndDate", "Moniker", whichCols)
+    whichCols = c(whichCols, "Lag", "EvaluationDate")
+    df = df[, whichCols]
+  }
+  
+  if (!missing(OriginPeriod)){
+    op = x@OriginPeriod[OriginPeriod]
+    i = i & (df$Moniker %in% op$Moniker)
+  }
+  
+  if (!missing(EvaluationDate)){
+    i = i & (df$EvaluationDate %in% EvaluationDate)
+  }
+  
+  if (!missing(Lag)){
+    i = i & (df$Lag %in% Lag)
+  }
+  
+  df = df[i, j, drop=drop]
+  
+  if (class(df) == "data.frame"){
+    df2 = x@Data
+    df2 = df2[i, ]
+    df = cbind(df, df2[, c("StartDate", "Lag", "EvaluationDate", "Moniker", LevelNames(x))])
+    sm = StochasticMeasure(op
+                           , Level=LevelNames(x)
+                           , Measure=j
+                           , DevPeriod=x@DevPeriod
+                           , EvaluationDates=df$EvaluationDate
+                           , Lags=df$Lag
+                           , Data=df)
+    return (sm)
+  } else {
+    return (df)
+  }
+  
 })
 
-setMethod("$<-", signature(x = "StochasticMeasure"), function(x, name, value) {
-  })
+setMethod("UpperTriangle", signature(object="StochasticMeasure"), definition=function(object){
+  # The upper triangle is all observations on or before the first evaluation for the most recent element of the OriginPeriod 
+  evalDate = object$EvaluationDate[object$StartDate == max(object$StartDate)]
+  scm = object[object$EvaluationDate <= min(evalDate)]
+  scm
+})
+
+setMethod("LatestDiagonal", signature(object="StochasticMeasure"), definition=function(object){
+  scm = object[object$EvaluationDate == max(object$EvaluationDates)]
+  scm
+})
+
+setMethod("Diagonal", signature(object="StochasticMeasure", EvaluationDate="ANY")
+          , definition=function(object, EvaluationDate){
+            scm = object[object$EvaluationDate == EvaluationDate]
+            scm
+})
 
 #************************************************************************************************************************
 # 5. Comparison ====
@@ -386,22 +564,93 @@ setMethod("as.data.frame", signature("StochasticMeasure"), function(x, ...){
 melt.StochasticMeasure = function(data){
   df = data@Data
   measure = MeasureNames(data)
-  mdf = melt(df, id.vars=c("StartDate", "EndDate", "Moniker", "EvaluationDate", "DevIntervals", LevelNames(data))
+  mdf = melt(df, id.vars=c("StartDate", "EndDate", "Moniker", "EvaluationDate", "Lag", LevelNames(data))
 #             , measure.vars=
              , variable.name="Measure")
   mdf
 }
 
+#' @export 
+# setMethod("LongToWide", signature("StochasticMeasure"), function(object, xAxis){
+#   mdf = melt(object)
+#   df = dcast(mdf, )
+# df = dcast(mdf, GroupName + Line + Measure + Moniker ~ Lag, sum)
+# })
 #************************************************************************************************************************
 # 7. Concatenate ====
-JoinStochaticMeasureElements = function(elements){
+JoinStochasticMeasureElements = function(elements){
+  
+  # 1. Sort out OriginPeriod
+  op = lapply(elements, slot, "OriginPeriod")
+  op = lapply(op, as.data.frame)
+  op = do.call(rbind, op)
+  op = unique(op)
+  OriginPeriod = OriginPeriod(StartDate=op$StartDate, Period=op$Period[1], Type=as.character(op$Type[1]), Moniker=as.character(op$Moniker))
+  
+  # 2. Get DevPeriod
+  DevPeriod = lapply(elements, slot, "DevPeriod")
+  if(length(unique(DevPeriod)) != 1) {
+    stop("DevPeriods must be equal to combine StochasticMeasures.")
+  }
+  DevPeriod = DevPeriod[[1]]
+  
+  # 3. Get Measures
+  Measures = lapply(elements, slot, "Measure")
+  if(length(unique(Measures)) != 1) {
+    stop("Measures must be equal to combine StochasticMeasures.")
+  }
+  Measures = Measures[[1]]
+  
+  # 4. Get Levels
+  Levels = lapply(elements, slot, "Level")
+  levelNames = lapply(Levels, names)
+  if(length(unique(levelNames)) != 1) {
+    stop("LevelNames must be equal to combine StochasticMeasures.")
+  }
+  levelNames = levelNames[[1]]
+  
+  # 5. Combine Data
+  # When combining data, we make our lives easier by assuming cumulative measures
+  Data = lapply(elements, slot, "Data")
+  Data = do.call(rbind, Data)  
+  Data = Data[, c("StartDate", "Moniker", "EvaluationDate", "Lag", levelNames, CumulativeMeasureNames(Measures))]
+  
+  x = StochasticMeasure(OriginPeriod = OriginPeriod
+                        , Measure = CumulativeMeasureNames(Measures)
+                        , Level = levelNames
+                        , DevPeriod = DevPeriod
+                        , EvaluationDates = Data$EvaluationDate
+                        , Lags=Data$Lag
+                        , Data = Data)
+  
+  x
 }
 
 #' @export
-rbind.StochaticMeasure = function(..., deparse.level=1){
+rbind.StochasticMeasure = function(..., deparse.level=1){
+  elements = list(...)
+  blnSCMs = sapply(elements, is.StochasticMeasure)
+  elements = elements[blnSCMs]
+  
+  scm = JoinStochasticMeasureElements(elements)
+  scm
 }
 
+#' @export
 setMethod("c", signature(x="StochasticMeasure"), definition=function(x, ...){
+  elements = list(...)
+  blnSCMs = sapply(elements, is.StochasticMeasure)
+  elements = elements[blnSCMs]
+  
+  if (length(elements) == 0) {
+    return (x)
+  } else if (length(elements) == 1){
+    scm = elements[[1]]
+  } else {
+    scm = JoinStochasticMeasureElements(elements)
+  }
+  scm = rbind(x, scm)
+  scm
 })
 
 #************************************************************************************************************************
@@ -424,26 +673,26 @@ setMethod("plot", signature(x="StochasticMeasure", y="missing")
             
             if (missing(Measure)) Measure = IncrementalMeasureNames(MeasureNames(x))
             if (missing(Group)) Group = "Moniker"
-            if (missing(TimeAxis)) TimeAxis="DevIntervals"
+            if (missing(TimeAxis)) TimeAxis="Lag"
             
             if (sum(mdf$Measure %in% Measure) == 0) stop("Improper Measure specification. Please specify Measures for this object.")
             
             mdf = mdf[mdf$Measure %in% Measure, ]
             
-            plt = ggplot(mdf, aes_string(x=TimeAxis, y="value", group=Group, color=GroupParameter)) + geom_line()
+            plt = ggplot(mdf, aes_string(x=TimeAxis, y="value", group=Group, color=Group)) + geom_line()
             
             if (missing(FacetFormula)){
-              facetCols = colnames(mdf)[!colnames(mdf) %in% c("StartDate", "EndDate", "Moniker", "EvaluationDate", "DevIntervals", Group, "value")]
+              facetCols = colnames(mdf)[!colnames(mdf) %in% c("StartDate", "EndDate", "Moniker", "EvaluationDate", "Lag", Group, "value")]
               
               FacetFormula = paste(facetCols, collapse="+")
               FacetFormula = as.formula(paste("~", FacetFormula))
               
               facetRow = length(unique(mdf[, facetCols]))
-              FacetRow = floor(sqrt(facetRow)) + 1
+              facetRow = floor(sqrt(facetRow)) + 1
               
-              plt = plt + facet_wrap(FacetFormula, facetRow)  
+              plt = plt + facet_wrap(FacetFormula, facetRow, scales="free")  
             } else {
-              plt = plt + facet_grid(FacetFormula)
+              plt = plt + facet_grid(FacetFormula, scales="free")
             }
             
             plt
