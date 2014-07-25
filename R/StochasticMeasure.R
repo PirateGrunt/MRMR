@@ -101,9 +101,9 @@ PriorMeasureNames = function(Measure){
 }
 
 CleanStochasticMeasure = function(Measure){
-  Measure = gsub("*cumulative*", "", Measure, ignore.case = TRUE)
-  Measure = gsub("*incremental*", "", Measure, ignore.case = TRUE)
-  Measure = gsub("*prior*", "", Measure, ignore.case = TRUE)
+  Measure = gsub("cumulative", "", Measure, ignore.case = TRUE)
+  Measure = gsub("incremental", "", Measure, ignore.case = TRUE)
+  Measure = gsub("prior", "", Measure, ignore.case = TRUE)
   Measure = unique(Measure)
 }
 
