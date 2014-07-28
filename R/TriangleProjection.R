@@ -188,6 +188,17 @@ setMethod("TriangleProjection"
 
 #************************************************************************************************************************
 # 8. Persistence ====
+#' @export
+setMethod("write.excel", signature=c(object = "TriangleProjection", file="character", overwrite="logical")
+          , definition=function(object, file, overwrite=FALSE, TimeAxis="Lag", Wide=TRUE){
+            
+            if (file.exists(file) & !overwrite){
+              stop("Excel file already exists. Either enter a new filename or set the overwrite parameter to TRUE.")
+            }
+            
+            write.excel(object@Projection, file, overwrite, TimeAxis, Wide)
+            
+})
 
 #************************************************************************************************************************
 # 9. Display ====

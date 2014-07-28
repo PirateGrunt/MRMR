@@ -218,6 +218,38 @@ setMethod("LongToWide", signature("Triangle"), function(object, TimeAxis="Lag"){
 #************************************************************************************************************************
 # 8. Persistence ====
 
+#' @export
+setMethod("write.excel", signature=c(object = "Triangle", file="character", overwrite="logical")
+          , definition=function(object, file, overwrite=FALSE, TimeAxis="Lag", Wide=TRUE){
+            
+            if (file.exists(file) & !overwrite){
+              stop("Excel file already exists. Either enter a new filename or set the overwrite parameter to TRUE.")
+            }
+            
+            wbk = loadWorkbook(file, create=TRUE)
+            
+            if (Wide) { 
+              df = LongToWide(object, TimeAxis) 
+              lst = split(df, df$Measure)
+              
+              for (i in seq_along(lst)){
+                df = lst[[i]]
+                shtName = as.character(df$Measure[1])
+                createSheet(wbk, name=shtName)
+                writeWorksheet(wbk, df, shtName, startRow = 1, header=TRUE)
+              }
+            } else {
+              df = as.data.frame(object)
+              shtName = object@Name
+              if (length(shtName) == 0) shtName = "Triangle"
+              createSheet(wbk, name=shtName)
+              writeWorksheet(wbk, df, shtName, startRow = 1, header=TRUE)
+            }
+
+            saveWorkbook(wbk)
+            
+})
+
 
 #************************************************************************************************************************
 # 9. Display ====
