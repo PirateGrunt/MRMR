@@ -257,7 +257,48 @@ MSE = function(object){
 }
 
 #************************************************************************************************************************
+# 6. Conversion ====
+#' @export
+setMethod("as.data.frame", signature("TriangleModel"), function(x, ...){
+  df = x@ModelData
+  whichCols = !(colnames(df) %in% MeasureNames(x@Triangle, Stem=FALSE))
+  whichCols = c(colnames(df)[whichCols], x@Predictor, x@Response)
+  whichCols = unique(whichCols)
+  df = df[, whichCols]
+  row.names(df) = NULL
+  df
+})
+
+
+#************************************************************************************************************************
 # 8. Persistence ====
+
+#' @export
+setMethod("write.excel", signature=c(object = "TriangleModel", file="character", overwrite="logical")
+          , definition=function(object, file, overwrite=FALSE, TimeAxis="Lag"){
+            
+            if (file.exists(file) & !overwrite){
+              stop("Excel file already exists. Either enter a new filename or set the overwrite parameter to TRUE.")
+            }
+            
+            wbk = loadWorkbook(file, create=TRUE)
+            
+            df = as.data.frame(df)
+            df = LongToWide(object, TimeAxis)
+            
+            lst = split(df, df$Measure)
+            
+            for (i in seq_along(lst)){
+              #writeSheet(wbk, sheetNames[i], lstGroups[[i]])
+              df = lst[[i]]
+              shtName = as.character(df$Measure[1])
+              createSheet(wbk, name=shtName)
+              writeWorksheet(wbk, df, shtName, startRow = 1, header=TRUE)
+            }
+            
+            saveWorkbook(wbk)
+            
+})
 
 #************************************************************************************************************************
 # 9. Display ====
