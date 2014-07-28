@@ -18,9 +18,10 @@ test_that("Construction", {
                         , Level=list(Line = "GL", Subline = c("PremOps", "Products"))
                         , Measure = c("PaidLoss", "IncurredLoss")
                         , DevPeriod = as.period(1, "year")
-                        , DevIntervals = 1:10
-                        , LastEvaluationDate = as.Date("2010-01-01"))
-                        #, Cumulative = TRUE)
+                        , Lags = 1:10
+                        , LastEvaluationDate = as.Date("2010-12-31"))
+  
+  df = LongToWide(scm)
 })
 
 # Properties
