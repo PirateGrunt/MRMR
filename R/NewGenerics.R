@@ -34,6 +34,6 @@ setGeneric("Diagonal", function(object, EvaluationDate){
   standardGeneric("Diagonal")
 })
 
-setGeneric("LongToWide", function(object){
+setGeneric("LongToWide", function(object, ...){
   standardGeneric("LongToWide")
 })

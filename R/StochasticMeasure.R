@@ -571,11 +571,15 @@ melt.StochasticMeasure = function(data){
 }
 
 #' @export 
-# setMethod("LongToWide", signature("StochasticMeasure"), function(object, xAxis){
-#   mdf = melt(object)
-#   df = dcast(mdf, )
-# df = dcast(mdf, GroupName + Line + Measure + Moniker ~ Lag, sum)
-# })
+setMethod("LongToWide", signature("StochasticMeasure"), function(object, TimeAxis="Lag"){
+  mdf = melt(object)
+  theFormula = paste(LevelNames(object), collapse="+")
+  theFormula = paste(theFormula, "Measure", "StartDate", "Moniker", sep="+")
+  theFormula = paste(theFormula, "~", TimeAxis)
+  df = dcast(mdf, as.formula(theFormula), sum)
+  df
+})
+
 #************************************************************************************************************************
 # 7. Concatenate ====
 JoinStochasticMeasureElements = function(elements){

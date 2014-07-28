@@ -189,6 +189,15 @@ melt.Triangle = function(data){
   mdf
 }
 
+#' @export 
+setMethod("LongToWide", signature("Triangle"), function(object, TimeAxis="Lag"){
+  mdf = melt(object)
+  theFormula = paste(LevelNames(object), collapse="+")
+  theFormula = paste(theFormula, "Measure", "StartDate", "Moniker", sep="+")
+  theFormula = paste(theFormula, "~", TimeAxis)
+  df = dcast(mdf, as.formula(theFormula), sum)
+  df
+})
 # PivotTriangleByFormula = function(df, Formula, Measure, Function = sum){
 #   z = dcast(df, theFormula, fun=Function, value.var=Measure, fill=NA_real_)
 # }
