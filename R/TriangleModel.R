@@ -256,6 +256,11 @@ MSE = function(object){
   MSE
 }
 
+#' @export
+setMethod("LevelNames", signature(x="TriangleModel"), definition=function(x){
+  LevelNames(x@Triangle)
+})
+
 #************************************************************************************************************************
 # 6. Conversion ====
 #' @export
@@ -269,7 +274,25 @@ setMethod("as.data.frame", signature("TriangleModel"), function(x, ...){
   df
 })
 
+#' @export
+melt.TriangleModel = function(data){
+  df = as.data.frame(data)
+  # melt will often generate a warning. It appears to be no cause for concern. This should be researched and confirmed.
+  suppressWarnings(mdf <- melt(df
+                              , id.vars=c("StartDate", "EndDate", "Moniker", "EvaluationDate", "Lag", LevelNames(data))
+                              , variable.name="Measure"))
+  mdf
+}
 
+#' @export 
+setMethod("LongToWide", signature("TriangleModel"), function(object, TimeAxis="Lag"){
+  mdf = melt(object)
+  theFormula = paste(LevelNames(object), collapse="+")
+  theFormula = paste(theFormula, "Measure", "StartDate", "Moniker", sep="+")
+  theFormula = paste(theFormula, "~", TimeAxis)
+  df = dcast(mdf, as.formula(theFormula), sum)
+  df
+})
 #************************************************************************************************************************
 # 8. Persistence ====
 
@@ -281,12 +304,12 @@ setMethod("write.excel", signature=c(object = "TriangleModel", file="character",
               stop("Excel file already exists. Either enter a new filename or set the overwrite parameter to TRUE.")
             }
             
-            wbk = loadWorkbook(file, create=TRUE)
-            
-            df = as.data.frame(df)
+            #df = as.data.frame(object)
             df = LongToWide(object, TimeAxis)
             
             lst = split(df, df$Measure)
+            
+            wbk = loadWorkbook(file, create=TRUE)
             
             for (i in seq_along(lst)){
               #writeSheet(wbk, sheetNames[i], lstGroups[[i]])

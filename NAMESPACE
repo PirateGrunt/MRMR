@@ -3,6 +3,7 @@
 S3method(melt,StaticMeasure)
 S3method(melt,StochasticMeasure)
 S3method(melt,Triangle)
+S3method(melt,TriangleModel)
 export(DateSequence)
 export(MSE)
 export(PlotResiduals)
