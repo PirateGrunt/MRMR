@@ -119,24 +119,26 @@ setGeneric("OriginPeriod", function(StartDate, EndDate, Period, ...) {
 setMethod("OriginPeriod", signature=c(StartDate="ANY", EndDate="ANY", Period="ANY")
           , definition = function(StartDate, EndDate, Period, Moniker, Type, Verbose=FALSE, NumPeriods, StartMonth, StartDay){
             
+            if (missing(StartDate)){
+              stop("StartDate must be specified")
+            }
+            
             if (missing(Type)) {Type = character()}
             
+            if (missing(Period)) {
+              if (missing(EndDate)){
+                # Missing Period and EndDate. We'll construct using the default period.
+                Period = DefaultPeriod()
+                if (Verbose) warning("Period will default to one year.")
+              } else {
+                # Period is missing, but we have EndDate. We can infer the period based on the months
+                # between StartDate and EndDate
+                Period = InferPeriod(StartDate, EndDate)
+              }
+            }
+            
             if (class(StartDate) == "Date") {
-              if (missing(Period)) {
-                if (missing(EndDate)){
-                  # Missing Period and EndDate. We'll construct using the default period.
-                  Period = DefaultPeriod()
-                } else {
-                  # Period is missing, but we have EndDate. We can infer the period based on the months
-                  # between StartDate and EndDate
-                  Period = InferPeriod(StartDate, EndDate)
-                }
-              } else { # Period is present
                 if (missing(EndDate)) {
-                  # This is a special case. The StartDate and Period are present. User has only given one element
-                  # for the StartDate and has also given an argument for the NumPeriods. We'll grow the StartDate
-                  # vector accordingly. Otherwise, we'll drop out and accept that this is an OriginPeriod with 
-                  # only one date.
                   if (length(StartDate) == 1 & !missing(NumPeriods)){
                     StartDate = StartDate + Period * (0:(NumPeriods-1))
                   }
@@ -160,9 +162,10 @@ setMethod("OriginPeriod", signature=c(StartDate="ANY", EndDate="ANY", Period="AN
                     if (verbose) warning("Calling standard constructor with StartDate and EndDate vectors. Period will be ignored.")
                     Period = InferPeriod(StartDate, EndDate)
                   }
-                } # Check missing period
               } # class(StartPeriod == "Date")
-            } else if (class(StartDate) == "integer") {
+            }
+            
+            if (class(StartDate) == "integer") {
               if(missing(StartMonth)) {StartMonth = 1}
               if(missing(StartDay)) {StartDay = 1}
               
