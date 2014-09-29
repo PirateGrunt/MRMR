@@ -1,0 +1,216 @@
+---
+output: html_document
+---
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{Introduction to dplyr}
+-->
+# MRMR in a Hurry
+
+## Overview
+This short vignette will give the basics of working with MRMR. To create a model and project results, follow these steps:
+
+1. Intall MRMR
+1. Define the OriginPeriod
+2. Create the St*Measure objects
+3. Create and visualize a Triangle 
+4. Build and diagnose a TriangleModel
+5. Project the results
+
+```{r Options, echo=FALSE, warning=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(message=FALSE)
+```
+
+## Install MRMR
+At the time of writing, the most recent release of MRMR is hosted on GitHub. A CRAN release is planned for later in 2014. To install from GitHub, you must have the devtools package installed.
+
+```{r LoadMRMR}
+library(MRMR)
+library(lubridate)
+```
+
+## Define the OriginPeriod
+An OriginPeriod stores a vector of start and end dates, each of which has a common period (typically one year). A moniker may be used to label the dates. The name describes what sort of origin period is being used: "accident year", "report year", "Lloyds year", etc.
+
+An OriginPeriod may be constructed in several ways:
+
+1. Pass in a starting date, number of periods and optionally the period length of each OriginPeriod. The default period length is one year.
+2. Pass in a start and end date, each of length one.
+3. Pass in a vector of start and end dates. The period will be inferred from the vectors and calculated in months.
+
+#### StartDate and NumPeriods
+10 annual periods.
+```{r OriginPeriodConstructor1A}
+op = OriginPeriod(StartDate = as.Date("2001-01-01"), NumPeriods=10)
+```
+
+20 semi-annual periods
+```{r OriginPeriodConstructor1B}
+op = OriginPeriod(StartDate = as.Date("2001-01-01"), NumPeriods=20, Period = as.period(6, "months"))
+```
+
+40 quarters
+```{r OriginPeriodConstructor1C}
+op = OriginPeriod(StartDate = as.Date("2001-01-01"), NumPeriods=40, Period = as.period(3, "months"))
+```
+
+#### StartDate and EndDate defined
+```{r OriginPeriodConstructor2A}
+op = OriginPeriod(StartDate = as.Date("2001-01-01"), EndDate = as.Date("2010-12-31"))
+```
+
+#### StartDate and EndDate as vectors
+```{r OriginPeriodConstructor2B}
+startDates = seq.Date(as.Date("2001-01-01"), as.Date("2010-01-01"), by = "1 year")
+endDates = seq.Date(as.Date("2001-12-31"), as.Date("2010-12-31"), by = "1 year")
+op = OriginPeriod(StartDate = startDates, EndDate = endDates)
+```
+
+#### Monikers
+Monikers may be added in the constructor, or after the object is created.
+```{r OriginPeriodMoniker}
+op = OriginPeriod(StartDate = as.Date("2001-01-01"), NumPeriods=10, Moniker = paste("AY", 2001:2010))
+op$Moniker = paste("Unfalljahr", year(op$StartDate))
+```
+
+#### Defaults:
+
+1. When no period is specified, one year is assumed.
+2. If no Moniker is specified, as.character(StartDate) is used.
+3. If Type is not specified, the string "No type specified" is used.
+
+## Create the St*Measure objects
+
+#### Levels
+St*Measaure objects store a hierarchy of data associated with 'Levels'. Each level may be thought of as the node of a tree hierarchy.
+
+A StaticMeasure has one observation per OriginPeriod, per Level. Think of exposure data like earned premium, square feet, number of autos, (unaudited) payroll, etc.
+
+A StochasticMeasure has one observation per OriginPeriod per Level per EvaluationDate. Think of development data like reported claims, open case reserve, paid indemnity, reported ALAE, etc.
+
+#### StaticMeasure
+
+```{r}
+op = OriginPeriod(StartDate = as.Date("1988-01-01")
+                  , NumPeriods = 10
+                  , Period=as.period(1, "year")
+                  , Type="Accident Year")
+data(NAIC)
+companies = unique(dfPPA$Company)
+smPPA = StaticMeasure(OriginPeriod = op
+                   , Level=list(Company=companies, Line="PPA")
+                   , Measure=c("DirectEP", "NetEP")
+                   , Data=dfPPA[dfPPA$Lag == 1, ])
+
+smWC = StaticMeasure(OriginPeriod = op
+                      , Level=list(Company=companies, Line="WC")
+                      , Measure=c("DirectEP", "NetEP")
+                      , Data=dfWC[dfWC$Lag == 1, ])
+
+smMulti = c(smPPA, smWC)
+```
+
+#### StochasticMeasure
+StochasticMeasures must be stored in "long" format.
+
+```{r}
+scmWC = StochasticMeasure(OriginPeriod = op
+                        , Level=list(Company=companies, Line="WC")
+                        , Measure = c("CumulativeIncurred", "CumulativePaid")
+                        , DevPeriod = as.period(1, "year")
+                        , Lags=1:10
+                        , Data=dfWC
+                        , OriginPeriodSort = "AccidentYear"
+                        , EvaluationDates=seq.Date(as.Date("1988-12-31"), as.Date("2006-12-31"), by="1 year"))
+
+scmPPA = StochasticMeasure(OriginPeriod = op
+                           , Level=list(Company=companies, Line="PPA")
+                           , Measure = c("CumulativeIncurred", "CumulativePaid")
+                           , DevPeriod = as.period(1, "year")
+                           , Data=dfPPA
+                           , Lags=1:10
+                           , OriginPeriodSort = "AccidentYear"
+                           , FirstEvaluationDate=as.Date("1988-12-31")
+                           , LastEvaluationDate=as.Date("2006-12-31"))
+
+scmMulti = c(scmWC, scmPPA)
+scmMulti = rbind(scmWC, scmPPA)
+```
+
+#### Visualization of StochasticMeasures
+StochasticMeasure objects may be visualized by a call to the "plot" generic function. Pass in a Measure as a character string and optionally specify the time axis. This allows one to easily switch between a development lag and calendar period view. The development lag is assumed as the default. As with StaticMeasures, one may facet the plots to observe differences between levels.
+
+```{r }
+plot(UpperTriangle(scmWC), Measure="CumulativeIncurred")
+plot(UpperTriangle(scmWC), Measure="CumulativeIncurred", TimeAxis="EvaluationDate")
+```
+
+## Create and visualize a Triangle 
+Once static and stochastic measures have been defined, creation of a Triangle object is trivial. Simply pass in the measures, with an optional name for the object.
+
+```{r}
+triWC = Triangle(smWC, scmWC, "Workers Comp Triangle")
+triPPA = Triangle(smPPA, scmPPA, "Personal Auto Triangle")
+triMulti = c(triWC, triPPA)
+```
+
+#### Triangle visualization
+Because visualization is a precursor to a model, we are explicit in the terms "Predictor" and "Response" in the calls to plot. Also, because a fit line is the result of the model, we show the data as a scatter plot rather than a line plot.
+
+```{r plotTriangle}
+plot(UpperTriangle(triWC), Response="IncrementalPaid", Predictor="PriorCumulativePaid")
+```
+
+## Build and diagnose a TriangleModel
+MRMR supports three different types of model: individual, pooled and blended. A thorough treatment of the differences is beyond the scope of this brief vignette. The curious reader is referred to Andrew Gelman for background.
+
+In brief, the models behave as follows:
+
+* individual: Each level is modelled on its own and all the other levels are ignored.
+* pooled: All observations are accorded equal weight and the same model factors are used for all of the data.
+* blended: This is a weighted average of the individual and pooled models. Actuaries may think of this as "loss reserving with credibility". Again, see Gelman for the technical details of how this is carried out.
+
+```{r}
+PaidCLPooled = TriangleModel(UpperTriangle(triWC)
+                             , Response = "IncrementalPaid"
+                             , Predictor = "PriorCumulativePaid"
+                             , ModelType = "pooled")
+```
+
+#### Residual plots
+Residual plots should be inspected for bias along the calendar year, origin period or development lag axes. Additionaly, one may construe bias in plotting residuals against the fitted results. Note that residuals have been standardized, with lines drawn at +/- 3. Standardized residuals greater or less than 3.0 may suggest violation of the assumption of normally distributed errors. A q-q plot is in the works
+
+```{r, warning=FALSE}
+PlotResiduals(PaidCLPooled)
+```
+
+## Project the results
+
+Projection of the results is trivial.
+```{r}
+projPaidCLPooled = TriangleProjection(PaidCLPooled
+                     , AsOfDate=as.Date("2006-12-31")
+                     , MaxLag=10)
+
+```
+
+## Miscellany
+
+#### Member acccess
+MRMR objects have object access and assignment behavior that mimcs that of data frames.
+
+```{r}
+y = op[3:4]
+y$Moniker
+y$Moniker = c("Moniker1", "Moniker2")
+```
+
+#### write.excel
+MRMR implements a new generic function 'write.excel'. This facilitates storage of data in .xlsx files so that information is organized by sheet tab.
+
+```{r eval=FALSE}
+write.excel(triWC, "triWC.xlsx", overwrite=TRUE)
+write.excel(PaidCLPooled, "PaidCLPooled.xlsx", overwrite=TRUE)
+write.excel(projPaidCLPooled, "ProjPaidCLPooled.xlsx", overwrite=TRUE)
+```

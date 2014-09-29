@@ -1,0 +1,20 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{MRMR in a hurry}
+-->
+# MRMR in a hurry
+
+* Overview
+* Object model
+* Application
+* Theory
+
+## Overview
+
+## Objects
+
+### OriginPeriod
+OriginPeriod is the 
+Loss reserving data is a set of longitudinal data, each member of which corresponds to an origin period. This origin period may be an accident period, policy period, report period or possibly something else. Events are typically aggregated across annual periods and we may speak of accident years, underwriting years and so forth. MRMR only needs to know the first period, the length of each period and either the last period or the total number of periods. Although not required, one may
+
+The following examples should make this clear
