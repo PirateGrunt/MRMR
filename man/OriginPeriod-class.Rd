@@ -19,7 +19,4 @@ are permitted.
 \strong{1. Construct an empty OriginPeriod}
 myOP = OriginPeriod()
 }
-\seealso{
-\code{\link{OriginPeriodConstructor}}
-}
 

@@ -3,9 +3,12 @@
 #' @include NewGenerics.R
 #' @include OriginPeriod.R
 #' 
+#' @import reshape2
+#' @import ggplot2
+#' @import XLConnect
+#' 
 #' @docType class
 #' 
-#' @seealso \code{\link{StaticMeasureConstructor}}
 #' 
 #' @name StaticMeasure-class
 #' @rdname StaticMeasure-class

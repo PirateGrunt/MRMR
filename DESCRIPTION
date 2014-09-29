@@ -1,20 +1,25 @@
 Package: MRMR
 Title: Multivariate Regression Models for Reserving
 Description: Tools to analyze non-life loss reserves
-Version: 1.0.0
+Version: 0.2.1
 Maintainer: Brian A. Fannin <BFannin@RedwoodsGroup.com>
-Author: Brian A. Fannin
+Authors@R: person("Brian A.", "Fannin"
+    , role = c("aut", "cre")
+    , email = "BFannin@RedwoodsGroup.com")
 License: GPL (>= 2)
 Depends:
+    R (>= 2.10)
+Imports:
     reshape2,
     ggplot2,
     lubridate,
-    stats,
-    methods,
-    XLConnect
+    XLConnect,
+    nlme
 Suggests:
-    testthat
+    testthat,
+    knitr
 Collate:
+    'DataDoc.R'
     'Help.R'
     'HelperFunctions.R'
     'NewGenerics.R'
@@ -24,3 +29,5 @@ Collate:
     'Triangle.R'
     'TriangleModel.R'
     'TriangleProjection.R'
+VignetteBuilder: knitr
+Type: Package

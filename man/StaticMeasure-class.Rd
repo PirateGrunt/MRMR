@@ -48,7 +48,4 @@ Because the "data frame" may be thought of as having rows specific by OriginPeri
 values, the i and i indices are used to specify these two dimensions. The third dimension is used to identify the Level. For a
 StochasticMeasure object, a fourth dimension is used to identify the evalution date, or development lag.
 }
-\seealso{
-\code{\link{StaticMeasureConstructor}}
-}
 

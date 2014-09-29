@@ -26,26 +26,26 @@ test_that("Construction", {
 
 # Properties
 
-test_that("Accessors", {
-
-  
-})
-
-test_that("Assignment", {
-
-  
-})
+# test_that("Accessors", {
+# 
+#   
+# })
+# 
+# test_that("Assignment", {
+# 
+#   
+# })
 
 # Comparison
 
-test_that("Conversion", {
-  df = as.data.frame(sm)
-  expect_true(class(df) == "data.frame")
-})
-
-test_that("Concatenate", {
-})
-
-test_that("Persistence", {
-  
-})
+# test_that("Conversion", {
+#   df = as.data.frame(sm)
+#   expect_true(class(df) == "data.frame")
+# })
+# 
+# test_that("Concatenate", {
+# })
+# 
+# test_that("Persistence", {
+#   
+# })

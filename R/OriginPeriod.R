@@ -5,7 +5,6 @@
 #' 
 #' @docType class
 #' 
-#' @seealso \code{\link{OriginPeriodConstructor}}
 #' 
 #' @name OriginPeriod-class
 #' @rdname OriginPeriod-class
@@ -34,7 +33,7 @@ NULL
 
 MonthsBetween = function(StartDate, EndDate){
   diff = as.double(EndDate - StartDate)
-  diff = round(diff / 30)
+  diff = round(diff / 30.5)
   as.period(diff, unit="months")
 }
 
@@ -49,6 +48,19 @@ InferPeriod = function(StartDate, EndDate){
   Period = MeanMonths(Period)
 }
 
+PeriodsBetween = function(StartDate, EndDate, Period){
+  
+  if (length(StartDate) != 1 | length(EndDate) != 1) {
+    stop("StartDate and EndDate must each have length == 1.")
+  }
+  
+  daysBetween = difftime(EndDate, StartDate, units="days") + 1
+  periodsBetween = suppressMessages(daysBetween / (Period / days(1)))
+  periodsBetween = round(as.numeric(periodsBetween))
+  
+  periodsBetween
+}
+
 DefaultPeriod = function(){
   years(1)
 }
@@ -57,6 +69,17 @@ DefaultMoniker = function(startDates){
   as.character(startDates)
 }
 
+#' is.OriginPeriod
+#' 
+#' Checks whether the object is an object of the OriginPeriod class.
+#' 
+#' @param object Object to be tested
+#' 
+#' @return TRUE/FALSE
+#' 
+#' @usage is.OriginPeriod(object)
+#' @export
+#' 
 is.OriginPeriod = function(object)
 {
   is(object, "OriginPeriod")
@@ -123,63 +146,98 @@ setMethod("OriginPeriod", signature=c(StartDate="ANY", EndDate="ANY", Period="AN
               stop("StartDate must be specified")
             }
             
-            if (missing(Type)) {Type = character()}
-            
-            if (missing(Period)) {
-              if (missing(EndDate)){
-                # Missing Period and EndDate. We'll construct using the default period.
-                Period = DefaultPeriod()
-                if (Verbose) warning("Period will default to one year.")
-              } else {
-                # Period is missing, but we have EndDate. We can infer the period based on the months
-                # between StartDate and EndDate
-                Period = InferPeriod(StartDate, EndDate)
-              }
+            isPOSIX = intersect(class(StartDate) , c("POSIXct", "POSIXt"))
+            if (length(isPOSIX) != 0) {
+              StartDate = as.Date(StartDate)
+              if (Verbose) message("StartDate was given as a POSIX date/time value. It has been converted to class 'Date'.")
             }
             
-            if (class(StartDate) == "Date") {
-                if (missing(EndDate)) {
-                  if (length(StartDate) == 1 & !missing(NumPeriods)){
-                    StartDate = StartDate + Period * (0:(NumPeriods-1))
-                  }
-                } else {
-                  # StartDate, EndDate and Period are all here. This means one of two things:
-                  #     1. The user wants a single element from StartDate and EndDate to signify the first and 
-                  #        last dates which have a common Period between them.
-                  #     2. Otherwise, it means that the user has passed in a superfluous Period argument.
-                  if (length(StartDate) == 1){
-                    # Estimate the number of elements between StartDate and EndDate
-                    # Very lazy way of working with periods
-                    daysBetween = difftime(EndDate, StartDate, units="days")
-                    periodsBetween = suppressMessages(daysBetween / (Period / days(1)))
-                    periodsBetween = floor(as.numeric(periodsBetween))
-                    
-                    StartDate = StartDate + Period * (0:(periodsBetween-1))
-                    
-                    if (StartDate[periodsBetween] < EndDate) StartDate[periodsBetween+1] = StartDate[periodsBetween]+Period
-                    
-                  } else {
-                    if (verbose) warning("Calling standard constructor with StartDate and EndDate vectors. Period will be ignored.")
-                    Period = InferPeriod(StartDate, EndDate)
-                  }
-              } # class(StartPeriod == "Date")
+            if (class(StartDate) == "numeric"){
+              StartDate = as.integer(StartDate)
+              if (Verbose) message("StartDate has been converted to an integer. Check that your results are as you expect.")
             }
             
             if (class(StartDate) == "integer") {
               if(missing(StartMonth)) {StartMonth = 1}
               if(missing(StartDay)) {StartDay = 1}
               
-              StartDate = ymd(paste(StartDate, StartMonth, StartDay, sep="/"))
-              StartDate = as.Date(StartDate)
-              if(missing(Period)) Period = DefaultPeriod()
+              StartDate = as.Date(paste(StartDate, StartMonth, StartDay, sep="-"))
             }
             
+            if (missing(EndDate)){
+              if (length(StartDate) != 1){
+                NumPeriods = length(StartDate)
+              } else {
+                if (missing(NumPeriods)) NumPeriods = 1
+              }
+              if(missing(Period)) Period = DefaultPeriod()
+            } else {
+              if (length(StartDate) != length(EndDate)) {
+                errMsg = "StartDate and EndDate must be of equal length."
+                errMsg = paste0(errMsg, "StartDate has length ", length(StartDate), ".")
+                errMsg = paste0(errMsg, "EndDate has length ", length(EndDate), ".")
+                stop(errMsg)
+              }
+              
+              if (length(StartDate) == 1){
+                if (missing(Period)) Period = DefaultPeriod()
+                NumPeriods = PeriodsBetween(StartDate, EndDate, Period)
+              } else {
+                if (missing(Period)) Period = InferPeriod(StartDate, EndDate)
+                NumPeriods = length(StartDate)
+              }
+            }
+            
+            StartDate = StartDate[1] + Period * (0:(NumPeriods-1))
             EndDate = StartDate + Period - days(1)
+            
+#             if (missing(Period)) {
+#               if (missing(EndDate)){
+#                 # Missing Period and EndDate. We'll construct using the default period.
+#                 Period = DefaultPeriod()
+#                 if (Verbose) warning("Period will default to one year.")
+#               } else {
+#                 # Period is missing, but we have EndDate. We can infer the period based on the months
+#                 # between StartDate and EndDate. To do this, we pass in a modified EndDate, which has the 
+#                 # same year as StartDate
+#                 adjustedEndDate = EndDate
+#                 year(adjustedEndDate) = year(StartDate)
+#                 Period = InferPeriod(StartDate, adjustedEndDate)
+#               }
+#             }
+#             
+#             if (class(StartDate) == "Date") {
+#                 if (missing(EndDate)) {
+#                   if (length(StartDate) == 1 & !missing(NumPeriods)){
+#                     StartDate = StartDate + Period * (0:(NumPeriods-1))
+#                   }
+#                 } else {
+#                   # StartDate, EndDate and Period are all here. This means one of two things:
+#                   #     1. The user wants a single element from StartDate and EndDate to signify the first and 
+#                   #        last dates which have a common Period between them.
+#                   #     2. Otherwise, it means that the user has passed in a superfluous Period argument.
+#                   if (length(StartDate) == 1){
+#                     # Estimate the number of elements between StartDate and EndDate
+#                     # Very lazy way of working with periods
+#                     
+#                     
+#                     StartDate = StartDate + Period * (0:(periodsBetween-1))
+#                     
+#                     if (StartDate[periodsBetween] < EndDate) StartDate[periodsBetween+1] = StartDate[periodsBetween]+Period
+#                     
+#                   } else {
+#                     if (Verbose) warning("Calling standard constructor with StartDate and EndDate vectors. Period will be ignored.")
+#                     Period = InferPeriod(StartDate, EndDate)
+#                   }
+#               } # class(StartPeriod == "Date")
+#             }
             
             if (missing(Moniker)) {
               Moniker = DefaultMoniker(StartDate)
               if (Verbose) warning("No Moniker has been specified. Defaulting to a blank Moniker.")
             }
+            
+            if (missing(Type)) {Type = character()}
             
             op = new("OriginPeriod"
                      , StartDate = StartDate
@@ -233,18 +291,18 @@ setMethod("length", signature=c(x="OriginPeriod"), definition=function(x){
 # 4. Accessors ====
 #' @export 
 setMethod("[", signature(x="OriginPeriod"), definition=function(x, i){
-  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Moniker=x@Moniker[i], Type=x@Type)
+  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Period = x@Period, Moniker=x@Moniker[i], Type=x@Type)
 })
 
 #' @export 
 setMethod("[", signature(x="OriginPeriod", i="character"), definition=function(x, i){
   i = match(i, x@Moniker)
-  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Moniker=x@Moniker[i], Type=x@Type)
+  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Period = x@Period, Moniker=x@Moniker[i], Type=x@Type)
 })
 
 #' @export
 setMethod("[[", signature(x = "OriginPeriod"), definition=function(x, i, j, ..., exact = TRUE){
-  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Moniker=x@Moniker[i], Type=x@Type)
+  op = OriginPeriod(x@StartDate[i], x@EndDate[i], Period = x@Period, Moniker=x@Moniker[i], Type=x@Type)
 })
 
 #' @export

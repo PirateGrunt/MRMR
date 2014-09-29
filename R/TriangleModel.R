@@ -11,8 +11,6 @@
 #' 
 #' @docType class
 #' 
-#' @seealso \code{\link{Triangle}}
-#' 
 #' @name TriangleModel-class
 #' @rdname TriangleModel-class
 #' @exportClass TriangleModel

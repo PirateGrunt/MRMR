@@ -10,7 +10,4 @@ a StaticMeasure object.
 \details{
 \strong{Triangle construction}
 }
-\seealso{
-\code{\link{Triangle}}
-}
 

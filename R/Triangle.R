@@ -7,8 +7,6 @@
 #' 
 #' @docType class
 #' 
-#' @seealso \code{\link{Triangle}}
-#' 
 #' @name Triangle-class
 #' @rdname Triangle-class
 #' @exportClass Triangle

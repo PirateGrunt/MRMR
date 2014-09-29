@@ -6,7 +6,4 @@
 \description{
 TriangleModel class
 }
-\seealso{
-\code{\link{Triangle}}
-}
 

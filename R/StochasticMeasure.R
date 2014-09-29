@@ -6,8 +6,6 @@
 #' 
 #' @docType class
 #' 
-#' @seealso \code{\link{StochasticMeasureConstructor}}
-#' 
 #' @name StochasticMeasure-class
 #' @rdname StochasticMeasure-class
 #' @exportClass StochasticMeasure

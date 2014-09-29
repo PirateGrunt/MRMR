@@ -6,7 +6,4 @@
 \description{
 TriangleProjection class
 }
-\seealso{
-\code{\link{Triangle}}
-}
 

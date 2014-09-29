@@ -8,8 +8,6 @@
 #' 
 #' @docType class
 #' 
-#' @seealso \code{\link{Triangle}}
-#' 
 #' @name TriangleProjection-class
 #' @rdname TriangleProjection-class
 #' @exportClass TriangleProjection

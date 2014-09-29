@@ -77,7 +77,7 @@ test_that("Construction", {
 })
 
 test_that("Accessors", {
-  x = OriginPeriod(seq(2001:2010))
+  x = OriginPeriod(2001:2010)
   
   y = x[1]
   expect_true(is.OriginPeriod(y))

@@ -1,6 +1,5 @@
 #
 # mySequence = DateSequence(as.Date("2001-01-01"), as.Date("2010-12-31"), as.period(1, "year"))
-#' @export
 DateSequence = function(from, to, by){
   daysBetween = difftime(to, from, units="days")
   periodsBetween = suppressMessages(daysBetween / (by / days(1)))
