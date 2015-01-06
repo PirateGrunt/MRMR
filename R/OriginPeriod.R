@@ -5,7 +5,6 @@
 #' 
 #' @docType class
 #' 
-#' 
 #' @name OriginPeriod-class
 #' @rdname OriginPeriod-class
 #' @exportClass OriginPeriod
