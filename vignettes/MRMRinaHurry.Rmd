@@ -1,11 +1,13 @@
 ---
-output: html_document
+title: "MRMR in a Hurry"
+author: "Brian A. Fannin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MRMR in a Hurry}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
-<!--
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{Introduction to dplyr}
--->
-# MRMR in a Hurry
 
 ## Overview
 This short vignette will give the basics of working with MRMR. To create a model and project results, follow these steps:
