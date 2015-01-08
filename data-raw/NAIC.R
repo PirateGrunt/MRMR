@@ -1,12 +1,10 @@
-library(MRMR)
+load("./data/ppauto.rda")
+dfPPA <- ppauto
 
-URL.stem = "http://www.casact.org/research/reserve_data/"
+load("./data/wkcomp.rda")
+dfWC = wkcomp
 
-URL = paste0(URL.stem, "ppauto_pos.csv")
-dfPPA = read.csv(URL, stringsAsFactors = FALSE)
-
-URL = paste0(URL.stem, "wkcomp_pos.csv")
-dfWC = read.csv(URL, stringsAsFactors=FALSE)
+rm(ppauto, wkcomp)
 
 NewColnames = c("GroupCode"
              , "Company"
@@ -24,7 +22,6 @@ NewColnames = c("GroupCode"
 
 colnames(dfPPA) = NewColnames
 colnames(dfWC) = NewColnames
-rm(URL.stem, URL, NewColnames)
 
 # Fetch the top 10 insurers
 TopPPA = aggregate(dfPPA$NetEP, by=list(dfPPA$Company), sum)
@@ -45,6 +42,10 @@ dfPPA$Line = "Personal Auto"
 dfWC = subset(dfWC, Company %in% companies)
 dfWC$Line = "Workers Comp"
 
+save(dfPPA, dfWC, file = "./data/NAIC.rda", compress = "xz")
+
+library(MRMR)
+library(lubridate)
 # Form the OriginPeriod
 ay = unique(dfWC$AccidentYear)
 op = OriginPeriod(StartDate = as.Date(paste0(min(ay),"-01-01"))
@@ -55,60 +56,55 @@ op = OriginPeriod(StartDate = as.Date(paste0(min(ay),"-01-01"))
 
 rm(ay)
 
-save(dfPPA, dfWC, file = "~/Documents/Projects/MRMR/data/NAIC.rda", compress = "xz")
+# Form a StaticMeasure
+smPPA = StaticMeasure(OriginPeriod = op
+                   , Level=list(Company=companies, Line="PPA")
+                   , Measure=c("DirectEP", "NetEP")
+                   , Data=dfPPA[dfPPA$Lag == 1, ])
 
-# load("./data/NAIC.rda")
-# 
-# # Form a StaticMeasure
-# smPPA = StaticMeasure(OriginPeriod = op
-#                    , Level=list(Company=companies, Line="PPA")
-#                    , Measure=c("DirectEP", "NetEP")
-#                    , Data=dfSubPPA[dfSubPPA$Lag == 1, ])
-# 
-# smWC = StaticMeasure(OriginPeriod = op
-#                       , Level=list(Company=companies, Line="WC")
-#                       , Measure=c("DirectEP", "NetEP")
-#                       , Data=dfSubWC[dfSubWC$Lag == 1, ])
-# 
-# smMulti = c(smPPA, smWC)
-# save(smPPA, smWC, smMulti, file="./data/smMulti.rda")
-# load("./data/smMulti.rda")
-# 
-# # Form a StochasticMeasure
-# scmWC = StochasticMeasure(OriginPeriod = op
-#                         , Level=list(Company=companies
-#                                      , Line="WC")
-#                         , Measure = c("CumulativeIncurred"
-#                                       , "CumulativePaid")
-#                         , DevPeriod = as.period(1, "year")
-#                         , Lags=1:10
-#                         , Data=dfSubWC
-#                         , OriginPeriodSort = "AccidentYear"
-#                         , EvaluationDates=seq.Date(
-#                           as.Date("1988-12-31")
-#                           , as.Date("2006-12-31"), by="1 year"))
-# 
-# scmPPA = StochasticMeasure(OriginPeriod = op
-#                            , Level=list(Company=companies, Line="PPA")
-#                            , Measure = c("CumulativeIncurred", "CumulativePaid")
-#                            , DevPeriod = as.period(1, "year")
-#                            , Data=dfSubPPA
-#                            , Lags=1:10
-#                            , OriginPeriodSort = "AccidentYear"
-#                            , FirstEvaluationDate=as.Date("1988-12-31")
-#                            , LastEvaluationDate=as.Date("2006-12-31"))
-# 
-# scmMulti = c(scmWC, scmPPA)
-# scmMulti = rbind(scmWC, scmPPA)
-# 
-# save(scmWC, scmPPA, scmMulti, file="./data/scmMulti.rda")
-# load("./data/scmMulti.rda")
-# 
-# # Form a triangle
-# triWC = Triangle(smWC, scmWC, "Workers Comp Triangle")
-# triPPA = Triangle(smPPA, scmPPA, "Personal Auto Triangle")
-# triMulti = c(triWC, triPPA)
-# triMulti = Triangle(smMulti, scmMulti, "Multi-line triangle")
-# 
-# save(triWC, triPPA, triMulti, file="./data/triMulti.rda")
-# load("./data/triMulti.rda")
+smWC = StaticMeasure(OriginPeriod = op
+                      , Level=list(Company=companies, Line="WC")
+                      , Measure=c("DirectEP", "NetEP")
+                      , Data=dfWC[dfWC$Lag == 1, ])
+
+smMulti = c(smPPA, smWC)
+save(smPPA, smWC, smMulti, file="./data/smMulti.rda", compress="xz")
+
+#load("./data/smMulti.rda")
+
+# Form a StochasticMeasure
+evalDates <- seq.Date(as.Date("1988-12-31"), as.Date("2006-12-31"), by="1 year")
+scmWC = StochasticMeasure(OriginPeriod = op
+                        , Level=list(Company=companies
+                                     , Line="WC")
+                        , Measure = c("CumulativeIncurred"
+                                      , "CumulativePaid")
+                        , DevPeriod = as.period(1, "year")
+                        , Lags=1:10
+                        , Data=dfWC
+                        , OriginPeriodSort = "AccidentYear"
+                        , EvaluationDates=evalDates)
+
+scmPPA = StochasticMeasure(OriginPeriod = op
+                           , Level=list(Company=companies, Line="PPA")
+                           , Measure = c("CumulativeIncurred", "CumulativePaid")
+                           , DevPeriod = as.period(1, "year")
+                           , Data=dfPPA
+                           , Lags=1:10
+                           , OriginPeriodSort = "AccidentYear"
+                           , FirstEvaluationDate=as.Date("1988-12-31")
+                           , LastEvaluationDate=as.Date("2006-12-31"))
+
+scmMulti = c(scmWC, scmPPA)
+scmMulti = rbind(scmWC, scmPPA)
+
+save(scmWC, scmPPA, scmMulti, file="./data/scmMulti.rda", compress="xz")
+#load("./data/scmMulti.rda")
+
+# Form a triangle
+triWC = Triangle(smWC, scmWC, "Workers Comp Triangle")
+triPPA = Triangle(smPPA, scmPPA, "Personal Auto Triangle")
+triMulti = c(triWC, triPPA)
+triMulti = Triangle(smMulti, scmMulti, "Multi-line triangle")
+
+save(triWC, triPPA, triMulti, file="./data/triMulti.rda", compress="xz")
