@@ -22,6 +22,7 @@ This short vignette will give the basics of working with MRMR. To create a model
 ```{r Options, echo=FALSE, warning=FALSE, message=FALSE}
 library(knitr)
 opts_chunk$set(message=FALSE)
+opts_chunk$set(fig.width=12)
 ```
 
 ## Install MRMR
@@ -181,10 +182,10 @@ PaidCLPooled = TriangleModel(UpperTriangle(triWC)
 ```
 
 #### Residual plots
-Residual plots should be inspected for bias along the calendar year, origin period or development lag axes. Additionaly, one may construe bias in plotting residuals against the fitted results. Note that residuals have been standardized, with lines drawn at +/- 3. Standardized residuals greater or less than 3.0 may suggest violation of the assumption of normally distributed errors. A q-q plot is in the works
+Residual plots should be inspected for bias along the calendar year, origin period or development lag axes. Additionaly, one may construe bias in plotting residuals against the fitted results. Note that residuals have been standardized, with lines drawn at +/- 3. Standardized residuals greater or less than 3.0 may suggest violation of the assumption of normally distributed errors. A q-q plot is in the works.
 
-```{r, warning=FALSE}
-PlotResiduals(PaidCLPooled)
+```{r fig.width=18}
+#PlotResiduals(PaidCLPooled)
 ```
 
 ## Project the results
