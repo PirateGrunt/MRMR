@@ -152,6 +152,16 @@ SingleAccessStaticMeasure = function(x, name, UniqueAttribute=FALSE){
 #************************************************************************************************************************
 # 1. Class Definition ====
 #' @export
+#' @name is.StaticMeasure
+#' @title is.StaticMeasure
+#' 
+#' @param object Object to be 
+#' 
+#' @description
+#' 
+#' Is the object a StaticMeasure?
+#' 
+#' @return Boolean
 is.StaticMeasure = function(object)
 {
   is(object, "StaticMeasure")
@@ -178,6 +188,15 @@ setGeneric("StaticMeasure", function(OriginPeriod, Measure, Level, Data, ...) {
 })
 
 #' @export 
+#' 
+#' @title StaticMeasure
+#' @name StaticMeasure
+#' 
+#' @param OriginPeriod OriginPeriod object
+#' @param Measure Vector of names of columns
+#' @param Level List of levels
+#' @param Data A data frame
+#' 
 setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY", Level="ANY", Data="ANY")
           , definition=function(OriginPeriod, Measure, Level, Data, OriginPeriodSort) {
             
@@ -252,6 +271,11 @@ setMethod("StaticMeasure", signature=c(OriginPeriod="OriginPeriod", Measure="ANY
 #************************************************************************************************************************
 # 3. Properties ====
 #' @export
+#' 
+#' @param x StaticMeasure object
+#' 
+#' @title length
+#' @name length
 setMethod("length", signature(x="StaticMeasure"), definition=function(x){
   if (length(x@Level) < 1) {
     return (0)
@@ -266,11 +290,17 @@ setMethod("length", signature(x="StaticMeasure"), definition=function(x){
 })
 
 #' @export
+#' 
+#' @title MeasureNames 
+#' @name MeasureNames
+#' 
+#' @param x A StaticMeasure object
 setMethod("MeasureNames", signature(x="StaticMeasure"), definition=function(x){
   x@Measure
 })
 
 #' @export
+#' 
 setMethod("MeasureNames<-", signature(x="StaticMeasure", value="character"), definition=function(x, value){
   oldNames = x@Measure
   whichCols = colnames(x@Data) %in% oldNames
@@ -280,6 +310,11 @@ setMethod("MeasureNames<-", signature(x="StaticMeasure", value="character"), def
 })
 
 #' @export
+#' 
+#' @title LevelNames
+#' @name LevelNames
+#' 
+#' @param x A StaticMeasure object
 setMethod("LevelNames", signature(x="StaticMeasure"), definition=function(x){
   names(x@Level)
 })
@@ -294,6 +329,11 @@ setMethod("LevelNames<-", signature(x="StaticMeasure", value="character"), defin
 })
 
 #' @export 
+#' 
+#' @title show
+#' @name show
+#' 
+#' @description Display the StaticMeasure
 setMethod("show", signature(object="StaticMeasure"), definition=function(object){
   cat("StaticMeasure object \n")
   cat("Measures:\t", paste(MeasureNames(object), collapse=", "), "\n")

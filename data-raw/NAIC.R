@@ -63,9 +63,9 @@ smPPA = StaticMeasure(OriginPeriod = op
                    , Data=dfPPA[dfPPA$Lag == 1, ])
 
 smWC = StaticMeasure(OriginPeriod = op
-                      , Level=list(Company=companies, Line="WC")
-                      , Measure=c("DirectEP", "NetEP")
-                      , Data=dfWC[dfWC$Lag == 1, ])
+                     , Level=list(Company=companies, Line="WC")
+                     , Measure=c("DirectEP", "NetEP")
+                     , Data=dfWC[dfWC$Lag == 1, ])
 
 smMulti = c(smPPA, smWC)
 save(smPPA, smWC, smMulti, file="./data/smMulti.rda", compress="xz")
@@ -75,15 +75,13 @@ save(smPPA, smWC, smMulti, file="./data/smMulti.rda", compress="xz")
 # Form a StochasticMeasure
 evalDates <- seq.Date(as.Date("1988-12-31"), as.Date("2006-12-31"), by="1 year")
 scmWC = StochasticMeasure(OriginPeriod = op
-                        , Level=list(Company=companies
-                                     , Line="WC")
-                        , Measure = c("CumulativeIncurred"
-                                      , "CumulativePaid")
-                        , DevPeriod = as.period(1, "year")
-                        , Lags=1:10
-                        , Data=dfWC
-                        , OriginPeriodSort = "AccidentYear"
-                        , EvaluationDates=evalDates)
+                          , Level=list(Company=companies, Line="WC")
+                          , Measure = c("CumulativeIncurred", "CumulativePaid")
+                          , DevPeriod = as.period(1, "year")
+                          , Lags=1:10
+                          , Data=dfWC
+                          , OriginPeriodSort = "AccidentYear"
+                          , EvaluationDates=evalDates)
 
 scmPPA = StochasticMeasure(OriginPeriod = op
                            , Level=list(Company=companies, Line="PPA")
