@@ -17,7 +17,8 @@ Imports:
     nlme
 Suggests:
     testthat,
-    knitr
+    knitr,
+    methods
 Collate:
     'DataDoc.R'
     'Help.R'
