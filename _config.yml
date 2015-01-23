@@ -1,0 +1,27 @@
+# Dependencies
+markdown:         Kramdown
+highlighter:      pygments
+
+# Permalinks
+permalink:        pretty
+relative_permalinks: true
+
+# Setup
+title:            MRMR
+tagline:          'Multivariate Regression Models for Reserving'
+description:      'MRMR'
+url:              http://pirategrunt.github.io/MRMR/
+baseurl:          /MRMR
+theme:            Superhero
+
+author:
+  name:           'Brian A. Fannin'
+  url:            https://PirateGrunt.com
+
+paginate:         5
+
+# Custom vars
+version:          1.0.0
+
+github:
+  repo:           https://github.com/PirateGrunt/MRMR
