@@ -1,0 +1,16 @@
+{
+    "contents" : "---\ntitle: Home\nlayout: page\n---\n\n## MRMR\n\nMultivariate Regression Models for Reserving",
+    "created" : 1421982989887.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1500421741",
+    "id" : "363A8448",
+    "lastKnownWriteTime" : 1421983011,
+    "path" : "~/Documents/Projects/MRMR/gh-pages/index.md",
+    "project_path" : "index.md",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "markdown"
+}
