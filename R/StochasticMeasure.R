@@ -369,7 +369,7 @@ setMethod("StochasticMeasure", signature=c(OriginPeriod = "OriginPeriod")
                   missingMeasure = EmptyMeasureColumns(nrow(dfKernel), missingMeasure)
                   dfKernel = cbind(dfKernel, missingMeasure)
                 }
-                  Data = Data[, c(Measure, names(Level), OriginPeriodSort, LagSort), drop=FALSE]
+                Data = Data[, c(Measure, names(Level), OriginPeriodSort, LagSort), drop=FALSE]
                 if (nrow(Data) != nrow(dfKernel)) {
 #                   warning("Length of 'Data' argument is not consistent with OriginPeriod and EvaluationDates. Did you forget to pass in the Evaluation Dates?") 
 #                   return(dfKernel)
