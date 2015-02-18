@@ -13,6 +13,7 @@ Imports:
     reshape2,
     ggplot2,
     lubridate,
+    mondate,
     XLConnect,
     nlme
 Suggests:

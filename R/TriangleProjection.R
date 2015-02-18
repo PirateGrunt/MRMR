@@ -149,6 +149,7 @@ setGeneric("TriangleProjection", function(TriangleModel, ...) {
 })
 
 #' @export
+#' @import mondate
 setMethod("TriangleProjection"
           , signature=c(TriangleModel="TriangleModel")
           , definition=function(TriangleModel, AsOfDate, MaxLag) {
