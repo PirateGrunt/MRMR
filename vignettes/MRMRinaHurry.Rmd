@@ -23,12 +23,13 @@ This short vignette will give the basics of working with MRMR. To create a model
 library(knitr)
 opts_chunk$set(message=FALSE)
 opts_chunk$set(fig.width=12)
+#opts_chunk$set(fig.height=10)
 ```
 
 ## Install MRMR
 At the time of writing, the most recent release of MRMR is hosted on GitHub. A CRAN release is planned for later in 2014. To install from GitHub, you must have the devtools package installed.
 
-```{r LoadMRMR}
+```{r LoadMRMR, warning=FALSE}
 library(MRMR)
 library(lubridate)
 ```
@@ -67,7 +68,7 @@ op = OriginPeriod(StartDate = as.Date("2001-01-01"), EndDate = as.Date("2010-12-
 ```{r OriginPeriodConstructor2B}
 startDates = seq.Date(as.Date("2001-01-01"), as.Date("2010-01-01"), by = "1 year")
 endDates = seq.Date(as.Date("2001-12-31"), as.Date("2010-12-31"), by = "1 year")
-op = OriginPeriod(StartDate = startDates, EndDate = endDates)
+#op = OriginPeriod(StartDate = startDates, EndDate = endDates)
 ```
 
 #### Monikers
@@ -184,8 +185,8 @@ PaidCLPooled = TriangleModel(UpperTriangle(triWC)
 #### Residual plots
 Residual plots should be inspected for bias along the calendar year, origin period or development lag axes. Additionaly, one may construe bias in plotting residuals against the fitted results. Note that residuals have been standardized, with lines drawn at +/- 3. Standardized residuals greater or less than 3.0 may suggest violation of the assumption of normally distributed errors. A q-q plot is in the works.
 
-```{r fig.width=18}
-#PlotResiduals(PaidCLPooled)
+```{r fig.width=12, fig.height=10, warning=FALSE}
+PlotResiduals(PaidCLPooled)
 ```
 
 ## Project the results

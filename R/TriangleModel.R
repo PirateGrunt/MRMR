@@ -394,8 +394,9 @@ PlotResiduals = function(object){
   op = par(mfrow=c(2,2), oma=c(0,0,2,0))
 #   op = par(mfrow=c(2,2))
   
-  ylow = min(df$Rstandard, -3)
-  ymax = max(df$Rstandard, 3)
+  RstandardOK <- !is.nan(df$Rstandard) & !is.infinite(df$Rstandard) & !is.na(df$Rstandard)
+  ylow = min(df$Rstandard[RstandardOK], -3)
+  ymax = max(df$Rstandard[RstandardOK], 3)
   
   plot(x = df$Predicted, y = df$Rstandard, col="blue", pch=16, xlab="Fitted values", ylab="Std. Resid.", xaxt="n", ylim=c(ylow, ymax))
   xTicks = pretty(df$Predicted, 8)
