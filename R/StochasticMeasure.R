@@ -537,8 +537,9 @@ setMethod("UpperTriangle", signature(object="StochasticMeasure"), definition=fun
   scm
 })
 
+#' @export
 setMethod("LatestDiagonal", signature(object="StochasticMeasure"), definition=function(object){
-  scm = object[object$EvaluationDate == max(object$EvaluationDates)]
+  scm = object[object$EvaluationDate == max(object$EvaluationDate)]
   scm
 })
 
