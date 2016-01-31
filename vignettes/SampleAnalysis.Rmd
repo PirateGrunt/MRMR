@@ -1,0 +1,50 @@
+---
+title: "Sample Analysis"
+author: "Brian A. Fannin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MRMR in a Hurry}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r Options, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(message=FALSE)
+knitr::opts_chunk$set(fig.width=12)
+#opts_chunk$set(fig.height=10)
+```
+
+```{r LoadMRMR, warning=FALSE}
+library(MRMR)
+library(lubridate)
+```
+
+```{r}
+data(triMulti)
+```
+
+```{r plotTriangle}
+plot(UpperTriangle(triWC), Response="IncrementalPaid", Predictor="PriorCumulativePaid")
+```
+
+```{r}
+PaidCLPooled = TriangleModel(UpperTriangle(triWC)
+                             , Response = "IncrementalPaid"
+                             , Predictor = "PriorCumulativePaid"
+                             , ModelType = "pooled")
+```
+
+```{r fig.width=12, fig.height=10, warning=FALSE}
+PlotResiduals(PaidCLPooled)
+```
+
+Need to revise the residual plots so that they're ggplot. Also, would like to do the residuals one at a time. Further, it'd be cool to color code the residuals with AY, dev or whatever. Break down the residuals by level.
+
+```{r}
+projPaidCLPooled = TriangleProjection(PaidCLPooled
+                     , AsOfDate=as.Date("2006-12-31")
+                     , MaxLag=10)
+
+```
+
