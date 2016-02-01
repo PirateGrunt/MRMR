@@ -2,15 +2,11 @@
 title: "Sample Analysis"
 author: "Brian A. Fannin"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{MRMR in a Hurry}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+output: rmarkdown::html_document
 ---
 
 ```{r Options, echo=FALSE, warning=FALSE, message=FALSE}
-knitr::opts_chunk$set(message=FALSE)
+knitr::opts_chunk$set(message = FALSE, echo = FALSE)
 knitr::opts_chunk$set(fig.width=12)
 #opts_chunk$set(fig.height=10)
 ```
@@ -18,6 +14,11 @@ knitr::opts_chunk$set(fig.width=12)
 ```{r LoadMRMR, warning=FALSE}
 library(MRMR)
 library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(pander)
+#panderOptions()
+library(stargazer)
 ```
 
 ```{r}
@@ -25,19 +26,47 @@ data(triMulti)
 ```
 
 ```{r plotTriangle}
-plot(UpperTriangle(triWC), Response="IncrementalPaid", Predictor="PriorCumulativePaid")
+triWC <- UpperTriangle(triWC)
+pltTriCL <- plot(triWC, Response="IncrementalPaid", Predictor="PriorCumulativePaid")
+pltTriCL + scale_y_continuous(labels = scales::comma) + scale_x_continuous(labels = scales::comma)
+
+pltTriAM <- plot(triWC, Response="IncrementalPaid", Predictor="NetEP")
+pltTriAM + scale_y_continuous(labels = scales::comma) + scale_x_continuous(labels = scales::comma)
 ```
 
 ```{r}
-PaidCLPooled = TriangleModel(UpperTriangle(triWC)
+PaidCLPooled = TriangleModel(triWC
                              , Response = "IncrementalPaid"
                              , Predictor = "PriorCumulativePaid"
+                             , ModelType = "pooled")
+
+PaidAMPooled = TriangleModel(triWC
+                             , Response = "IncrementalPaid"
+                             , Predictor = "NetEP"
                              , ModelType = "pooled")
 ```
 
 ```{r fig.width=12, fig.height=10, warning=FALSE}
-PlotResiduals(PaidCLPooled)
+dfPaidAMPooled <- as.data.frame(PaidAMPooled) %>% select(Company, Predicted, Rstandard) %>% 
+  mutate(Method = "PaidAMPooled")
+dfPaidCLPooled <- as.data.frame(PaidCLPooled) %>% select(Company, Predicted, Rstandard) %>% 
+  mutate(Method = "PaidCLPooled")
+
+dfResiduals <- bind_rows(dfPaidCLPooled, dfPaidAMPooled)
+
+pltResiduals <- ggplot(dfResiduals, aes(Predicted, Rstandard, color = Method)) + geom_point(aes(shape = Company))
+pltResiduals + geom_hline(yintercept = c(-3, 3), linetype = "dashed") + geom_hline(yintercept = 0, linetype = "solid")
 ```
+
+```{r results = 'asis'}
+fitPaidAMPooled <- PaidAMPooled@Fit
+fitPaidCLPooled <- PaidCLPooled@Fit 
+
+stargazer(fitPaidAMPooled[[2]], fitPaidCLPooled[[1]]
+          , fitPaidAMPooled[[3]], fitPaidCLPooled[[2]]
+          , type = "html")
+```
+
 
 Need to revise the residual plots so that they're ggplot. Also, would like to do the residuals one at a time. Further, it'd be cool to color code the residuals with AY, dev or whatever. Break down the residuals by level.
 
@@ -46,5 +75,51 @@ projPaidCLPooled = TriangleProjection(PaidCLPooled
                      , AsOfDate=as.Date("2006-12-31")
                      , MaxLag=10)
 
+projPaidAMPooled = TriangleProjection(PaidAMPooled
+                     , AsOfDate=as.Date("2006-12-31")
+                     , MaxLag=10)
 ```
 
+```{r}
+dfPaidCLPooled <- as.data.frame(projPaidCLPooled@Projection)
+
+dfPaidAMPooled <- as.data.frame(projPaidAMPooled@Projection)
+```
+
+```{r }
+GetUlt <- function(df){
+  df <- df %>% 
+    group_by(StartDate, Moniker) %>% 
+    summarise(Ultimate = sum(IncrementalPaid)) %>% 
+    arrange(StartDate)
+  df
+}
+
+dfPaidCLUlt <- dfPaidCLPooled %>% 
+  GetUlt() %>% 
+  rename(PaidCL = Ultimate)
+
+dfPaidAMUlt <- dfPaidAMPooled %>% 
+  GetUlt() %>% 
+  rename(PaidAM = Ultimate)
+
+dfCompare <- inner_join(dfPaidCLUlt, dfPaidAMUlt, by = c("StartDate", "Moniker")) 
+```
+
+```{r }
+dfPlot <- dfCompare %>% 
+  tidyr::gather(Method, Ultimate, -StartDate, -Moniker)
+
+pltCompareLine <- ggplot(dfPlot, aes(x = StartDate, y = Ultimate, colour = Method)) + geom_point() + geom_line()
+pltCompareLine + scale_y_continuous(limits = c(0, NA), labels = scales::comma)
+```
+
+```{r results = 'asis'}
+printTable <- dfCompare %>% 
+  ungroup() %>% 
+  mutate(PaidCL = scales::comma(PaidCL, digits = 0)
+         , PaidAM = scales::comma(PaidAM, digits = 0)) %>% 
+  select(-StartDate)
+
+pander::pandoc.table(printTable, justify = "crr", style = "grid")
+```
