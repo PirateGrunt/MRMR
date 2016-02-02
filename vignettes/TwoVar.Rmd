@@ -1,0 +1,35 @@
+---
+title: "Sample Analysis"
+author: "Brian A. Fannin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_document
+---
+
+```{r Options, echo=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = FALSE)
+knitr::opts_chunk$set(fig.width=12)
+#opts_chunk$set(fig.height=10)
+```
+
+```{r LoadMRMR, warning=FALSE}
+library(MRMR)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(pander)
+```
+
+```{r }
+data(triMulti)
+```
+
+```{r }
+dfWC <- as.data.frame(triWC)
+dfLag2 <- dfWC %>% 
+  filter(Lag == 2)
+
+fit2 <- lm(data = dfLag2, IncrementalPaid ~ 0 + PriorCumulativePaid + NetEP)
+
+summary(fit2)
+```
+
