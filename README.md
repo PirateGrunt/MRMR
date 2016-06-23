@@ -1,3 +1,7 @@
+[![Travis-CI Build Status](https://travis-ci.org/PirateGrunt/MRMR.svg?branch=master)](https://travis-ci.org/PirateGrunt/MRMR)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/MRMR)](http://cran.r-project.org/package=MRMR)
+[![Downloads from the RStudio CRAN mirror](http://cranlogs.r-pkg.org/badges/MRMR)](https://cran.r-project.org/package=MRMR)
+
 MRMR
 ====
 
