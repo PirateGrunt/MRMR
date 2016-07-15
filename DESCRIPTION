@@ -1,41 +1,45 @@
 Package: MRMR
 Title: Multivariate Regression Models for Reserving
-Description: Tools to analyze non-life loss reserves
-Version: 0.1.3
-Maintainer: Brian A. Fannin <BFannin@RedwoodsGroup.com>
+Description: Non-life runoff reserves may be analyzed using linear models. This generalizes the special cases of multiplicative chain ladder and
+    the additive model. In addition, MRMR provides visual and statistical diagnostics to assess the quality of modeled link ratios.
+Version: 0.1.4
+Maintainer: Brian A. Fannin <FanninQED@Yahoo.com>
 Author: Brian A. Fannin
 License: GPL (>= 2)
 Depends:
+    lubridate
+Imports:
     reshape2,
     ggplot2,
-    lubridate,
     stats,
     lmtest,
     methods,
     plyr
 Suggests:
-    testthat
+    testthat,
+    mondate
 Collate:
-    'Help.R'
-    'TriangleAdjustMeasures.R'
     'CreateOriginPeriods.R'
     'CreateEvaluationDates.R'
     'CreateDevelopmentLags.R'
+    'TriangleAdjustMeasures.R'
     'Triangle.R'
-    'PlotTriangle.R'
-    'TriangleMeta.R'
-    'LatestDiagonal.R'
     'TriangleModel.R'
-    'SummaryTriangleModel.R'
+    'TriangleProjection.R'
+    'CompleteTriangle.R'
+    'GetTriangleData.R'
+    'Help.R'
+    'LatestDiagonal.R'
     'PlotModelFactors.R'
     'PlotModelGoF.R'
+    'PlotResiduals.R'
+    'PlotTriangle.R'
     'PlotTriangleModel.R'
     'ProjectToDate.R'
     'ProjectToDev.R'
     'ProjectValues.R'
-    'TriangleProjection.R'
-    'CompleteTriangle.R'
-    'data.R'
-    'PlotResiduals.R'
     'SerialCorrelation.R'
-    'GetTriangleData.R'
+    'SummaryTriangleModel.R'
+    'TriangleMeta.R'
+    'data.R'
+RoxygenNote: 5.0.1
