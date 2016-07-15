@@ -17,7 +17,7 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
   
   if (is.null(OriginPeriods)) stop ("OriginPeriods were not specified.")
   
-  DevelopmentInterval = new_interval(int_start(OriginPeriods), EvalDates + days(3))
+  DevelopmentInterval = interval(int_start(OriginPeriods), EvalDates + days(3))
   DevelopmentLag = suppressMessages (DevelopmentInterval / DevelopmentPeriod)
   DevelopmengLag = DevelopmentLag * DevelopmentPeriod
 }
@@ -48,36 +48,11 @@ CreateLagsFromEvalDates = function(EvalDates, OriginPeriods, DevelopmentPeriod =
 #' @return A vector of intervals
 #' 
 #' @seealso \code{\link{CreateDevelopmentLags}}, \code{\link{CreateEvaluationDates}}
-#' @examples
-#' library(lubridate)
 #' 
-#' Sys.setenv(TZ='UTC')
-#' # Case 1
-#' DevelopmentLag = c(months(12), months(24), months(12))
-#' DevelopmentLag
+#' @importFrom lubridate is.period
+#' @importFrom lubridate days
+#' @importFrom lubridate int_start
 #' 
-#' # Case 2
-#' LagValues = c(12, 24, 12)
-#' dPeriod = months(1)
-#' DevelopmentLags = CreateDevelopmentLags(LagValues, DevelopmentPeriod = dPeriod)
-#' DevelopmentLags
-#' 
-#' # Case 3
-#' OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
-#' OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
-#' OriginPeriods = CreateOriginPeriods(OriginStart, OriginEnd)
-#' 
-#' EvaluationDates = c(mdy("12/31/2000"), mdy("12/31/2001"), mdy("12/31/2001"))
-#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
-#'                                        , EvaluationDates = EvaluationDates
-#'                                        , OriginPeriods = OriginPeriods)
-#' DevelopmentLags
-#' 
-#' DevelopmentPeriod = years(1)
-#' DevelopmentLags = CreateDevelopmentLags(DevelopmentPeriod = months(1)
-#'                                        , EvaluationDates = EvaluationDates
-#'                                        , OriginPeriods = OriginPeriods)
-#' DevelopmentLag
 CreateDevelopmentLags = function(LagValues, DevelopmentPeriod = months(1), EvaluationDates = NULL, OriginPeriods = NULL, Verbose = TRUE)
 {
   if (!is.period(DevelopmentPeriod)) stop ("A period object was not specified for the DevelopmentPeriod.")

@@ -13,6 +13,9 @@
 #' 
 #' @return A data frame
 #' 
+#' @importFrom lubridate tz
+#' @importFrom lubridate tz<-
+#' 
 GetTriangleData = function(Triangle, OriginPeriodStart = NULL, DevInteger = NULL, EvaluationDate = NULL, Measure){
   df = Triangle@TriangleData
   

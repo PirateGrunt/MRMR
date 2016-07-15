@@ -14,6 +14,10 @@
 #' @export PlotModelFactors
 #' @include TriangleModel.R
 #' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_line
+#' @importFrom reshape2 melt
+#' 
 PlotModelFactors = function(objTriangleModel)
 {
   
@@ -40,6 +44,7 @@ PlotModelFactors = function(objTriangleModel)
   
 }
 
+#' @importFrom stats confint
 GetX = function(objTriangleModel)
 {
   fit = objTriangleModel@Fit

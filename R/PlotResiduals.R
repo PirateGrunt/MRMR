@@ -15,6 +15,17 @@
 #' @return 
 #' This function does not return a value.
 #' 
+#' @importFrom stats rstandard
+#' @importFrom stats fitted
+#' 
+#' @importFrom graphics abline
+#' @importFrom graphics axis
+#' @importFrom graphics lines
+#' @importFrom graphics par
+#' @importFrom graphics plot
+#' 
+#' @importFrom plyr .
+#' 
 PlotResiduals = function(objTriangleModel){
   fit = objTriangleModel@Fit
 

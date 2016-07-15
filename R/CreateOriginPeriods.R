@@ -12,7 +12,7 @@ OriginPeriodFromDates = function(OriginStart, OriginEnd, Verbose = FALSE)
   
   if (sum(OriginStart >= OriginEnd)) stop("At least one OriginStart date comes after OriginEnd.")
   
-  OriginPeriod = new_interval(OriginStart, OriginEnd) 
+  OriginPeriod = interval(OriginStart, OriginEnd) 
 }
 
 OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), StartDay = 1, StartMonth = 1, Verbose = FALSE)
@@ -39,7 +39,7 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
   minute(OriginStart) = 0
   second(OriginStart) = 0
   OriginEnd = OriginStart + OriginLength - days(1)
-  OriginPeriod = new_interval(OriginStart, OriginEnd)
+  OriginPeriod = interval(OriginStart, OriginEnd)
   
 }
 
@@ -76,7 +76,7 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
 #' @seealso \code{\link{CreateDevelopmentLags}}, \code{\link{CreateEvaluationDates}}
 #' 
 #' @examples
-#'
+#' \dontrun{
 #' # Case 1
 #' library(lubridate)
 #' OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
@@ -95,6 +95,25 @@ OriginPeriodFromYears = function(OriginStartYears, OriginLength = years(1), Star
 #' OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1)
 #'                                      , StartDay = 1, StartMonth = 1)
 #' OriginPeriods
+#' }
+#' 
+#' @importFrom lubridate is.POSIXt
+#' @importFrom lubridate years 
+#' @importFrom lubridate year
+#' @importFrom lubridate month
+#' @importFrom lubridate day
+#' @importFrom lubridate hour
+#' @importFrom lubridate minute
+#' @importFrom lubridate second
+#' @importFrom lubridate interval
+#' @importFrom lubridate days
+#' @importFrom lubridate now
+#' @importFrom lubridate year<-
+#' @importFrom lubridate month<-
+#' @importFrom lubridate day<-
+#' @importFrom lubridate hour<-
+#' @importFrom lubridate minute<-
+#' @importFrom lubridate second<-
 #' 
 CreateOriginPeriods = function(OriginStart, OriginEnd = NULL
                                , OriginLength = years(1), StartDay = 1

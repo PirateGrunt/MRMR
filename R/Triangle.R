@@ -31,6 +31,8 @@ checkTriangle = function(object)
 #' @rdname Triangle-class
 #' @exportClass Triangle
 #' 
+#' @importClassesFrom lubridate Period
+#' 
 setClass("Triangle"
          , representation(TriangleData = "data.frame"
                           , TriangleName = "character"
@@ -66,6 +68,15 @@ setClass("Triangle"
 #' @include CreateDevelopmentLags.R
 #' @include CreateEvaluationDates.R
 #' @include CreateOriginPeriods.R
+#' 
+#' @importFrom lubridate int_start
+#' @importFrom lubridate int_end
+#' @importFrom lubridate days
+#' @importFrom lubridate interval
+#' @importFrom lubridate is.interval
+#' 
+#' @importFrom methods is
+#' @importFrom methods new
 #' 
 # User-friendly constructor
 newTriangle = function(TriangleData
@@ -129,7 +140,7 @@ newTriangle = function(TriangleData
   
   dfNewTriangleData$CalendarPeriodStart = dfNewTriangleData$EvaluationDate - CommonDevInterval + days(1)
   dfNewTriangleData$CalendarPeriodEnd = dfNewTriangleData$EvaluationDate 
-  dfNewTriangleData$CalendarPeriod = with(dfNewTriangleData, new_interval(CalendarPeriodStart, CalendarPeriodEnd))
+  dfNewTriangleData$CalendarPeriod = with(dfNewTriangleData, interval(CalendarPeriodStart, CalendarPeriodEnd))
   
   if (is.null(Groups))
   {

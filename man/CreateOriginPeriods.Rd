@@ -42,7 +42,7 @@ periods may be established one of three ways:
    in month and day values
 }
 \examples{
-
+\dontrun{
 # Case 1
 library(lubridate)
 OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
@@ -61,6 +61,7 @@ OriginStartYear = c(2000, 2000, 2001)
 OriginPeriods = CreateOriginPeriods(OriginStartYear, OriginLength = years(1)
                                      , StartDay = 1, StartMonth = 1)
 OriginPeriods
+}
 
 }
 \seealso{

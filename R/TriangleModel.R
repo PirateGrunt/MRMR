@@ -26,6 +26,11 @@ setOldClass("htest")
 #' @rdname TriangleModel-class
 #' @exportClass TriangleModel
 #' 
+#' @importFrom stats as.formula
+#' @importFrom stats dnorm
+#' @importFrom stats predict.lm
+#' @importFrom stats residuals
+#' 
 setClass("TriangleModel"
          , representation(ModelData = "data.frame"
                           , Response = "character"
@@ -64,6 +69,9 @@ TailFunction = function(x, Tail)
 #' @param Intercept Boolean indicating whether or not to include an intercept
 #' @param Alpha Numeric indicating the parameter used to weight the predictors
 #' @param Tail Integer indicating the maximum development lag for grouping
+#' 
+#' @importFrom stats shapiro.test
+#' @importFrom lmtest bptest
 #' 
 newTriangleModel = function(Triangle
                             , Response

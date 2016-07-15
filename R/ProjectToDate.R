@@ -13,6 +13,12 @@
 #' 
 #' @return
 #' A data frame which has projected dates and columns for the new stochastic values
+#' 
+#' @importFrom lubridate tz
+#' @importFrom lubridate tz<-
+#' @importFrom lubridate interval
+#' @importFrom lubridate as.period
+#' 
 ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
 {
   objTriangle = objTriangleModel@Triangle
@@ -21,7 +27,7 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   mojo = lapply(lOriginYears, function(x){
     tz(AsOfDate) = tz(x$EvaluationDate)
     # TODO: add a check for a remainder
-    ProjectionInterval = new_interval(x$EvaluationDate, AsOfDate)
+    ProjectionInterval = interval(x$EvaluationDate, AsOfDate)
     ProjectionIntervals = suppressMessages(ProjectionInterval / DevelopmentInterval)
     aList = replicate(ProjectionIntervals, x, simplify=FALSE)
     x = do.call("rbind", aList)
@@ -33,7 +39,7 @@ ProjectToDate = function(objTriangleModel, lOriginYears, AsOfDate)
   
   df = do.call("rbind", mojo)
   
-  df$DevelopmentLag = as.period(new_interval(df$OriginPeriodStart, df$EvaluationDate + days(1)))
+  df$DevelopmentLag = as.period(interval(df$OriginPeriodStart, df$EvaluationDate + days(1)))
   df$DevInteger = df$DevelopmentLag / DevelopmentInterval
   
   priors = GetPriorNames(objTriangle@StochasticMeasures)

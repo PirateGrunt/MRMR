@@ -13,6 +13,12 @@
 #' 
 #' @seealso \code{\link{PlotModelFactors}}
 #' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 geom_vline
+#' @importFrom stats qf
+#' 
 PlotModelGoF = function(objTriangleModel)
 {
   fit = objTriangleModel@Fit

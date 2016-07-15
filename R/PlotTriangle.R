@@ -10,6 +10,15 @@
 #' @param Lines Draw lines to connect the observations?
 #' @param FitLines Draw a line of best fit? Note that fit lines will have an intercept
 #' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 stat_smooth
+#' 
 plotTriangle = function(objTriangle, Response
                         , Predictor, Group = "OriginPeriodStart"
                         , Lines = TRUE, FitLines = FALSE)

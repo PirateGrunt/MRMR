@@ -14,6 +14,8 @@
 #' @return
 #' A data frame
 #' 
+#' @importFrom plyr dlply
+#' 
 LatestDiagonal = function(x)
 {
   if (class(x) == "Triangle") x = x@TriangleData

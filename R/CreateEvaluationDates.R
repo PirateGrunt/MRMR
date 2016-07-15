@@ -11,8 +11,7 @@
 #' @seealso \code{\link{CreateDevelopmentLags}}, \code{\link{CreateOriginPeriods}}
 #' 
 #' @examples
-#' library(lubridate)
-#'
+#' \dontrun{
 #' OriginStart = c(mdy("1/1/2000"), mdy("1/1/2000"), mdy("1/1/2001"))
 #' OriginEnd = c(mdy("12/31/2000"), mdy("12/31/2000"), mdy("12/31/2001"))
 #' OriginPeriod = CreateOriginPeriods(OriginStart, OriginEnd) 
@@ -20,7 +19,14 @@
 #' 
 #' EvaluationDates = CreateEvaluationDates(OriginPeriod, DevelopmentLag)
 #' EvaluationDates
-
+#' }
+#' 
+#' @importFrom lubridate is.interval
+#' @importFrom lubridate is.period
+#' @importFrom lubridate days
+#' @importFrom lubridate mdy
+#' @importFrom lubridate int_start
+#' 
 CreateEvaluationDates = function(OriginPeriod, DevelopmentLag)
 {
   if (!is.interval(OriginPeriod)) stop ("OriginPeriod is not a valid interval object.")

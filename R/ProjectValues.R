@@ -1,3 +1,4 @@
+#' @importFrom stats predict
 #' @include TriangleModel.R
 
 ProjectStaticValues = function(objTriangleModel, dfProjection)
@@ -8,6 +9,7 @@ ProjectStaticValues = function(objTriangleModel, dfProjection)
   dfProjection
 }
 
+#' @importFrom stats predict
 ProjectStochasticValues = function(objTriangleModel, dfProjection)
 {
   fit = objTriangleModel@Fit

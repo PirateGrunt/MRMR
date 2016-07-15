@@ -10,6 +10,8 @@
 #' 
 #' @seealso \code{\link{CreateCumulative}}, \code{\link{CreatePriors}}
 #' 
+#' @importFrom plyr dlply
+#' 
 CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 {
   incrColNames = gsub("Cumulative", "Incremental", measureCols)
@@ -44,6 +46,8 @@ CreateIncrementals = function(dfTriangleData, measureCols, Groups)
 #' @return A data frame of measures with cumulatives included
 #' @seealso \code{\link{CreateIncrementals}}, \code{\link{CreatePriors}}
 #' 
+#' @importFrom plyr dlply
+#' 
 CreateCumulative = function(dfTriangleData, measureCols, Groups)
 {
   cumulColNames = gsub("Incremental", "Cumulative", measureCols)
@@ -77,6 +81,8 @@ CreateCumulative = function(dfTriangleData, measureCols, Groups)
 #' 
 #' @return A data frame of measures which includes prior values
 #' @seealso \code{\link{CreateIncrementals}}, \code{\link{CreateCumulative}}
+#' 
+#' @importFrom plyr dlply
 #' 
 CreatePriors = function(dfTriangleData, measureCols, Groups)
 {

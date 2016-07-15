@@ -21,6 +21,9 @@ GetPriorResiduals = function(df, Axis1, Axis2){
 #' @include TriangleModel.R
 #' 
 #' @param objTriangleModel A Triangle model
+#' 
+#' @importFrom stats lm
+#' 
 FitSerialCorrelation = function(objTriangleModel){
   df = GetPriorResiduals(objTriangleModel@ModelData, "DevInteger", "OriginPeriodStart")
   df$EvalGroup = as.factor(df$EvaluationDate)
@@ -36,6 +39,11 @@ FitSerialCorrelation = function(objTriangleModel){
 #' @include TriangleModel.R
 #' 
 #' @param objTriangleModel A Triangle model
+#' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 stat_smooth
+#' 
 plotSerialCorrelation = function(objTriangleModel){
   lstReturn = FitSerialCorrelation(objTriangleModel)
   df = lstReturn$df

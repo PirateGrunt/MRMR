@@ -31,6 +31,13 @@ setClass("TriangleProjection"
 #' 
 #' @include Triangle.R
 #' @include TriangleModel.R
+#' 
+#' @importFrom plyr dlply
+#' 
+#' @importFrom lubridate as.period
+#' @importFrom lubridate interval
+#' @importFrom lubridate days
+#' 
 TriangleProjection = function(objTriangleModel
                               , ProjectToDev = TRUE
                               , MaxDev = 10
