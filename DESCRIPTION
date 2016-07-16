@@ -1,7 +1,7 @@
 Package: MRMR
 Title: Multivariate Regression Models for Reserving
 Description: Non-life runoff reserves may be analyzed using linear models. This generalizes the special cases of multiplicative chain ladder and
-    the additive model. In addition, MRMR provides visual and statistical diagnostics to assess the quality of modeled link ratios.
+    the additive model. In addition, the package provides visual and statistical diagnostics to assess the quality of modeled link ratios.
 Version: 0.1.4
 Maintainer: Brian A. Fannin <FanninQED@Yahoo.com>
 Author: Brian A. Fannin
