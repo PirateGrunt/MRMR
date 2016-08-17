@@ -1,3 +1,5 @@
+[![Downloads from the RStudio CRAN mirror](http://cranlogs.r-pkg.org/badges/grand-total/MRMR)](https://cran.r-project.org/package=MRMR)
+
 MRMR
 ====
 
